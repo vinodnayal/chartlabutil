@@ -1,0 +1,178 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9CBCE75A-552C-4A42-9820-3452DAA79A99}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FinLib</RootNamespace>
+    <AssemblyName>FinLib</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="log4net">
+      <HintPath>..\HelperLib\dlls\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Algo\MovingAvg.cs" />
+    <Compile Include="Algo\PatternRecognizer.cs" />
+    <Compile Include="Algo\TrendCalculation.cs" />
+    <Compile Include="Bands.cs" />
+    <Compile Include="CandleStick.cs" />
+    <Compile Include="Model\StatisticsPerf.cs" />
+    <Compile Include="Model\SymbolAlerts.cs" />
+    <Compile Include="Model\AlertDateList.cs" />
+    <Compile Include="Model\AllHistoricalDates.cs" />
+    <Compile Include="Model\AvgReturnAndCount.cs" />
+    <Compile Include="Model\BarData.cs" />
+    <Compile Include="Model\BuySellRating.cs" />
+    <Compile Include="Model\BuySellRatingChangeHist.cs" />
+    <Compile Include="Model\Constants.cs" />
+    <Compile Include="Model\CTRating.cs" />
+    <Compile Include="Model\CTRatingEnum.cs" />
+    <Compile Include="Model\CTRatingHistory.cs" />
+    <Compile Include="Model\DailyAverageVolume.cs" />
+    <Compile Include="Model\DailySymbolsData.cs" />
+    <Compile Include="Model\DateAD.cs" />
+    <Compile Include="Model\DateADCount.cs" />
+    <Compile Include="Model\DateForSentimentSymbolAlert.cs" />
+    <Compile Include="Model\DateOBOS.cs" />
+    <Compile Include="Model\DateOBOSCount.cs" />
+    <Compile Include="Model\DatePrice.cs" />
+    <Compile Include="Algo\FinCalculator.cs" />
+    <Compile Include="Algo\SeriesCrossFinder.cs" />
+    <Compile Include="Model\DatePriceList.cs" />
+    <Compile Include="Model\DayWiseAvgReturnForCTRating.cs" />
+    <Compile Include="Model\DayWiseAvgReturnForGroup.cs" />
+    <Compile Include="Model\DayWiseAvgReturnForSentimentSymbol.cs" />
+    <Compile Include="Model\DayWiseAvgReturnForSymbol.cs" />
+    <Compile Include="Model\DividendHistory.cs" />
+    <Compile Include="Model\InputBarData.cs" />
+    <Compile Include="Model\MarketInternal.cs" />
+    <Compile Include="Model\obosEnum.cs" />
+    <Compile Include="Model\PatternBarData.cs" />
+    <Compile Include="Model\PatternBound.cs" />
+    <Compile Include="Model\PatternEnum.cs" />
+    <Compile Include="Model\PatternInterval.cs" />
+    <Compile Include="Model\PatternValue.cs" />
+    <Compile Include="Model\Rating.cs" />
+    <Compile Include="Model\RatingEnum.cs" />
+    <Compile Include="Model\SectorPerfHist.cs" />
+    <Compile Include="Model\SectorPerfRating.cs" />
+    <Compile Include="Model\SectorStocks.cs" />
+    <Compile Include="Model\SectorStrongWeakSymbol.cs" />
+    <Compile Include="Model\SeriesData.cs" />
+    <Compile Include="Model\ShortLongAlertPerf.cs" />
+    <Compile Include="Model\SymbolAnalytics.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="Cycle.cs" />
+    <Compile Include="Field.cs" />
+    <Compile Include="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="General.cs" />
+    <Compile Include="Index.cs" />
+    <Compile Include="LinearRegression.cs" />
+    <Compile Include="LineStudy.cs" />
+    <Compile Include="Model\SymbolLastDayPrice.cs" />
+    <Compile Include="Model\SymbolNameId.cs" />
+    <Compile Include="Model\SymbolRatingAlert.cs" />
+    <Compile Include="Model\SymbolRule.cs" />
+    <Compile Include="Model\TempState.cs" />
+    <Compile Include="Model\Trend.cs" />
+    <Compile Include="Model\TrendEnum.cs" />
+    <Compile Include="Model\TrendObjects.cs" />
+    <Compile Include="Model\UserAlerts.cs" />
+    <Compile Include="Model\VolumeHistoryList.cs" />
+    <Compile Include="MovingAverage.cs" />
+    <Compile Include="Navigator.cs" />
+    <Compile Include="NeuralNetwork.cs" />
+    <Compile Include="Note.cs" />
+    <Compile Include="Oscillator.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="Recordset.cs" />
+    <Compile Include="TASDK.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
