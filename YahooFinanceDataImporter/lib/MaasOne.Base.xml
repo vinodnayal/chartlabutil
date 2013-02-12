@@ -1,0 +1,74 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+MaasOne.Base
+</name>
+</assembly>
+<members>
+<member name="P:MaasOne.Base.DownloadEventArgs.UserArgs">
+	<summary>
+ Gets the user argument that were passed when the download was started.
+ </summary>
+	<value></value>
+	<returns>An object defined by the user</returns>
+	<remarks></remarks>
+</member><member name="T:MaasOne.Base.DownloadEventArgs">
+	<summary>
+ Base event class for asynchronous download processes and provides the individual user argument. This class must be inherited.
+ </summary>
+	<remarks></remarks>
+</member><member name="P:MaasOne.Base.DownloadChangedEventArgs.ReceivedResultsCount">
+	<summary>
+ The number of currently received results.
+ </summary>
+	<value></value>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="P:MaasOne.Base.DownloadChangedEventArgs.MaximumResultsCount">
+	<summary>
+ The maximum number of received results.
+ </summary>
+	<value></value>
+	<returns></returns>
+	<remarks>If value is 0, all results will be downloaded</remarks>
+</member><member name="P:MaasOne.Base.DownloadChangedEventArgs.Percentage">
+	<summary>
+ The calculated percentage of download progress.
+ </summary>
+	<value></value>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="T:MaasOne.Base.DownloadChangedEventArgs">
+	<summary>
+ Base event class for changed asynchronous download processes that provides additionally the response of the download. This class must be inherited.
+ </summary>
+	<remarks></remarks>
+</member><member name="P:MaasOne.Base.DownloadCompletedEventArgs.Response">
+	<summary>
+ Gets the response of the download process.
+ </summary>
+	<value></value>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="T:MaasOne.Base.DownloadCompletedEventArgs">
+	<summary>
+ Base event class for completed asynchronous download processes that provides additionally the response of the download. This class must be inherited.
+ </summary>
+	<remarks></remarks>
+</member><member name="P:MaasOne.My.Resources.Resources.ResourceManager">
+	<summary>
+  Gibt die zwischengespeicherte ResourceManager-Instanz zurück, die von dieser Klasse verwendet wird.
+</summary>
+</member><member name="P:MaasOne.My.Resources.Resources.Culture">
+	<summary>
+  Überschreibt die CurrentUICulture-Eigenschaft des aktuellen Threads für alle
+  Ressourcenzuordnungen, die diese stark typisierte Ressourcenklasse verwenden.
+</summary>
+</member><member name="T:MaasOne.My.Resources.Resources">
+	<summary>
+  Eine stark typisierte Ressourcenklasse zum Suchen von lokalisierten Zeichenfolgen usw.
+</summary>
+</member>
+</members>
+</doc>

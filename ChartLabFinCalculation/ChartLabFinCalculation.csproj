@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3BD5516F-11BE-4FAD-9DC1-3FBAD73AF3E1}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ChartLabFinCalculation</RootNamespace>
+    <AssemblyName>ChartLabFinCalculation</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="log4net, Version=1.2.11.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\HelperLib\dlls\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="MongoDB.Bson">
+      <HintPath>dlls\MongoDB.Bson.dll</HintPath>
+    </Reference>
+    <Reference Include="MongoDB.Driver">
+      <HintPath>dlls\MongoDB.Driver.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BL\AggresiveDefensivePerformance.cs" />
+    <Compile Include="BL\BuySellRatingCalculation.cs" />
+    <Compile Include="BL\Common.cs" />
+    <Compile Include="BL\CTRatingCalculation.cs" />
+    <Compile Include="BL\EmailAlertsCalculation.cs" />
+    <Compile Include="BL\ETFSymbolsDataCalculation.cs" />
+    <Compile Include="BL\GroupPerformance.cs" />
+    <Compile Include="BL\HistoricalDataImporter.cs" />
+    <Compile Include="BL\LongShortAlerts.cs" />
+    <Compile Include="BL\MarketInternalsCalculation.cs" />
+    <Compile Include="BL\OBOSRatingCalculation.cs" />
+    <Compile Include="BL\RulesCalculation.cs" />
+    <Compile Include="BL\SectorPerformance.cs" />
+    <Compile Include="BL\SectorWiseTopBottomSymbols.cs" />
+    <Compile Include="BL\SentimentIndicator.cs" />
+    <Compile Include="BL\SnPPriceCalculation.cs" />
+    <Compile Include="BL\StatisticsCalculation.cs" />
+    <Compile Include="BL\SymbolAnalyticsCalculation.cs" />
+    <Compile Include="BL\SymbolPerformance.cs" />
+    <Compile Include="BL\UpdateHistoryDates.cs" />
+    <Compile Include="DAL\AggresiveDefensivePerformanceDAO.cs" />
+    <Compile Include="DAL\BuySellRatingDAO.cs" />
+    <Compile Include="DAL\ChangeHistoryDatesDAO.cs" />
+    <Compile Include="DAL\CommonDAO.cs" />
+    <Compile Include="DAL\DataImportLocalDAO.cs" />
+    <Compile Include="DAL\EmailAlertsDAO.cs" />
+    <Compile Include="DAL\ETFSymbolsDAO.cs" />
+    <Compile Include="DAL\GroupPerformanceDAO.cs" />
+    <Compile Include="DAL\SnPPriceDAO.cs" />
+    <Compile Include="DAL\StatisticsDAO.cs" />
+    <Compile Include="DAL\SymbolHistoricalMongoDAO.cs" />
+    <Compile Include="DAL\LongShortAlertDAO.cs" />
+    <Compile Include="DAL\MarketInternalsDAO.cs" />
+    <Compile Include="DAL\OBOSRatingDAO.cs" />
+    <Compile Include="DAL\RulesCalculationDAO.cs" />
+    <Compile Include="DAL\SectorPerformanceDAO.cs" />
+    <Compile Include="DAL\SectorWiseSymbolsDAO.cs" />
+    <Compile Include="DAL\SymbolAnalyticsDAO.cs" />
+    <Compile Include="DAL\SymbolPerfDAO.cs" />
+    <Compile Include="DAL\VolumeDAO.cs" />
+    <Compile Include="DAL\WatchlistDAO.cs" />
+    <Compile Include="UTIL\CSVExporter.cs" />
+    <Compile Include="DAL\CSVToDB.cs" />
+    <Compile Include="UTIL\DataDownloader.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="BL\VolumeAlerts.cs" />
+    <Compile Include="RestartCache.cs" />
+    <Compile Include="DAL\SymbolHistoricalDAO.cs" />
+    <Compile Include="UTIL\MailUtility.cs" />
+    <Compile Include="UTIL\UnusedUTIL.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FinLib\FinLib.csproj">
+      <Project>{9CBCE75A-552C-4A42-9820-3452DAA79A99}</Project>
+      <Name>FinLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HelperLib\HelperLib.csproj">
+      <Project>{3C4862C7-8F4C-4B71-B389-5701B67EEA78}</Project>
+      <Name>HelperLib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Patterns\Channel.apr.xml" />
+    <Content Include="Patterns\DoubleBottom.apr.xml" />
+    <Content Include="Patterns\DoubleTop.apr.xml" />
+    <Content Include="Patterns\Downtrend.apr.xml" />
+    <Content Include="Patterns\Flag.apr.xml" />
+    <Content Include="Patterns\TriangleBottom.apr.xml" />
+    <Content Include="Patterns\TriangleTop.apr.xml" />
+    <Content Include="Patterns\TripleBottom.apr.xml" />
+    <Content Include="Patterns\TripleTop.apr.xml" />
+    <Content Include="Patterns\Uptrend.apr.xml" />
+    <Content Include="Patterns\WedgeDowntrend.apr.xml" />
+    <Content Include="Patterns\WedgeUptrend.apr.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="dlls\" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 Client Profile %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
