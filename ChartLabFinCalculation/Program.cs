@@ -47,6 +47,8 @@ namespace ChartLabFinCalculation
         static string CTRatingChangeHistFolderPath = ConfigurationManager.AppSettings["CTRatingChangeHistFilePath"];
         static string AlertsPath = ConfigurationManager.AppSettings["AlertsPath"];
         static string ETFSymbolsDataPath = ConfigurationManager.AppSettings["ETFSymbolsDataPath"];
+        static int HIST_DATA_LENGTH = Convert.ToInt32(ConfigurationManager.AppSettings["HIST_DATA_LENGTH"]);
+        
         //static string CTRatingHistoryFolderPath = ConfigurationManager.AppSettings["CTRatingHistoryFilePath"];
         //static string CTRatingPerfFolderPath = ConfigurationManager.AppSettings["CTRatingPerfFilePath"];
 
@@ -271,7 +273,8 @@ namespace ChartLabFinCalculation
 
                         logTime.Info("Starting Historical Data Import Programme at: " + DateTime.Now);
                         toDate = DateTime.Now.Date;
-                        fromDate = DateTime.Now.AddYears(-Constants.HIST_DATA_LENGTH).Date;
+                       // fromDate = DateTime.Now.AddYears(-Constants.HIST_DATA_LENGTH).Date;
+                        fromDate = DateTime.Now.AddYears(-HIST_DATA_LENGTH).Date;
                         HistoricalDataImporter.HistoricalDataFilePath = HistoricalDataFilePath;
                         HistoricalDataImporter.ERRORSymbolsPath = ERRORSymbolsPath;
                         if (args.Length > 1)
@@ -577,15 +580,15 @@ namespace ChartLabFinCalculation
 
                         #endregion
 
-                    case "ETFRating":
+                    //case "ETFRating":
 
-                        #region ETFRating calculations
-                        logTime.Info("Starting calculate ETF Rating change hist Programme at: " + DateTime.Now);
-                        ETFSymbolsDataCalculation.CTRatingChangeHistory();
-                        ETFSymbolsDataCalculation.BuySellRatingChangeHistory();
-                        break;
+                    //    #region ETFRating calculations
+                    //    logTime.Info("Starting calculate ETF Rating change hist Programme at: " + DateTime.Now);
+                    //    ETFSymbolsDataCalculation.CTRatingChangeHistory();
+                    //    ETFSymbolsDataCalculation.BuySellRatingChangeHistory();
+                    //    break;
 
-                        #endregion
+                    //    #endregion
                     default:
 
                         break;
