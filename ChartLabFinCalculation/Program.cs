@@ -321,6 +321,8 @@ namespace ChartLabFinCalculation
                         BuySellRatingCalculation.BuySellRatingFilePath = BuySellRatingFilePath;
                         BuySellRatingCalculation.BuySellRatingCsvFilePath = BuySellRatingCsvFilePath;
                         BuySellRatingCalculation.calculateBuySellRating();
+                       //BuySellRatingCalculation.updateETFRatings();
+
                         break;
 
                         #endregion
@@ -542,7 +544,7 @@ namespace ChartLabFinCalculation
                         #region Email Alerts sending
                         logTime.Info("Starting Email Alerts sending Programme at: " + DateTime.Now);
                         DayOfWeek dayOfWeek = DateTime.Now.DayOfWeek;
-                        EmailAlertsCalculation.SendAlertsEmailtoUsers();
+                        
                         if (!dayOfWeek.ToString().Equals("Sunday") && !dayOfWeek.ToString().Equals("Monday"))
                         {
                             EmailAlertsCalculation.SendAlertsEmailtoUsers();

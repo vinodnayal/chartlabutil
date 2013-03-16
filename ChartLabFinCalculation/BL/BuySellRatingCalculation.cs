@@ -94,6 +94,10 @@ namespace ChartLabFinCalculation
 
             BuySellRating SnPAvgRating = CalculateAvgRatingForSnP(Constants.GSPCSymbol);
             BuySellRatingDAO.InsertSnPAvgRating(SnPAvgRating);
+        
+        
+        
+        
         }
 
         private static BuySellRating CalculateAvgRatingForSnP(string symbol)
@@ -200,6 +204,19 @@ namespace ChartLabFinCalculation
                 log.Error("Problem in calculating Buy sell rating change hist");
             }
             return ChangeBuySellRatingHist;
+        }
+
+        internal static void updateETFRatings()
+        {
+            try
+            {
+                BuySellRatingDAO.updateETFRatingsfromHistBSRatingTbl();
+            }
+            catch (Exception ex)
+            {
+                
+                log.Error("Problem in calculating Buy sell rating for ETFs"+ex);
+            }
         }
     }
 }
