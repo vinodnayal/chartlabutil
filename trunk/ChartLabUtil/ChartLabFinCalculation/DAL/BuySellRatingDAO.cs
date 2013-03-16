@@ -717,5 +717,30 @@ namespace ChartLabFinCalculation
             }
             return symbolRating;
         }
+
+       internal static void updateETFRatingsfromHistBSRatingTbl()
+        {
+            
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
+            OdbcCommand deleteComm = new OdbcCommand(@" delete from etfhistbsctrating  WHERE ratingdate= (SELECT MAX(ratingdate) FROM historybuysellrating)", con);
+
+            OdbcCommand insertComm = new OdbcCommand(@"INSERT INTO etfhistbsctrating (symbol,rating,ratingdate,ratingValue,ctrating,ctratingvalue)
+                                                SELECT e.symbol,rating,ratingdate,ratingValue,ctrating,ctratingvalue FROM  historybuysellrating h
+                                                INNER JOIN etfsymbols e ON e.symbol= h.symbol
+                                                WHERE ratingdate= (SELECT MAX(ratingdate) FROM historybuysellrating)", con);
+            try
+            {
+                con.Open();
+                deleteComm.ExecuteNonQuery();
+                insertComm.ExecuteNonQuery();
+                con.Close();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+           
+        }
+        
     }
 }
