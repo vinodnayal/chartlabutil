@@ -53,9 +53,9 @@ namespace ChartLabFinCalculation.DAL
         {
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
 
-            OdbcCommand deleteCommand = new OdbcCommand("DELETE from etfhistbsctrating where symbol= '"+symbol+"'", con);
+           // OdbcCommand deleteCommand = new OdbcCommand("DELETE from etfhistbsctrating where symbol= '"+symbol+"'", con);
                OdbcCommand insertCommand = new OdbcCommand("LOAD DATA LOCAL INFILE" + " '" + ETFDataFilesPath + "/RatingFile.csv' " +
-                                                "INTO TABLE etfhistbsctrating " +
+                                                "INTO TABLE historybuysellrating " +
                                                 "FIELDS TERMINATED BY ',' " +
                                                 "LINES TERMINATED BY '\n' " +
                                                 "(symbol,rating,ratingvalue,ctrating,ctratingvalue,ratingdate);", con);
@@ -64,7 +64,7 @@ namespace ChartLabFinCalculation.DAL
             {
                 con.Open();
 
-                deleteCommand.ExecuteNonQuery();
+              //  deleteCommand.ExecuteNonQuery();
                 insertCommand.ExecuteNonQuery();
                 log.Info(" ETF BuySellRating Updated....");
                 con.Close();
