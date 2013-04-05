@@ -13,7 +13,16 @@ namespace ChartLabFinCalculation
 
        public static void CalculateLongShortAlerts()
        {
-           LongShortAlertDAO.UpdateLongShortAlerts();
+           try
+           {
+               log.Info("Process: Update Long, Short,Intermediate Long/short Alerts in DB");
+               LongShortAlertDAO.UpdateLongShortAlerts();
+           }
+           catch (Exception ex)
+           {
+
+               log.Error("Error: " + ex);
+           }
        }
 
         //public static void CaculateAndUpdateLongShortAlertPerf(string LongShortPerfPath)

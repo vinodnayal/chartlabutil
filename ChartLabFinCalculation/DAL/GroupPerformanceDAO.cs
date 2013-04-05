@@ -32,11 +32,16 @@ namespace ChartLabFinCalculation
                     SymbolList.Add(dr.GetString(0));
                 }
                 dr.Close();
-                con.Close();
+             
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return SymbolList;
@@ -66,11 +71,16 @@ namespace ChartLabFinCalculation
                     });
                 }
                 dr.Close();
-                con.Close();
+               
             }
             catch (Exception ex)
             {
                 log.Info("ERROR \n" + "============ \n" + ex.ToString());
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
             return todaysDatePriceList;
         }
@@ -79,10 +89,10 @@ namespace ChartLabFinCalculation
         {
             List<DatePriceList> datePriceList = new List<DatePriceList>();
             log.Info("\n\n\n\n\n Getting Data from DB for symbol " + symbol);
-
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
             try
             {
-                OdbcConnection con = new OdbcConnection(Constants.MyConString);
+               
                 string date = historyDate.Date.ToString("yyyy-MM-dd");
                 OdbcCommand com = new OdbcCommand("SELECT date,close from  symbolshistorical where symbol = '" + symbol + "' and date='" + date + "'", con);
                 //OdbcCommand com = new OdbcCommand("SELECT date,close,volume from  symbolshistorical where symbol = 'SPY' order by date desc", con);
@@ -99,12 +109,16 @@ namespace ChartLabFinCalculation
 
                 }
                 dr.Close();
-                con.Close();
-
+               
             }
             catch (Exception ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
             return datePriceList;
         }
@@ -129,11 +143,16 @@ namespace ChartLabFinCalculation
                 insertCommand.ExecuteReader();
 
                 log.Info("\nGroup Performance Updated....\n");
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
     }

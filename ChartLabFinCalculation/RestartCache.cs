@@ -21,7 +21,7 @@ namespace ChartLabFinCalculation
            }
            catch (Exception ex)
            {
-               log.Error(ex);
+               log.Error("Error : "+ex);
            }
        }
     }

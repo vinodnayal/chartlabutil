@@ -35,11 +35,16 @@ namespace ChartLabFinCalculation
                     SymbolList.Add(dr.GetString(0));
                 }
                 dr.Close();
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return SymbolList;
@@ -67,11 +72,16 @@ namespace ChartLabFinCalculation
                 }
                 insertCommand.ExecuteReader();
                 log.Info("OBOS Percentage Saved....");
-                con.Close();
+              
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
 

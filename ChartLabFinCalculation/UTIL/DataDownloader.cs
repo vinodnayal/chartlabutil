@@ -38,7 +38,7 @@ namespace ChartLabFinCalculation
             DividendHistory histDividend = new DividendHistory();
             try
             {
-                
+
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
                 request.Proxy = null;
                 //String arrayrow= File.GetAttributes(url);
@@ -55,14 +55,14 @@ namespace ChartLabFinCalculation
                         {
                             string data = sr.ReadToEnd();
                             string[] rows = data.Split('\n');
-                          
+
                             if (rows.Length > 2)
                             {
                                 string[] values = rows[1].Split(',');
                                 log.Info("\n\n Some Dividend Data is present for this symbol  " + symbol);
-                               
+
                                 histDividend.symbol = symbol;
-                                histDividend.dividendDate =DateTime.Parse(values[0]).Date;
+                                histDividend.dividendDate = DateTime.Parse(values[0]).Date;
                                 histDividend.todaysDate = to.Date;
                                 histDividend.isdividend = true;
                                 return histDividend;
@@ -92,23 +92,13 @@ namespace ChartLabFinCalculation
         private static List<BarData> GetDataFromFeedFromYahoo(DateTime from, DateTime to, string symbol, int retryCount)
         {
 
-
-            //if (CheckIfThereIsAnyDividend(from, to, symbol))
-            //{
-            // delete data for symbol
-            //SymbolHistoricalDAO.DeleteData(symbol);
-
-
-
-            //  return GetDataFromFeedFromBATS(from, to, symbol);
-            //}
             Dictionary<DateTime, BarData> map = new Dictionary<DateTime, BarData>();
-           // List<BarData> barData = new List<BarData>();
+            // List<BarData> barData = new List<BarData>();
             string url = string.Format("http://ichart.finance.yahoo.com/table.csv?s={0}&a={1}&b={2}&c={3}&d={4}&e={5}&f={6}&g=d&ignore=.csv",
                                                                 symbol,
                                                                  from.Month - 1, from.Day, from.Year,
                                                                  to.Month - 1, to.Day, to.Year);
-          
+
 
 
             try
@@ -129,7 +119,7 @@ namespace ChartLabFinCalculation
                         {
                             string data = sr.ReadToEnd();
                             string[] rows = data.Split('\n');
-                            
+
                             foreach (string row in rows.Skip(1))
                             {
                                 string[] values = row.Split(',');
@@ -141,7 +131,6 @@ namespace ChartLabFinCalculation
 
                                 }
 
-                               
                                 BarData dataBar = new BarData
                                  {
 
@@ -155,13 +144,10 @@ namespace ChartLabFinCalculation
                                  };
                                 if (!map.ContainsKey(dataBar.date))
                                 {
-                                    map.Add(dataBar.date,dataBar);
+                                    map.Add(dataBar.date, dataBar);
                                 }
-                               
 
-                               
                             }
-
 
                         }
                     }
@@ -185,15 +171,11 @@ namespace ChartLabFinCalculation
                 }
 
             }
-          
-           List<BarData> barData= map.Values.ToList();
-           List<BarData> SortedList = barData.OrderBy(o => o.date).ToList();
-           
-            //SortedList.Reverse();
-           // barData.Reverse();
-           return SortedList;
-            //return map.ToList<BarData>();
 
+            List<BarData> barData = map.Values.ToList();
+            List<BarData> SortedList = barData.OrderBy(o => o.date).ToList();
+
+            return SortedList;
         }
         public static List<BarData> GetDataFromFeedFromYahooIfNotDB(DateTime from, DateTime to, string symbol)
         {
@@ -270,19 +252,27 @@ namespace ChartLabFinCalculation
         internal static List<string> GetErrorSymbols(string path)
         {
             List<string> symbols = new List<string>();
-            StreamReader reader = new StreamReader(path);
-            string strline = "";
-            string[] _values = null;
-            int x = 0;
-            while (!reader.EndOfStream)
+            try
             {
-                strline = reader.ReadLine();
-                _values = strline.Split(',');
-                foreach (string value in _values)
+                StreamReader reader = new StreamReader(path);
+                string strline = "";
+                string[] _values = null;
+                int x = 0;
+                while (!reader.EndOfStream)
                 {
-                    symbols.Add(value);
-                }
+                    strline = reader.ReadLine();
+                    _values = strline.Split(',');
+                    foreach (string value in _values)
+                    {
+                        symbols.Add(value);
+                    }
 
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
             }
             return symbols;
         }
@@ -307,16 +297,6 @@ namespace ChartLabFinCalculation
                         {
 
                         }
-                        //  using (StreamReader sr = new StreamReader(stream))
-                        //{
-                        //    string data = sr.ReadToEnd();
-                        //    string[] rows = data.Split('\n');
-
-                        //    foreach (string row in rows.Skip(1))
-                        //    {
-                        //        string[] values = row.Split(',');
-                        //        if (values.Length != 7)
-                        //            continue;
 
                         using (StreamReader sr = new StreamReader(stream))
                         {
@@ -357,9 +337,6 @@ namespace ChartLabFinCalculation
         public static List<SymbolNameId> GetSymbolListForSentimentAlert()
         {
             List<SymbolNameId> lstSymbols = new List<SymbolNameId>();
-            OdbcConnection MyConnection = new OdbcConnection(Constants.MyConString);
-            MyConnection.Open();
-
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
 
 
@@ -379,11 +356,16 @@ namespace ChartLabFinCalculation
                     lstSymbols.Add(symbolIdobj);
                 }
                 dr.Close();
-                con.Close();
+
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return lstSymbols;
@@ -417,17 +399,12 @@ namespace ChartLabFinCalculation
 
             try
             {
-
                 con.Open();
-
-
 
                 OdbcDataReader dr = sentimentAlerts.ExecuteReader();
 
                 while (dr.Read())
                 {
-
-
 
                     DateListForAlert.Add(new DateForSymbolAlert
                     {
@@ -437,11 +414,16 @@ namespace ChartLabFinCalculation
                     });
                 }
                 dr.Close();
-                con.Close();
+               
             }
             catch (Exception ex)
             {
                 log.Info("ERROR \n" + "============ \n" + ex.ToString());
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
             return DateListForAlert;
         }

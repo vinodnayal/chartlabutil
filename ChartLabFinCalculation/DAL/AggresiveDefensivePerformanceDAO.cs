@@ -29,11 +29,15 @@ namespace ChartLabFinCalculation
                 updateDefncvPerfComm.ExecuteNonQuery();
                 log.Info("\nUpdated Defensive Performance...\n");
 
-                con.Close();
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
     }

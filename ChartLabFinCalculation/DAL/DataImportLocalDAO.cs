@@ -32,11 +32,15 @@ namespace ChartLabFinCalculation
                 insertCommand.ExecuteReader();
                 log.Info("Historical BuySell Change rating File  Saved....");
 
-                con.Close();
             }
             catch (OdbcException ex)
             {
                 log.Error("ERROR \n" + "============ \n" + ex.ToString());
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
     }

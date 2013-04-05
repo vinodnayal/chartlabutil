@@ -7,9 +7,9 @@ using FinLib;
 
 namespace ChartLabFinCalculation.DAL
 {
-   public class ETFSymbolsDAO
-   {
-       static log4net.ILog log = log4net.LogManager.GetLogger(typeof(ETFSymbolsDAO));
+    public class ETFSymbolsDAO
+    {
+        static log4net.ILog log = log4net.LogManager.GetLogger(typeof(ETFSymbolsDAO));
         internal static List<string> getETFSymbolsList()
         {
             List<string> symbolList = new List<string>();
@@ -38,40 +38,48 @@ namespace ChartLabFinCalculation.DAL
 
                 }
 
-
-                con.Close();
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return symbolList;
         }
 
-        internal static void InsertRatingDataInDB(string ETFDataFilesPath, String symbol,bool isHistorical)
+        internal static void InsertRatingDataInDB(string ETFDataFilesPath, String symbol, bool isHistorical)
         {
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
 
-           // OdbcCommand deleteCommand = new OdbcCommand("DELETE from etfhistbsctrating where symbol= '"+symbol+"'", con);
-               OdbcCommand insertCommand = new OdbcCommand("LOAD DATA LOCAL INFILE" + " '" + ETFDataFilesPath + "/RatingFile.csv' " +
-                                                "INTO TABLE historybuysellrating " +
-                                                "FIELDS TERMINATED BY ',' " +
-                                                "LINES TERMINATED BY '\n' " +
-                                                "(symbol,rating,ratingvalue,ctrating,ctratingvalue,ratingdate);", con);
+            // OdbcCommand deleteCommand = new OdbcCommand("DELETE from etfhistbsctrating where symbol= '"+symbol+"'", con);
+            OdbcCommand insertCommand = new OdbcCommand("LOAD DATA LOCAL INFILE" + " '" + ETFDataFilesPath + "/RatingFile.csv' " +
+                                             "INTO TABLE historybuysellrating " +
+                                             "FIELDS TERMINATED BY ',' " +
+                                             "LINES TERMINATED BY '\n' " +
+                                             "(symbol,rating,ratingvalue,ctrating,ctratingvalue,ratingdate);", con);
 
-                try
+            try
             {
                 con.Open();
 
-              //  deleteCommand.ExecuteNonQuery();
+                //  deleteCommand.ExecuteNonQuery();
                 insertCommand.ExecuteNonQuery();
                 log.Info(" ETF BuySellRating Updated....");
-                con.Close();
-             }
+
+            }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
@@ -106,27 +114,24 @@ namespace ChartLabFinCalculation.DAL
                     }
                 }
                 dr.Close();
-                con.Close();
+              
             }
             catch (Exception ex)
             {
                 log.Error("ERROR \n" + "============ \n" + ex.ToString());
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
             return ctRatingHist;
         }
         internal static List<BuySellRating> getETFBuySellRatingHistroyFromDB()
         {
             List<BuySellRating> buySellRatingHist = new List<BuySellRating>();
-            //Now we will create a connection
-
-
-
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-
-            //Now we will create a command
-
             OdbcCommand historyBuySellRating = new OdbcCommand("SELECT symbol,rating,ratingdate FROM etfhistbsctrating ORDER BY symbol,ratingdate", con);
-
 
             try
             {
@@ -144,14 +149,18 @@ namespace ChartLabFinCalculation.DAL
                     });
                 }
                 dr.Close();
-                con.Close();
             }
             catch (Exception ex)
             {
                 log.Error("ERROR \n" + "============ \n" + ex.ToString());
             }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
             return buySellRatingHist;
         }
-   
-   }
+
+    }
 }

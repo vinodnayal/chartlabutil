@@ -36,12 +36,15 @@ namespace ChartLabFinCalculation
                 }
                 dr.Close();
 
-
-                con.Close();
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
             return sectorList;
         }
@@ -95,12 +98,15 @@ namespace ChartLabFinCalculation
                 }
                 dr.Close();
 
-
-                con.Close();
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return symbolList;
@@ -127,11 +133,16 @@ namespace ChartLabFinCalculation
                 insertCommand.ExecuteReader();
 
                 log.Info("\nSector Wise Strong Weak Symbol Saved....\n");
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 

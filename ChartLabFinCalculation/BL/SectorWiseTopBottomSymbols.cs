@@ -13,6 +13,7 @@ namespace ChartLabFinCalculation
         public static void CalculateTopBottomSymbols(string StrongWeakSymbolsPath)
         {
             List<int> sectorList = SectorWiseSymbolsDAO.GetSectorId();
+            log.Info("Process: calculating sectors top and bottom symbols");
             List<SectorStrongWeakSymbol> StrongWeakSymbolList = new List<SectorStrongWeakSymbol>();
             try
             {
@@ -28,10 +29,12 @@ namespace ChartLabFinCalculation
             }
             catch (Exception ex)
             {
-                log.Error(ex);
+                log.Error("Error :"+ex);
             }
 
+            log.Info("Process: Write T oCSV Sector Wise Strong Weak Symbols");
             CSVExporter.WriteToCSVSectorWiseStrongWeakSymbols(StrongWeakSymbolList, StrongWeakSymbolsPath + "/StrongWeakSymbolsFile.csv");
+            log.Info("Process: Save Daily Strong Weak Symbols CSV To DB");
             SectorWiseSymbolsDAO.SaveDailyStrongWeakSymbolsCSVToDB(StrongWeakSymbolsPath);
 
         }

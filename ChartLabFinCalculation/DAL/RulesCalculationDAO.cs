@@ -17,7 +17,7 @@ namespace ChartLabFinCalculation
             OdbcCommand com = new OdbcCommand("SELECT symbol, buySellRating, ctrating,previuosBSRating,changedateprice,preSBRatingDate from symbolanalytics", con);
 
             Dictionary<string, SymbolRatingAlert> RatingDict = new Dictionary<string, SymbolRatingAlert>();
-            
+
 
             try
             {
@@ -26,7 +26,7 @@ namespace ChartLabFinCalculation
 
                 while (dr.Read())
                 {
-                  
+
                     object rating = dr.GetValue(1);
                     object ctrating = dr.GetValue(2);
                     object prevrating = dr.GetValue(3);
@@ -35,7 +35,7 @@ namespace ChartLabFinCalculation
                     double changeprice = 0;
                     int prevbsrating;
 
-                    if (!Convert.IsDBNull(rating) & !Convert.IsDBNull(ctrating) &  !Convert.IsDBNull(price))
+                    if (!Convert.IsDBNull(rating) & !Convert.IsDBNull(ctrating) & !Convert.IsDBNull(price))
                     {
                         try
                         {
@@ -45,37 +45,41 @@ namespace ChartLabFinCalculation
                             int ctratingValue = (int)dr.GetValue(2);
                             if (!Convert.IsDBNull(prevrating))
                             {
-                                 prevbsrating = (int)dr.GetValue(3);
+                                prevbsrating = (int)dr.GetValue(3);
                             }
                             else
                             {
-                                prevbsrating = ratingValue; 
+                                prevbsrating = ratingValue;
                             }
                             DateTime.TryParse(dr.GetString(5), out changedate);
-                            changeprice=dr.GetFloat(4);
-                           
+                            changeprice = dr.GetFloat(4);
+
 
                             ratingsymbol.currating = ratingValue;
                             ratingsymbol.ctrating = ctratingValue;
                             ratingsymbol.prevrating = prevbsrating;
                             ratingsymbol.ratingChangeDate = changedate;
                             ratingsymbol.changeDatePrice = changeprice;
-
-                            RatingDict.Add(symbol, ratingsymbol);
+                            if (!RatingDict.ContainsKey(symbol))
+                                RatingDict.Add(symbol, ratingsymbol);
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
-                            throw  e;
+                            throw e;
                         }
                     }
                 }
                 dr.Close();
 
-                con.Close();
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return RatingDict;
@@ -83,11 +87,11 @@ namespace ChartLabFinCalculation
 
         internal static Dictionary<string, SymbolRatingAlert> GetLongShortAlerts(int type)
         {
-          
+
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand com = new OdbcCommand("SELECT	a.symbol,a.prevrating,a.currating,a.changedate,h.close FROM lngshrtsymbols AS a LEFT JOIN "+
-                                            "symbolshistorical AS h ON a.symbol=h.symbol "+
-                                            "WHERE a.lngshrtid="+type+" AND h.date=a.changedate", con);
+            OdbcCommand com = new OdbcCommand("SELECT	a.symbol,a.prevrating,a.currating,a.changedate,h.close FROM lngshrtsymbols AS a LEFT JOIN " +
+                                            "symbolshistorical AS h ON a.symbol=h.symbol " +
+                                            "WHERE a.lngshrtid=" + type + " AND h.date=a.changedate", con);
 
             Dictionary<string, SymbolRatingAlert> symbolLongShortAlertDict = new Dictionary<string, SymbolRatingAlert>();
 
@@ -116,17 +120,22 @@ namespace ChartLabFinCalculation
                         symbolAlert.currating = currating;
                         symbolAlert.ratingChangeDate = prevdate;
                         symbolAlert.changeDatePrice = prevprice;
-
+                        if (!symbolLongShortAlertDict.ContainsKey(symbol))
                         symbolLongShortAlertDict.Add(symbol, symbolAlert);
                     }
                 }
                 dr.Close();
 
-                con.Close();
+
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return symbolLongShortAlertDict;
@@ -135,13 +144,13 @@ namespace ChartLabFinCalculation
         internal static Dictionary<string, SymbolRatingAlert> GetIntermediateLongShortAlerts(int type)
         {
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand com = new OdbcCommand("SELECT	a.symbol,a.prevrating,a.currating,a.changedate,h.close FROM intermediatelngshrtsymbols AS a LEFT JOIN "+
-                                            "symbolshistorical AS h ON a.symbol=h.symbol "+
-                                            "WHERE a.intermediatelngshrtid="+type+" AND h.date=a.changedate", con);
+            OdbcCommand com = new OdbcCommand("SELECT	a.symbol,a.prevrating,a.currating,a.changedate,h.close FROM intermediatelngshrtsymbols AS a LEFT JOIN " +
+                                            "symbolshistorical AS h ON a.symbol=h.symbol " +
+                                            "WHERE a.intermediatelngshrtid=" + type + " AND h.date=a.changedate", con);
 
 
             Dictionary<string, SymbolRatingAlert> symbolLongShortAlertDict = new Dictionary<string, SymbolRatingAlert>();
-            
+
 
             try
             {
@@ -167,17 +176,22 @@ namespace ChartLabFinCalculation
                         symbolAlert.currating = currating;
                         symbolAlert.ratingChangeDate = prevdate;
                         symbolAlert.changeDatePrice = prevprice;
-
+                        if (!symbolLongShortAlertDict.ContainsKey(symbol))
                         symbolLongShortAlertDict.Add(symbol, symbolAlert);
                     }
                 }
                 dr.Close();
 
-                con.Close();
+
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return symbolLongShortAlertDict;
@@ -195,7 +209,7 @@ namespace ChartLabFinCalculation
                                               "LINES TERMINATED BY '\n' " +
                                               "(symbol,ruleid,ratingchangedate,changedateprice,currating,prevrating);", con);
 
-            
+
             try
             {
                 con.Open();
@@ -203,20 +217,25 @@ namespace ChartLabFinCalculation
                 insertCommand.ExecuteNonQuery();
                 log.Info("Symbol Rules File Saved....");
 
-                con.Close();
+
             }
             catch (OdbcException ex)
             {
                 log.Error("ERROR \n" + "============ \n" + ex.ToString());
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
         internal static Dictionary<DateTime, SymbolRatingAlert> GetCTRatingHistory(string symbol)
         {
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand com = new OdbcCommand("SELECT ratingdate,ctrating,h.close FROM historybuysellrating AS r JOIN symbolshistorical AS h "+
-                                            "ON r.symbol=h.symbol "+
-                                            "WHERE r.symbol='"+symbol+"' AND h.date=r.ratingdate "+
+            OdbcCommand com = new OdbcCommand("SELECT ratingdate,ctrating,h.close FROM historybuysellrating AS r JOIN symbolshistorical AS h " +
+                                            "ON r.symbol=h.symbol " +
+                                            "WHERE r.symbol='" + symbol + "' AND h.date=r.ratingdate " +
                                             "ORDER BY r.ratingdate desc", con);
 
 
@@ -237,20 +256,24 @@ namespace ChartLabFinCalculation
                     if (!Convert.IsDBNull(ctratingdate) & !Convert.IsDBNull(ctrating) & !Convert.IsDBNull(price))
                     {
                         SymbolRatingAlert symbolrating = new SymbolRatingAlert();
-                        symbolrating.ctrating=(int)dr.GetValue(1);
-                        symbolrating.changeDatePrice=dr.GetFloat(2);
-
+                        symbolrating.ctrating = (int)dr.GetValue(1);
+                        symbolrating.changeDatePrice = dr.GetFloat(2);
+                        if (!ctRatingHistoryDict.ContainsKey((DateTime)dr.GetValue(0)))
                         ctRatingHistoryDict.Add((DateTime)dr.GetValue(0), symbolrating);
                     }
                 }
                 dr.Close();
-                con.Close();
+
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
             }
-
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
             return ctRatingHistoryDict;
         }
     }

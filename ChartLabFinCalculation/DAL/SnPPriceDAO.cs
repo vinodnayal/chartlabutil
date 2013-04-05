@@ -28,13 +28,18 @@ namespace ChartLabFinCalculation
                 con.Open();
                 deleteCommand.ExecuteReader();
                 insertCommand.ExecuteReader();
-                log.Info("SNP price inserted for WatchlictCreateDate ....");
+                log.Info("SNP price inserted for Watchlict CreateDate ....");
 
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 log.Error("ERROR \n" + "============ \n" + ex.ToString());
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
         }

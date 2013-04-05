@@ -19,94 +19,102 @@ namespace ChartLabFinCalculation
         {
             
             string type = null;
-           
-            List<InputBarData> listInputDataForSymbols = new List<InputBarData>();
-            List<String> symbolList = new List<string>();
 
-            if (isMF)
+            try
             {
+                List<InputBarData> listInputDataForSymbols = new List<InputBarData>();
+                List<String> symbolList = new List<string>();
+                log.Info("Symbol Analytics: Getting symbol list from DB ");
 
-                symbolList = SymbolHistoricalDAO.GetIndexMFFromDB();
-            }
-            else
-            {
-                symbolList = SymbolHistoricalDAO.GetsymbolListFromDB(from, to); 
-                //new List<string>();
-              //  symbolList.Add("GOOG");
-                // SymbolHistoricalDAO.GetsymbolListFromDB(from, to);
-            }
-
-            foreach (String symbol in symbolList)
-            {
-                List<BarData> barlist = null;
-                log.Info("Getting Data For symbol: " + symbol);
-
-                try
-                {
-                    barlist = SymbolHistoricalMongoDAO.GetHistoricalDataFromMongo(fromDate, toDate, symbol);
-                }
-                catch (Exception ex)
+                if (isMF)
                 {
 
-                    log.Error("Error:" + ex);
-                }
-                if (barlist == null || barlist.Count == 0)
-                {
-
-                    log.Info("Empty List Returned From Provider" + symbol);
+                    symbolList = SymbolHistoricalDAO.GetIndexMFFromDB();
                 }
                 else
                 {
-                    InputBarData inputListRow = new InputBarData();
-                    inputListRow.barListRow = barlist;
-                    inputListRow.symbol = symbol;
-                    listInputDataForSymbols.Add(inputListRow);
+                    symbolList = SymbolHistoricalDAO.GetsymbolListFromDB(from, to);
 
                 }
-
-            }
-            if (isMF)
-            {
-                type = "indicies";
-            }
-            else
-            {
-                type = "symbols";
-            }
-
-            log.Info("Calculaitng SymbolAnalytics for "+type+"....");
-            List<SymbolAnalytics> symbolAnalyticsList = CalculateAnalytics(listInputDataForSymbols,isMF);
-            if (isMF)
-            {
-                CSVExporter.WriteToCSV(symbolAnalyticsList, SymbolAnalyticsPath + "/SymbolAnalytics_Index_MF.csv");
-            }
-            else
-            {
-                CSVExporter.WriteToCSV(symbolAnalyticsList, SymbolAnalyticsPath + "/SymbolAnalytics_" + from + "_" + to + ".csv");
-            }
-           
-            log.Info("Calculaitng Patterns for "+type+"....");
-            List<PatternBarData> PatternMixData = calculatePatterns(listInputDataForSymbols);
-            DirectoryInfo di = new DirectoryInfo(patternsFilePath);//AppDomain.CurrentDomain.BaseDirectory);
-            try
-            {
-                foreach (FileInfo file in di.GetFiles("*.xml"))
+                log.Info("Symbol Analytics: start  calulation for symbols count : " + symbolList.Count);
+                foreach (String symbol in symbolList)
                 {
+                    List<BarData> barlist = null;
+                    
+                    log.Info("Symbol Analytics: Getting Hist Data from mongo For symbol: " + symbol);
 
-                    String PatternType = (file.Name).Replace(".apr.xml", "");
-                    List<PatternBarData> PatternSeperateData = PatternMixData.Where(x => x.Pattern.Equals(PatternType, StringComparison.OrdinalIgnoreCase)).ToList();
-                    if (isMF)
+                    try
                     {
-                        CSVExporter.WriteToCSVPattern(PatternSeperateData, PatternsCsvFilePath + "/Pattern_MF" + ".csv");
+                        barlist = SymbolHistoricalMongoDAO.GetHistoricalDataFromMongo(fromDate, toDate, symbol);
+                    }
+                    catch (Exception ex)
+                    {
+
+                        log.Error("Error:" + ex);
+                    }
+                    if (barlist == null || barlist.Count == 0)
+                    {
+
+                        log.Info("Symbol Analytics: Empty List Returned From Provider for " + symbol);
                     }
                     else
                     {
-                        CSVExporter.WriteToCSVPattern(PatternSeperateData, PatternsCsvFilePath + "/Pattern_" + PatternType + "_" + from + "_" + to + ".csv");
+                        InputBarData inputListRow = new InputBarData();
+                        inputListRow.barListRow = barlist;
+                        inputListRow.symbol = symbol;
+                        listInputDataForSymbols.Add(inputListRow);
+
                     }
+
+                }
+                if (isMF)
+                {
+                    type = "indicies";
+                }
+                else
+                {
+                    type = "symbols";
+                }
+
+                log.Info("Symbol Analytics: Calculaitng SymbolAnalytics for asset class " + type + "....");
+                List<SymbolAnalytics> symbolAnalyticsList = CalculateAnalytics(listInputDataForSymbols, isMF);
+                if (isMF)
+                {
+                    CSVExporter.WriteToCSV(symbolAnalyticsList, SymbolAnalyticsPath + "/SymbolAnalytics_Index_MF.csv");
+                }
+                else
+                {
+                    CSVExporter.WriteToCSV(symbolAnalyticsList, SymbolAnalyticsPath + "/SymbolAnalytics_" + from + "_" + to + ".csv");
+                }
+
+                log.Info("Symbol Analytics: Calculating Patterns for " + type + "....");
+                List<PatternBarData> PatternMixData = calculatePatterns(listInputDataForSymbols);
+                DirectoryInfo di = new DirectoryInfo(patternsFilePath);//AppDomain.CurrentDomain.BaseDirectory);
+                try
+                {
+                    foreach (FileInfo file in di.GetFiles("*.xml"))
+                    {
+
+                        String PatternType = (file.Name).Replace(".apr.xml", "");
+                        List<PatternBarData> PatternSeperateData = PatternMixData.Where(x => x.Pattern.Equals(PatternType, StringComparison.OrdinalIgnoreCase)).ToList();
+                        if (isMF)
+                        {
+                            CSVExporter.WriteToCSVPattern(PatternSeperateData, PatternsCsvFilePath + "/Pattern_MF" + ".csv");
+                        }
+                        else
+                        {
+                            CSVExporter.WriteToCSVPattern(PatternSeperateData, PatternsCsvFilePath + "/Pattern_" + PatternType + "_" + from + "_" + to + ".csv");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Error:" + ex);
                 }
             }
             catch (Exception ex)
             {
+
                 log.Error("Error:" + ex);
             }
 
@@ -120,31 +128,19 @@ namespace ChartLabFinCalculation
 
         private  static List<SymbolAnalytics> CalculateAnalytics(List<InputBarData> inputBarList,bool isMF)
         {
-
-
             List<SymbolAnalytics> symbolAnalyticsList = new List<SymbolAnalytics>();
             List<HistoricalDates> listHistoricalDates = CommonDAO.getHistoricalDatesFromDB();
-
 
             foreach (InputBarData inputRow in inputBarList)
             {
                 FinCalculator fincalc = new FinCalculator();
                 List<BarData> barlist = inputRow.barListRow;
                 String symbol = inputRow.symbol;
-                log.Info("Calculaitng SymbolAnalytics for symbol: " + symbol);
+                log.Info("Symbol Analytics: Calculaitng SymbolAnalytics using fincalc for symbol: " + symbol);
                 try
                 {
                     SymbolAnalytics symbolAnalytics = fincalc.CalculateAnalytics(symbol, barlist, listHistoricalDates);
-
-                    //if (isMF)
-                    //{
-                    //   // symbolAnalytics.symbol = SymbolAnalyticsDAO.GetIndexSymbolName(symbol);
-                    //}
-                    //else
-                    //{
-                        symbolAnalytics.symbol = symbol;
-                    //}
-
+                    symbolAnalytics.symbol = symbol;
                     TrendObjects trends = calculateTrend(symbol, barlist);
                     symbolAnalytics.longTermTrend = trends.longTermTrend;
                     symbolAnalytics.mediumTermTrend = trends.mediumTermTrend;
@@ -155,24 +151,22 @@ namespace ChartLabFinCalculation
                 }
                 catch (Exception ex)
                 {
-                    log.Error("Error for Symbol While calculaing Analytics " + symbol);
-                    log.Error(ex);
+                    log.Error("Error: for Symbol While calculaing Analytics " + symbol +ex);
+                    
                 }
             }
 
 
             return symbolAnalyticsList;
 
-
-
         }
 
         private static List<PatternBarData> calculatePatterns(List<InputBarData> inputBarList)
         {
+            log.Info("Symbol Analytics: Calculating  Patterns"); 
             List<PatternBarData> patternRowList = new List<PatternBarData>();
             try
             {
-               
                 if (!Directory.Exists(patternsFilePath))
                 {
                     Directory.CreateDirectory(patternsFilePath);
@@ -191,34 +185,29 @@ namespace ChartLabFinCalculation
                     }
                     //  barlist.Reverse();
                     String symbol = inputRow.symbol;
-
-
-
                     foreach (FileInfo file in di.GetFiles("*.xml"))
                     {
                         PatternRecognizer patternRecognizer = new PatternRecognizer();
                         String PatternType = (file.Name).Replace(".apr.xml", "");
                         if (file.Name.Contains("Uptrend"))
                         {
-                            log.Info("Calculating " + PatternType + " Pattern for symbol " + symbol);
+                            log.Info("Symbol Analytics: Calculating " + PatternType + " Pattern for symbol " + symbol);
                         }
-                        log.Info("Calculating " + PatternType + " Pattern for symbol " + symbol);
+                        log.Info("Symbol Analytics: Calculating " + PatternType + " Pattern for symbol " + symbol);
 
                         patternRecognizer.Init();
                         patternRecognizer.AppendRecords(barlistNew);
                         int count = patternRecognizer.Scan((file).FullName, "{2E036561-F762-471d-93FD-869AFE438639}");
                         if (count == -1)
                         {
-                            log.Info("Wrong License code.");
+                            log.Warn("Symbol Analytics: Wrong License code Calculating  Patterns.");
 
                         }
-
 
                         //analize results, in this sample we just display in a list
                         int i = 0;
                         foreach (var patternValue in patternRecognizer.Results)
                         {
-
                             PatternBarData patternRow = new PatternBarData();
                             int StartIndex = (int)patternValue.Interval.x;
                             int EndIndex = (int)patternValue.Interval.y;
@@ -258,7 +247,7 @@ namespace ChartLabFinCalculation
             }
             catch (Exception ex)
             {
-                throw (ex);
+                log.Error(ex);
             }
 
             return patternRowList;
@@ -272,21 +261,21 @@ namespace ChartLabFinCalculation
 
             if (barlist == null || barlist.Count == 0)
             {
-                log.Info("Empty List Returned From Provider" + symbol);
+                log.Info("Symbol Analytics: Empty List Returned From Provider" + symbol);
             }
 
             else
             {
                 try
                 {
-                    log.Info("Calculating Trend For symbol:  " + symbol);
+                    log.Info("Symbol Analytics: Calculating Trend For symbol:  " + symbol);
                     
                     TrendCalculation trendcalc = new TrendCalculation();
                     TrendObject = trendcalc.CalulateAllTrends(barlist, symbol);
                 }
                 catch (Exception ex)
                 {
-                    log.Error("Error for Symbol While calculaing Trend " + symbol);
+                    log.Error("Error: for Symbol While calculaing Trend " + symbol);
                     log.Error(ex);
                 }
             }
@@ -299,37 +288,48 @@ namespace ChartLabFinCalculation
 
         public static void SaveSymbolAnalytics()
         {
-            
-            #region   update symbol analytics in db
-            DirectoryInfo di = new DirectoryInfo(SymbolAnalyticsPath);
-            FileInfo[] fileEntries = di.GetFiles("*.csv");
-            int count = 0;
-            foreach (FileInfo fileName in fileEntries)
+
+            try
             {
-                if (count == 0)
+                log.Info("Symbol Analytics: updating symbol analytics in db");
+                #region   update symbol analytics in db
+                DirectoryInfo di = new DirectoryInfo(SymbolAnalyticsPath);
+                FileInfo[] fileEntries = di.GetFiles("*.csv");
+                int count = 0;
+                log.Info("Symbol Analytics: save data CSV files To DB ");
+                foreach (FileInfo fileName in fileEntries)
                 {
-                    SymbolAnalyticsDAO.SymbolAnalyticsCSVToDB(SymbolAnalyticsPath, fileName.Name, true);
+                    if (count == 0)
+                    {
+                        SymbolAnalyticsDAO.SymbolAnalyticsCSVToDB(SymbolAnalyticsPath, fileName.Name, true);
+                    }
+                    else
+                    {
+                        SymbolAnalyticsDAO.SymbolAnalyticsCSVToDB(SymbolAnalyticsPath, fileName.Name, false);
+                    }
+                    count++;
                 }
-                else
+                #endregion
+
+                #region update patterns in db
+
+                DirectoryInfo diPatterns = new DirectoryInfo(PatternsCsvFilePath);
+                FileInfo[] fileEntriesPatterns = diPatterns.GetFiles("*.csv");
+                SymbolAnalyticsDAO.DeletePatterns();
+                log.Info("Symbol Analytics: Delete Patterns ");
+                foreach (FileInfo fileName in fileEntriesPatterns)
                 {
-                    SymbolAnalyticsDAO.SymbolAnalyticsCSVToDB(SymbolAnalyticsPath, fileName.Name, false);
+                    SymbolAnalyticsDAO.UpdatedPatterns(PatternsCsvFilePath, fileName.Name);
+                    log.Info("Symbol Analytics: updated patters " + fileName.Name);
                 }
-                count++;
+
+                SymbolAnalyticsDAO.UpdatedAlertsInSymbolAnalytics();
+                log.Info("Symbol Analytics:  Updated Alerts In Symbol Analytics");
             }
-            #endregion
-
-            #region update patterns in db
-
-            DirectoryInfo diPatterns = new DirectoryInfo(PatternsCsvFilePath);
-            FileInfo[] fileEntriesPatterns = diPatterns.GetFiles("*.csv");
-            SymbolAnalyticsDAO.DeletePatterns();
-            foreach (FileInfo fileName in fileEntriesPatterns)
+            catch (Exception ex)
             {
-                SymbolAnalyticsDAO.UpdatedPatterns(PatternsCsvFilePath, fileName.Name);
-
+                log.Error("Error: "+ex);
             }
-
-            SymbolAnalyticsDAO.UpdatedAlertsInSymbolAnalytics();
 
             #endregion
         }

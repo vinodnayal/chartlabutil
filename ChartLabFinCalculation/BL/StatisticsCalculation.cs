@@ -67,7 +67,8 @@ namespace ChartLabFinCalculation.BL
             }
             catch (Exception ex)
             {
-                log.Error(ex);
+
+                log.Error("Error: " + ex);
             }
             return finalStatPerfData;
 
@@ -137,7 +138,8 @@ namespace ChartLabFinCalculation.BL
             }
             catch (Exception ex)
             {
-                log.Error(ex);
+
+                log.Error("Error: " + ex);
             }
         }
 
@@ -183,7 +185,8 @@ namespace ChartLabFinCalculation.BL
             }
             catch (Exception ex)
             {
-                log.Error(ex);
+
+                log.Error("Error: " + ex);
             }
         }
 
@@ -252,7 +255,8 @@ namespace ChartLabFinCalculation.BL
             }
             catch (Exception ex)
             {
-                log.Error(ex);
+
+                log.Error("Error: " + ex);
             }
         }
 
@@ -294,7 +298,8 @@ namespace ChartLabFinCalculation.BL
             }
             catch (Exception ex)
             {
-                log.Error(ex);
+
+                log.Error("Error: " + ex);
             }
 
         }
@@ -309,7 +314,8 @@ namespace ChartLabFinCalculation.BL
             }
             catch (Exception ex)
             {
-                log.Error(ex);
+
+                log.Error("Error: " + ex);
             }
         }
 
@@ -333,7 +339,8 @@ namespace ChartLabFinCalculation.BL
             }
             catch (Exception ex)
             {
-                log.Error(ex);
+
+                log.Error("Error: " + ex);
             }
         }
     }

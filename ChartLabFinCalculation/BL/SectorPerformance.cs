@@ -15,103 +15,129 @@ namespace ChartLabFinCalculation
 
         public static void CalculateSectorDailyStocks()
         {
-            
-            List<int> sectorIdList = SectorWiseSymbolsDAO.GetSectorId();
-            SectorPerformanceDAO.deleteStockSymbols();
-            Dictionary<int, int> todayStockList = SectorPerformanceDAO.getTodayTopRatingSymbolStocks();
-            Dictionary<int, int> fivedaysStockList = SectorPerformanceDAO.getfiveDaysTopRatingSymbolStocks();
-
-            SectorPerformanceDAO.insertSectorPerf();
-
-            foreach(int sectorId in sectorIdList)
-            {
-                if (todayStockList.ContainsKey(sectorId))
-                {
-                    SectorPerformanceDAO.updateTodaysStock(sectorId, todayStockList[sectorId]);
-                }
-
-                if (fivedaysStockList.ContainsKey(sectorId))
-                {
-                    SectorPerformanceDAO.updatefiveDaysStock(sectorId, fivedaysStockList[sectorId]);
-                }
-
-            }
-
-            Dictionary<int, SectorPerfRating> ratingList = SectorPerformanceDAO.getRatingAvgValue();
-
-            foreach (int sectorId in sectorIdList)
-            {
-                if (ratingList.ContainsKey(sectorId))
-                {
-                    SectorPerformanceDAO.updateAvgRating(sectorId, ratingList[sectorId].rating,ratingList[sectorId].ctrating);
-                }
-
-            }
-
-        }
-
-        public static void CalculateSectorPerfHistory(bool isHistorical)
-        {
-            List<int> sectorIdList = SectorWiseSymbolsDAO.GetSectorId();
-            List<DateTime> dateList = new List<DateTime>();
-
-            if (isHistorical)
-            {
-                 dateList = BuySellRatingDAO.GetDistinctRatingDatesFromDB();
-            }
-            else
-            {
-                dateList = SectorPerformanceDAO.GetCurrentDate();
-                
-            }
-            List<SectorPerfHist> sectorHistPerfList = new List<SectorPerfHist>();
 
             try
             {
-                foreach (DateTime date in dateList)
+                List<int> sectorIdList = SectorWiseSymbolsDAO.GetSectorId();
+                SectorPerformanceDAO.deleteStockSymbols();
+                log.Info("Process: Getting Todays Top Rating Symbol Stocks");
+                Dictionary<int, int> todayStockList = SectorPerformanceDAO.getTodayTopRatingSymbolStocks();
+                log.Info("Process: Getting five days before Top Rating Symbol Stocks");
+                Dictionary<int, int> fivedaysStockList = SectorPerformanceDAO.getfiveDaysTopRatingSymbolStocks();
+
+                
+                SectorPerformanceDAO.insertSectorPerf();
+                log.Info("Process: calculating sector perf for sectors count " + sectorIdList.Count);
+                foreach (int sectorId in sectorIdList)
                 {
-
-                    try
+                    if (todayStockList.ContainsKey(sectorId))
                     {
-                        log.Info("\nGetting Avg Rating For Date " + date + "\n");
-
-                        foreach (int secId in sectorIdList)
-                        {
-                            SectorPerfHist sectorPerf = new SectorPerfHist();
-
-                            double ratingValue = SectorPerformanceDAO.getSectorWiseAvgRating(date, secId);
-                            RatingEnum rating = BuySellRatingCalculation.calculateBSRatingEnum(ratingValue);
-                            sectorPerf.rating = (int)rating;
-                            sectorPerf.date = date;
-                            sectorPerf.sectorId = secId;
-
-                            sectorHistPerfList.Add(sectorPerf);
-                        }
+                        SectorPerformanceDAO.updateTodaysStock(sectorId, todayStockList[sectorId]);
                     }
-                    catch (Exception ex)
+
+                    if (fivedaysStockList.ContainsKey(sectorId))
                     {
-                        log.Error(ex);
+                        SectorPerformanceDAO.updatefiveDaysStock(sectorId, fivedaysStockList[sectorId]);
+                    }
+
+                }
+
+                Dictionary<int, SectorPerfRating> ratingList = SectorPerformanceDAO.getRatingAvgValue();
+
+                foreach (int sectorId in sectorIdList)
+                {
+                    if (ratingList.ContainsKey(sectorId))
+                    {
+                        SectorPerformanceDAO.updateAvgRating(sectorId, ratingList[sectorId].rating, ratingList[sectorId].ctrating);
                     }
 
                 }
             }
             catch (Exception ex)
             {
-                log.Error(ex);
+
+                log.Error("Error: " + ex);
             }
 
-            string fileName = "";
+        }
 
-            if (isHistorical)
+        public static void CalculateSectorPerfHistory(bool isHistorical)
+        {
+            try
             {
-                 fileName = SectorPerfHistFolderPath + "/SectorAvgRatingList.csv";
+                
+                List<int> sectorIdList = SectorWiseSymbolsDAO.GetSectorId();
+                List<DateTime> dateList = new List<DateTime>();
+               
+                if (isHistorical)
+                {
+                    log.Info("Process: Getting historical Dates From DB: " );
+                    dateList = BuySellRatingDAO.GetDistinctRatingDatesFromDB();
+                }
+                else
+                {
+                    log.Info("Process: Getting  Current Date From DB ");
+                    dateList = SectorPerformanceDAO.GetCurrentDate();
+
+                }
+                List<SectorPerfHist> sectorHistPerfList = new List<SectorPerfHist>();
+
+                try
+                {
+                    foreach (DateTime date in dateList)
+                    {
+
+                        try
+                        {
+                            log.Info("Process: Getting Avg Rating For Date " + date + "\n");
+
+                            foreach (int secId in sectorIdList)
+                            {
+                                SectorPerfHist sectorPerf = new SectorPerfHist();
+
+                                double ratingValue = SectorPerformanceDAO.getSectorWiseAvgRating(date, secId);
+                                RatingEnum rating = BuySellRatingCalculation.calculateBSRatingEnum(ratingValue);
+                                sectorPerf.rating = (int)rating;
+                                sectorPerf.date = date;
+                                sectorPerf.sectorId = secId;
+
+                                sectorHistPerfList.Add(sectorPerf);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+
+                            log.Error("Error: " + ex);
+                        }
+
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                    log.Error("Error: " + ex);
+                }
+
+                string fileName = "";
+
+                if (isHistorical)
+                {
+                    fileName = SectorPerfHistFolderPath + "/SectorAvgRatingList.csv";
+                }
+                else
+                {
+                    fileName = SectorPerfDailyFolderPath + "/SectorAvgRatingList.csv";
+                }
+                log.Info("Process: Writing To CSV SectorPerf ");
+                CSVExporter.WriteToCSVSectorPerf(sectorHistPerfList, fileName);
+                log.Info("Process: Saving Sector Perf Data CSV To DB ");
+                SectorPerformanceDAO.SaveSectorPerfHistDataCSVToDB(fileName, isHistorical);
             }
-            else
+            catch (Exception ex)
             {
-                fileName = SectorPerfDailyFolderPath + "/SectorAvgRatingList.csv";
+
+                log.Error("Error: " + ex);
             }
-            CSVExporter.WriteToCSVSectorPerf(sectorHistPerfList, fileName);
-            SectorPerformanceDAO.SaveSectorPerfHistDataCSVToDB(fileName,isHistorical);
         }
     }
 }

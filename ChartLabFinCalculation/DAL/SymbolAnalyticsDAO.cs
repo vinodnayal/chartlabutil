@@ -31,11 +31,19 @@ namespace ChartLabFinCalculation
                 insertCommand.ExecuteReader();
                 log.Info("SymbolAnalytics File " + filename + " Saved....");
 
-                con.Close();
+
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+
+                if (con != null)
+                {
+                    con.Close();
+                }
             }
         }
 
@@ -45,9 +53,6 @@ namespace ChartLabFinCalculation
 
             OdbcCommand deleteCommand = new OdbcCommand("DELETE from patternHistory", con);
 
-
-
-
             try
             {
                 con.Open();
@@ -55,12 +60,20 @@ namespace ChartLabFinCalculation
                 deleteCommand.ExecuteNonQuery();
 
 
-                //log.Info("SymbolAnalytics File " + count + " Saved....");
-                con.Close();
+                log.Info("SymbolAnalytics csv File  Saved....");
+               
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+
+                if (con != null)
+                {
+                    con.Close();
+                }
             }
         }
 
@@ -75,8 +88,7 @@ namespace ChartLabFinCalculation
                                                 "LINES TERMINATED BY '\n' " +
                                                 "(symbol,startDate,endDate,PatternId);", con);
 
-
-
+            
             try
             {
                 con.Open();
@@ -84,11 +96,19 @@ namespace ChartLabFinCalculation
                 insertCommand.ExecuteReader();
 
                 log.Info("SymbolAnalytics File " + filename + " Saved....");
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+
+                if (con != null)
+                {
+                    con.Close();
+                }
             }
         }
 
@@ -115,11 +135,19 @@ namespace ChartLabFinCalculation
                 updateCommand.ExecuteReader();
 
                 log.Info("Alerts Updates....");
-                con.Close();
+                
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+
+                if (con != null)
+                {
+                    con.Close();
+                }
             }
         }
 
@@ -143,16 +171,23 @@ namespace ChartLabFinCalculation
                 }
                 dr.Close();
 
-                con.Close();
             }
             catch (OdbcException ex)
             {
-                log.Error(ex);
+                log.Error("Error: "+ex);
+            }
+            finally
+            {
+
+                if (con != null)
+                {
+                    con.Close();
+                }
             }
 
-         return  indexSymbol;
+            return indexSymbol;
         }
 
-    
+
     }
 }

@@ -89,6 +89,7 @@
     <Compile Include="BL\SymbolAnalyticsCalculation.cs" />
     <Compile Include="BL\SymbolPerformance.cs" />
     <Compile Include="BL\UpdateHistoryDates.cs" />
+    <Compile Include="BL\ValidationDataHelper.cs" />
     <Compile Include="DAL\AggresiveDefensivePerformanceDAO.cs" />
     <Compile Include="DAL\BuySellRatingDAO.cs" />
     <Compile Include="DAL\ChangeHistoryDatesDAO.cs" />

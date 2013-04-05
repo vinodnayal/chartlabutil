@@ -14,7 +14,7 @@ namespace ChartLabFinCalculation
         public static void ChangeHistoryDate()
         {
 
-
+            log.Info("Process: Calculating weekly, monthly, yearly, quaterly dates");
             Dictionary<DateTime, DateTime> dateDict = new Dictionary<DateTime, DateTime>();
             DateTime oneMonth = new DateTime();
             DateTime five_days = new DateTime();
@@ -143,6 +143,7 @@ namespace ChartLabFinCalculation
                 dates.Quaterly = UpdateHistoryDates.GetBackwardDate(dateDict, quaterlyDate).Date.ToString("yyyy-MM-dd");
                // dates.Quaterly = UpdateHistoryDates.GetForwardDate(dateDict, quaterlyDate, dbQuaterlyDate).Date.ToString("yyyy-MM-dd");
 
+                log.Info("Process: updating in DB weekly, monthly, yearly, quaterly dates");
                 OdbcCommand updateHistoricalDates = new OdbcCommand("UPDATE historicaldates " +
                                                                  "SET DATE=CASE WHEN (DateType='" + Constants.W + "') THEN '" + dates.Weekly + "' WHEN (DateType='" + Constants.Q + "') THEN '" + dates.Quaterly + "' " +
                                                                  "WHEN (DateType='" + Constants.Y + "') THEN '" + dates.Yearly + "' WHEN (DateType='" + Constants.M + "') THEN '" + dates.Monthly + "' " +
@@ -152,14 +153,18 @@ namespace ChartLabFinCalculation
                                                                  "END", con);
 
                 updateHistoricalDates.ExecuteReader();
-                log.Info("\nHistorical Dates Updated \n");
-                con.Close();
-
+                log.Info("Process: Historical Dates Updated \n");
+              
             }
 
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
         }

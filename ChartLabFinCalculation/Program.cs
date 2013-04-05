@@ -47,6 +47,7 @@ namespace ChartLabFinCalculation
         static string CTRatingChangeHistFolderPath = ConfigurationManager.AppSettings["CTRatingChangeHistFilePath"];
         static string AlertsPath = ConfigurationManager.AppSettings["AlertsPath"];
         static string ETFSymbolsDataPath = ConfigurationManager.AppSettings["ETFSymbolsDataPath"];
+        static string BuySellRatingFTPFilesPath = ConfigurationManager.AppSettings["BuySellRatingFTPFilesPath"];
         //static string CTRatingHistoryFolderPath = ConfigurationManager.AppSettings["CTRatingHistoryFilePath"];
         //static string CTRatingPerfFolderPath = ConfigurationManager.AppSettings["CTRatingPerfFilePath"];
 
@@ -159,7 +160,7 @@ namespace ChartLabFinCalculation
                 if (!Directory.Exists(AlertsPath))
                 {
                     Directory.CreateDirectory(AlertsPath);
-                }       
+                }
 
                 //if (!Directory.Exists(CTRatingHistoryFolderPath))
                 //{
@@ -178,7 +179,7 @@ namespace ChartLabFinCalculation
 
                         #region Symbol Analytics
 
-                        log.Info("Starting Symbol Analytics Programme at: " + DateTime.Now);
+                        log.Info("Symbol Analytics: Starting Symbol Analytics Programme at: " + DateTime.Now);
 
                         DateTime fromDate = DateTime.Now.AddDays(-400);
                         DateTime toDate = DateTime.Now;
@@ -196,47 +197,47 @@ namespace ChartLabFinCalculation
                         {
                             SymbolAnalyticsCalculation.CalculateSymbolAnalytics(fromDate, toDate, true);
                         }
-
+                        log.Info("Symbol Analytics: calculation done. " + DateTime.Now);
                         #endregion
                         break;
                     case "Save":
 
                         #region Save Symbol Analytics
-                        log.Info("Starting Save Symbol Analytics Programme at: " + DateTime.Now);
+                        log.Info("Symbol Analytics: Starting Save Symbol Analytics Programme at: " + DateTime.Now);
 
                         SymbolAnalyticsCalculation.SymbolAnalyticsPath = SymbolAnalyticsPath;
                         SymbolAnalyticsCalculation.PatternsCsvFilePath = PatternsCsvFilePath;
                         SymbolAnalyticsCalculation.SaveSymbolAnalytics();
+                        log.Info("Symbol Analytics: Save Symbol Analytics done. " + DateTime.Now);
                         break;
 
                         #endregion
                     case "Daily":
 
                         #region Daily Data Import
-
+                        logTime.Info("Process: Starting Daily Data Import Programme at: " + DateTime.Now);
                         toDate = DateTime.Now.Date;
                         fromDate = DateTime.Now.Date;
                         int daysBehind = 0;
-                       
-                        if (args.Length ==2)
+
+                        if (args.Length == 2)
                         {
                             daysBehind = int.Parse(args[1]);
                             fromDate = DateTime.Now.Date.AddDays(-daysBehind);
                         }
                         if (args.Length > 2)
                         {
+                            logTime.Info("Process: Daily Data Import for Daily Error Symbol Data ");
                             daysBehind = int.Parse(args[1]);
                             fromDate = DateTime.Now.Date.AddDays(-daysBehind);
 
                             string filename = ERRORSymbolsPath + "/" + args[2];
                             HistoricalDataImporter.HistoricalDataFilePath = HistoricalDataFilePath;
                             HistoricalDataImporter.ERRORSymbolsPath = ERRORSymbolsPath;
-                            HistoricalDataImporter.DailyErrorSymbolData(fromDate,toDate,filename,false);
+                            HistoricalDataImporter.DailyErrorSymbolData(fromDate, toDate, filename, false);
                         }
                         else
                         {
-                            logTime.Info("Starting Daily Data Import Programme at: " + DateTime.Now);
-
 
                             HistoricalDataImporter.HistoricalDataFilePath = HistoricalDataFilePath;
                             HistoricalDataImporter.ERRORSymbolsPath = ERRORSymbolsPath;
@@ -244,6 +245,7 @@ namespace ChartLabFinCalculation
                             HistoricalDataImporter.SaveDailyData(fromDate, toDate, true);
                             HistoricalDataImporter.SaveDailyData(fromDate, toDate, false);
                         }
+                        logTime.Info("Process: Done! Daily Data Import Programme at: " + DateTime.Now);
                         break;
 
                         #endregion
@@ -252,7 +254,7 @@ namespace ChartLabFinCalculation
 
                         #region Newly Added Symbols Data Import
 
-                        log.Info("Starting Newly Added Symbols Data Import Programme at: " + DateTime.Now);
+                        log.Info("Process: Starting Newly Added Symbols Data Import Programme at: " + DateTime.Now);
 
                         toDate = DateTime.Now.Date;
                         fromDate = DateTime.Now.AddYears(-Constants.HIST_DATA_LENGTH).Date;
@@ -262,16 +264,16 @@ namespace ChartLabFinCalculation
                         HistoricalDataImporter.SaveHistData(fromDate, toDate, false, true);
 
                         SymbolHistoricalDAO.ChangeIsnewSymbols();
-
+                        log.Info("Process: Done! Newly Added Symbols Data Import Programme at: " + DateTime.Now);
                         break;
                         #endregion
                     case "Hist":
 
                         #region Historical Data Import
 
-                        logTime.Info("Starting Historical Data Import Programme at: " + DateTime.Now);
+                        logTime.Info("Process: Starting Historical Data Import Programme at: " + DateTime.Now);
                         toDate = DateTime.Now.Date;
-                       
+
                         fromDate = DateTime.Now.AddYears(-Constants.HIST_DATA_LENGTH).Date;
                         HistoricalDataImporter.HistoricalDataFilePath = HistoricalDataFilePath;
                         HistoricalDataImporter.ERRORSymbolsPath = ERRORSymbolsPath;
@@ -279,43 +281,65 @@ namespace ChartLabFinCalculation
                         {
                             switch (args[1])
                             {
+                                case "D":   //specific Date
+                                    
+                                    toDate = DateTime.Now.Date;
+                                    fromDate = DateTime.Now.Date;
+                                    if (args.Length > 2)
+                                    {
+                                        DateTime date = DateTime.Parse(args[2]);
+                                        fromDate =toDate = date;
+                                        logTime.Info("Process: Starting  Data Import for specific date " + date);
+                                    }
+                                    HistoricalDataImporter.HistoricalDataFilePath = HistoricalDataFilePath;
+                                    HistoricalDataImporter.ERRORSymbolsPath = ERRORSymbolsPath;
+
+                                    HistoricalDataImporter.SaveDailyData(fromDate, toDate, true);
+                                    HistoricalDataImporter.SaveDailyData(fromDate, toDate, false);
+
+                                    break;
+
                                 case "S":   //specific Symbol
 
-                                    if (args.Length >3)
+                                    if (args.Length > 3)
                                     {
                                         int customHistDataLength = Convert.ToInt32(args[3]);
                                         int year = DateTime.Now.AddYears(-customHistDataLength).Date.Year;
-                                        fromDate = new DateTime(year,1,1);
+                                        fromDate = new DateTime(year, 1, 1);
                                     }
                                     string symbol = args[2];
+                                    logTime.Info("Process: Starting Historical Data Import for specific symbol " + symbol);
                                     SymbolHistoricalDAO.DeleteData(symbol);
                                     HistoricalDataImporter.SaveHistDataSymbol(fromDate, toDate, symbol, false, true);
+                                    logTime.Info("Process: Done! Historical Data Import for specific symbol " + symbol);
                                     break;
 
                                 case "E":
-
+                                    logTime.Info("Process: Starting Historical Data Import Daily Error Symbol Data ");
                                     string filename = ERRORSymbolsPath + "/" + args[2];
                                     HistoricalDataImporter.HistoricalDataFilePath = HistoricalDataFilePath;
                                     HistoricalDataImporter.DailyErrorSymbolData(fromDate, toDate, filename, true);
+                                    logTime.Info("Process: Done! Historical Data Import Daily Error Symbol Data ");
                                     break;
 
                                 case "M":
-                                    
+                                    logTime.Info("Process: Starting Historical Data Import for mutual funds ");
                                     HistoricalDataImporter.SaveHistData(fromDate, toDate, true, false);
-                                  
+                                    logTime.Info("Process: Done! Historical Data Import for mutual funds ");
                                     break;
                                 case "A":
-
+                                    logTime.Info("Process: Starting Historical Data Import for All Symbols ");
                                     SymbolHistoricalDAO.DeleteData();
                                     HistoricalDataImporter.SaveHistData(fromDate, toDate, true, false);
                                     HistoricalDataImporter.SaveHistData(fromDate, toDate, false, false);
+                                    logTime.Info("Process: Done! Historical Data Import for All Symbols ");
                                     break;
 
                                 default:
                                     break;
                             }
                         }
-                        
+
 
                         #endregion
                         break;
@@ -323,13 +347,16 @@ namespace ChartLabFinCalculation
                     case "B":
 
                         #region Buy Sell Rating
-                        log.Info("Starting Buy Sell Rating Programme at: " + DateTime.Now);
+                        log.Info("Rating: Starting Buy Sell Rating Programme at: " + DateTime.Now);
 
                         BuySellRatingCalculation.BuySellRatingFilePath = BuySellRatingFilePath;
                         BuySellRatingCalculation.BuySellRatingCsvFilePath = BuySellRatingCsvFilePath;
-                        BuySellRatingCalculation.calculateBuySellRating();
-                       //BuySellRatingCalculation.updateETFRatings();
 
+                        BuySellRatingCalculation.calculateBuySellRating();
+                       
+                        BuySellRatingCalculation.backupBSRatingFiles(BuySellRatingFTPFilesPath);
+                        log.Info("Rating: backup BS Rating Files Programme at: " + DateTime.Now);
+                        log.Info("Rating: Done! Buy Sell Rating Programme at: " + DateTime.Now);
                         break;
 
                         #endregion
@@ -337,11 +364,12 @@ namespace ChartLabFinCalculation
                     case "R":
 
                         #region OBOS
-                        logTime.Info("Starting OBOS Programme at: " + DateTime.Now);
+                        logTime.Info("Process: Starting OBOS Programme at: " + DateTime.Now);
 
                         OBOSRatingCalculation.OBOSRatingPath = OBOSRatingPath;
                         if (args.Length > 1 && args[1].Equals("H"))
                         {
+                            logTime.Info("Process: Calculate OBOS Rating in history mode");
                             OBOSRatingCalculation.CalculateOBOSRating(true);
 
                         }
@@ -349,13 +377,13 @@ namespace ChartLabFinCalculation
                         {
                             OBOSRatingCalculation.CalculateOBOSRating(false);
                         }
-                        
+                        logTime.Info("Process: Done! OBOS Programme at: " + DateTime.Now);
                         #endregion
                         break;
                     case "MI":
 
                         #region Calculate Market Internals
-                        logTime.Info("Starting Calculate Market Internals Programme at: " + DateTime.Now);
+                        logTime.Info("Process: Starting Calculate Market Internals Programme at: " + DateTime.Now);
 
                         try
                         {
@@ -363,9 +391,9 @@ namespace ChartLabFinCalculation
                         }
                         catch (Exception ex)
                         {
-                            log.Error(ex);
+                            log.Error("Error:"+ex);
                         }
-
+                        logTime.Info("Process: Done! Calculate Market Internals Programme at: " + DateTime.Now);
                         #endregion
                         break;
 
@@ -373,143 +401,145 @@ namespace ChartLabFinCalculation
 
                         #region Buy Sell Change History
 
-                        logTime.Info("Starting Buy Sell Change History Programme at: " + DateTime.Now);
+                        logTime.Info("Rating: Starting Buy Sell Change History Programme at: " + DateTime.Now);
                         BuySellRatingCalculation.BuySellRatingChangeHistCsvFilePath = BuySellRatingChangeHistCsvFilePath;
 
                         BuySellRatingCalculation.BuySellChangeHistory();
-
+                        logTime.Info("Rating: Done! Buy Sell Change History Programme at: " + DateTime.Now);
                         #endregion
                         break;
 
                     case "VD":
                         #region  Daily Average Volume
-
-                        logTime.Info("Starting Daily Average Volume Programme at: " + DateTime.Now);
-
+                        logTime.Info("Process: Starting Daily Average Volume Programme at: " + DateTime.Now);
                         VolumeAlerts.CalculateDailyAverageVolume(DailyAvgVolumeFolderPath);
-
+                        logTime.Info("Process: Dane! Daily Average Volume Programme at: " + DateTime.Now);
                         #endregion
                         break;
 
                     case "VDA":
                         #region  Daily Volume Alert
 
-                        logTime.Info("Starting Daily Volume Alert Programme at: " + DateTime.Now);
+                        logTime.Info("Process: Starting Daily Volume Alert Programme at: " + DateTime.Now);
                         VolumeAlerts.InsertVolumeAlertDaily();
-
+                        logTime.Info("Process: Done! Daily Volume Alert Programme at: " + DateTime.Now);
                         #endregion
                         break;
 
                     case "VH":
                         #region Historical Volume Alert
 
-                        logTime.Info("Starting Volume Alert Historical Programme at: " + DateTime.Now);
+                        logTime.Info("Process: Starting Volume Alert Historical Programme at: " + DateTime.Now);
 
                         VolumeAlerts.CalculateAndSaveHistoricalAlerts(HistoricalVolumeFolderPath, HistoricalVolumeAlertPerfFolderPath);
-
+                        logTime.Info("Process: Done! Volume Alert Historical Programme at: " + DateTime.Now);
                         #endregion
                         break;
 
                     case "CHD":
                         #region Change History Dates
 
-                        logTime.Info("Starting Change Historical Dates Programme at: " + DateTime.Now);
+                        logTime.Info("Process: Starting Change Historical Dates Programme at: " + DateTime.Now);
                         UpdateHistoryDates.ChangeHistoryDateInDB();
-
+                        logTime.Info("Process: Done! Change Historical Dates Programme at: " + DateTime.Now);
                         #endregion
                         break;
 
                     case "GP":
                         #region Group Performance
 
-                        logTime.Info("Starting Group Performance Programme at: " + DateTime.Now);
+                        logTime.Info("Process:  Starting Group Performance Programme at: " + DateTime.Now);
                         GroupPerformance.CalculateAndSaveGroupPerformance(GroupPerformanceFolderPath);
-
+                        logTime.Info("Process:  done! Group Performance Programme at: " + DateTime.Now);
                         #endregion
                         break;
 
                     case "SW":
                         #region Sector Wise Top Bottom Symbols
 
-                        logTime.Info("Starting  Sector Wise Top Bottom Symbols Programme at: " + DateTime.Now);
+                        logTime.Info("Process: Starting calculation for Sector Wise Top Bottom Symbols Programme at: " + DateTime.Now);
                         SectorWiseTopBottomSymbols.CalculateTopBottomSymbols(StrongWeakSymbolsFolderPath);
-
+                        logTime.Info("Process: Done!  Sector Wise Top Bottom Symbols Programme at: " + DateTime.Now);
                         #endregion
                         break;
 
                     case "LSA":
                         #region Long Short Alerts
 
-                        logTime.Info("Starting  Long Short Alerts Programme at: " + DateTime.Now);
+                        logTime.Info("Process: Starting  Long Short Alerts Programme at: " + DateTime.Now);
                         LongShortAlerts.CalculateLongShortAlerts();
-
+                        logTime.Info("Process: Done!  Long Short Alerts Programme at: " + DateTime.Now);
                         #endregion
                         break;
 
                     case "ADP":
                         #region Aggresive Defensive Performance
 
-                        logTime.Info("Starting Aggresive Defensive Performance Programme at: " + DateTime.Now);
+                        logTime.Info("Process: Starting Aggresive Defensive Performance Programme at: " + DateTime.Now);
                         AggresiveDefensivePerformance.UpdateADPerformance();
-
+                        logTime.Info("Process: Done Aggresive Defensive Performance Programme at: " + DateTime.Now);
                         #endregion
                         break;
 
                     case "RC":
                         #region Restart MemCache
 
-                        logTime.Info("Restarting MemCache Programme at: " + DateTime.Now);
+                        logTime.Info("Process: Restarting MemCache Programme at: " + DateTime.Now);
                         RestartCache.RestartingMemCache();
-
+                        logTime.Info("Process: done Restarting MemCache Programme at: " + DateTime.Now);
                         #endregion
                         break;
 
                     case "SP":
                         #region Sector Performance Daily Stocks
 
-                        logTime.Info("Starting Sector Daily Stocks Programme at: " + DateTime.Now);
+                        logTime.Info("Process: Starting Sector Daily Stocks Programme at: " + DateTime.Now);
                         SectorPerformance.CalculateSectorDailyStocks();
-                            #endregion
+                        logTime.Info("Process: Done Sector Daily Stocks Programme at: " + DateTime.Now);
+                        #endregion
 
                         break;
 
 
                     case "SPH":
                         #region Sector Performance Historical
-                        logTime.Info("Starting Sector Historical Performance Programme at: " + DateTime.Now);
+                        logTime.Info("Process: Starting Sector Historical Performance Programme at: " + DateTime.Now);
 
                         SectorPerformance.SectorPerfHistFolderPath = SectorPerfHistFolderPath;
                         SectorPerformance.CalculateSectorPerfHistory(true);
-                            #endregion
+                        logTime.Info("Process: done, Sector Historical Performance Programme at: " + DateTime.Now);
+                        #endregion
 
                         break;
 
                     case "SPD":
                         #region Sector Performance Daily
-                        logTime.Info("Starting Sector Daily Performance Programme at: " + DateTime.Now);
+                        logTime.Info("Process: Starting Sector Daily Performance Programme at: " + DateTime.Now);
 
                         SectorPerformance.SectorPerfDailyFolderPath = SectorPerfDailyFolderPath;
                         SectorPerformance.CalculateSectorPerfHistory(false);
-                            #endregion
+                        logTime.Info("Process: Done, Sector Daily Performance Programme at: " + DateTime.Now);
+                        #endregion
 
                         break;
 
                     case "SymbolPerf":
                         #region Symbol Performance
-                        logTime.Info("Starting Symbol Daily Performance Programme at: " + DateTime.Now);
+                        logTime.Info("Process: Starting Symbol Daily Performance Programme at: " + DateTime.Now);
 
                         SymbolPerformance.CalculateSymbolPerf();
-                        
+                        logTime.Info("Process: done! Symbol Daily Performance Programme at: " + DateTime.Now);
                         #endregion
                         break;
 
                     case "Rules":
 
                         #region Symbol Rules Calculation
-                        logTime.Info("Starting Symbol Rules Calculation Programme at: " + DateTime.Now);
+                        logTime.Info("Process: Starting Symbol Rules Calculation Programme at: " + DateTime.Now);
 
                         RulesCalculation.SymbolRuleCsvFilePath = SymbolRuleCsvFilePath;
                         RulesCalculation.CalculateSymbolRules();
+                        logTime.Info("Process: Done Symbol Rules Calculation Programme at: " + DateTime.Now);
                         break;
 
                         #endregion
@@ -518,71 +548,91 @@ namespace ChartLabFinCalculation
                     case "SnPPrice":
 
                         #region SnP Watchlist Create Date Price
-                        logTime.Info("Starting SnP Watchlist Create Date Price  Programme at: " + DateTime.Now);
+                        logTime.Info("Process:  Starting SnP Watchlist Create Date Price  Programme at: " + DateTime.Now);
                         SnPPriceCalculation.SnPSpecificDatePricesPath = SnPSpecificDatePricesPath;
                         SnPPriceCalculation.CalculateSnPPrice();
+                        logTime.Info("Process:  Done! SnP Watchlist Create Date Price  Programme at: " + DateTime.Now);
                         break;
 
                         #endregion
 
-                        
+
                     case "CTCH":
 
                         #region CT Rating CHange History
-                        logTime.Info("Starting CT Rating CHange History Programme at: " + DateTime.Now);
-                        CTRatingCalculation.CTRatingChangeHistCsvFilePath= CTRatingChangeHistFolderPath;
+                        logTime.Info("Rating:  Starting CT Rating CHange History Programme at: " + DateTime.Now);
+                        CTRatingCalculation.CTRatingChangeHistCsvFilePath = CTRatingChangeHistFolderPath;
                         CTRatingCalculation.CTRatingChangeHistory();
+                        logTime.Info("Rating:  Done! CT Rating CHange History Programme at: " + DateTime.Now);
                         break;
 
                         #endregion
                     case "AC":
 
                         #region Alerts calculation
-                        logTime.Info("Starting Email Alerts calculation Programme at: " + DateTime.Now);
-                       EmailAlertsCalculation.CalculateMyAlerts();
-                       EmailAlertsCalculation.calculateCommonSubsAlerts();
-                     
-                       
+                        logTime.Info("Process:  Starting Email Alerts calculation Programme at: " + DateTime.Now);
+                        EmailAlertsCalculation.CalculateMyAlerts();
+                        EmailAlertsCalculation.calculateCommonSubsAlerts();
+                        logTime.Info("EmailAlert:  done Email Alerts calculation Programme at: " + DateTime.Now);
+
                         break;
 
                         #endregion
                     case "EA":
 
                         #region Email Alerts sending
-                        logTime.Info("Starting Email Alerts sending Programme at: " + DateTime.Now);
-                        DayOfWeek dayOfWeek = DateTime.Now.DayOfWeek;
-                        
-                        if (!dayOfWeek.ToString().Equals("Sunday") && !dayOfWeek.ToString().Equals("Monday"))
-                        {
-                            EmailAlertsCalculation.SendAlertsEmailtoUsers();
-                        }
-                        else
-                        {
-                            logTime.Info("Email alerts will not send because today is : " + dayOfWeek.ToString());
-                        }
+                        logTime.Info("EmailAlert:  Starting Email Alerts sending Programme at: " + DateTime.Now);
+                        //DayOfWeek dayOfWeek = DateTime.Now.DayOfWeek;
+
+                        EmailAlertsCalculation.SendAlertsEmailtoUsers();
+                        logTime.Info("EmailAlert:  Done Email Alerts sending Programme at: " + DateTime.Now);
                         break;
 
                         #endregion
                     case "Stats":
 
                         #region Calculate Statistics
-                        logTime.Info("Starting Calculate Statistics Programme at: " + DateTime.Now);
-                        List<StatisticsPerf> StatsPerfData= StatisticsCalculation.calculateStatistics();
+                        logTime.Info("Process:  Starting Calculate Statistics Programme at: " + DateTime.Now);
+
+                        List<StatisticsPerf> StatsPerfData = StatisticsCalculation.calculateStatistics();
                         CSVExporter.WriteToCSVStatsPerfData(StatsPerfData, StatisticsPath + "/StatisticsData.csv");
                         StatisticsDAO.InsertStatsDataCSVToDB(StatisticsPath);
                         StatisticsCalculation.calculateStatisticsPerf();
+                        logTime.Info("Process:  Done. Calculate Statistics Programme at: " + DateTime.Now);
                         break;
 
                         #endregion
                     case "ETF":
 
                         #region ETF data import
-                        logTime.Info("Starting calculate and import ETF market data in DB Programme at: " + DateTime.Now);
+                        logTime.Info("Process:  Starting calculate and import ETF market data in DB Programme at: " + DateTime.Now);
                         ETFSymbolsDataCalculation.ETFDataFilesPath = ETFSymbolsDataPath;
                         ETFSymbolsDataCalculation.CalculateFTFSymbolsData();
                         break;
 
                         #endregion
+
+                    case "TRH":
+
+                        #region Top Rating symbols Hist
+                        logTime.Info("Process:  Top Rating symbols Hist: " + DateTime.Now);
+                        BuySellRatingCalculation.SaveTopRatingSymbolsHist();
+                        BuySellRatingCalculation.SaveTopRatingAddRemoveSymbolsHist();
+                       
+                        break;
+
+                        #endregion
+
+                    case "V":
+
+                        #region Validation check for data
+                        logTime.Info("Process: starting Validation check for data: " + DateTime.Now);
+                        ValidationDataHelper.ValidateData();
+
+                        break;
+
+                        #endregion
+
 
                     //case "ETFRating":
 
@@ -597,7 +647,7 @@ namespace ChartLabFinCalculation
 
                         break;
 
-                     
+
                 }
                 log.Info("Ending Programme at: " + DateTime.Now);
                 #region Commented
@@ -1215,8 +1265,8 @@ namespace ChartLabFinCalculation
 
         }
 
-      
+
     }
-       
-    
+
+
 }

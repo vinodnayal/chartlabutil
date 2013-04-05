@@ -21,17 +21,17 @@ namespace ChartLabFinCalculation
             try
             {
                 con.Open();
-
-
-
                 updateCommand.ExecuteReader();
 
-
-                con.Close();
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
@@ -77,11 +77,16 @@ namespace ChartLabFinCalculation
 
                 }
                 dr.Close();
-                con.Close();
+              
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return obosCountList;
@@ -127,11 +132,16 @@ namespace ChartLabFinCalculation
                     SymbolList.Add(dr.GetString(0));
                 }
                 dr.Close();
-                con.Close();
+              
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return SymbolList;
@@ -172,11 +182,16 @@ namespace ChartLabFinCalculation
                     SymbolList.Add(dr.GetString(0));
                 }
                 dr.Close();
-                con.Close();
+             
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return SymbolList;
@@ -211,17 +226,17 @@ namespace ChartLabFinCalculation
             try
             {
                 con.Open();
-
-
-
                 updateCommand.ExecuteReader();
 
-
-                con.Close();
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
         }

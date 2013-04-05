@@ -20,111 +20,142 @@ namespace ChartLabFinCalculation
         {
 
 
-            List<BuySellRating> BuySellRatingList = new List<BuySellRating>();
-            List<Rating> RatingList = new List<Rating>();
-
-            StreamReader readFile = new StreamReader(BuySellRatingFilePath + "\\STOCK_PWTS.TXT");
             try
             {
+                List<BuySellRating> BuySellRatingList = new List<BuySellRating>();
+                List<Rating> RatingList = new List<Rating>();
 
-                string line;
-                string[] row;
-                int flag = 0;
-                // RatingList
-                while ((line = readFile.ReadLine()) != null)
+                StreamReader readFile = new StreamReader(BuySellRatingFilePath + "\\STOCK_PWTS.TXT");
+                try
                 {
-                    BuySellRating ratingObject = new BuySellRating();
-                    row = line.Split(' ');
-                    for (int i = 1; i < row.Length; i++)
-                    {
 
-                        if (row[i] != "" && flag == 0)
+                    string line;
+                    string[] row;
+                    int flag = 0;
+                    // RatingList
+                    log.Info("Rating: Calculating BuySell Rating ");
+                    while ((line = readFile.ReadLine()) != null)
+                    {
+                        BuySellRating ratingObject = new BuySellRating();
+                        row = line.Split(' ');
+
+                        for (int i = 1; i < row.Length; i++)
                         {
-                            log.Info("\nCalculating BuySell Rating for symbol: " + row[i]);
-                            ratingObject.symbol = row[i];
-                            flag = 1;
+
+                            if (row[i] != "" && flag == 0)
+                            {
+                                // log.Info("Rating: Calculating BuySell Rating for symbol: " + row[i]);
+                                ratingObject.symbol = row[i];
+                                flag = 1;
+                            }
+                            else if (row[i] != "" && flag == 1)
+                            {
+                                double ratingValue = double.Parse(row[i]);
+                                RatingEnum rating = calculateBSRatingEnum(ratingValue);
+                                ratingObject.rating = (int)rating;
+                                ratingObject.ratingValue = ratingValue;
+                                flag = 0;
+                            }
+                            if (i == row.Length - 1)
+                                BuySellRatingList.Add(ratingObject);
                         }
-                        else if (row[i] != "" && flag == 1)
+
+
+
+                    }
+                    log.Info("Rating: Calculated BuySell Rating for symbols count: " + BuySellRatingList.Count);
+
+
+                    List<CTRating> ctRatingList = CTRatingCalculation.CalculateCTRating(BuySellRatingFilePath);
+                    log.Info("Rating: merging Ct ratings to rating object with bs ratings");
+                    for (int i = 0; i < BuySellRatingList.Count; i++)
+                    {
+                        for (int j = 0; j < ctRatingList.Count; j++)
                         {
-                            double ratingValue = double.Parse(row[i]);
-                            RatingEnum rating = calculateBSRatingEnum(ratingValue);
-                            ratingObject.rating = (int)rating;
-                            ratingObject.ratingValue = ratingValue;
-                            flag = 0;
+                            if (BuySellRatingList[i].symbol == ctRatingList[j].symbol)
+                            {
+                                Rating ratingObj = new Rating();
+                                ratingObj.symbol = BuySellRatingList[i].symbol;
+                                ratingObj.ratingValue = BuySellRatingList[i].ratingValue;
+                                ratingObj.ratingDate = BuySellRatingList[i].ratingDate;
+                                ratingObj.rating = BuySellRatingList[i].rating;
+                                ratingObj.ctRatingValue = ctRatingList[j].ctRatingValue;
+                                ratingObj.ctRating = ctRatingList[j].ctRating;
+                                RatingList.Add(ratingObj);
+                            }
+
                         }
-                        if (i == row.Length - 1)
-                            BuySellRatingList.Add(ratingObject);
                     }
 
 
-
                 }
-
-
-
-                List<CTRating> ctRatingList = CTRatingCalculation.CalculateCTRating(BuySellRatingFilePath);
-                for (int i = 0; i < BuySellRatingList.Count; i++)
+                catch (Exception ex)
                 {
-                    for (int j = 0; j < ctRatingList.Count; j++)
-                    {
-                        if (BuySellRatingList[i].symbol == ctRatingList[j].symbol)
-                        {
-                            Rating ratingObj = new Rating();
-                            ratingObj.symbol = BuySellRatingList[i].symbol;
-                            ratingObj.ratingValue = BuySellRatingList[i].ratingValue;
-                            ratingObj.ratingDate = BuySellRatingList[i].ratingDate;
-                            ratingObj.rating = BuySellRatingList[i].rating;
-                            ratingObj.ctRatingValue = ctRatingList[j].ctRatingValue;
-                            ratingObj.ctRating = ctRatingList[j].ctRating;
-                            RatingList.Add(ratingObj);
-                        }
+                    log.Error("Error: " + ex);
 
-                    }
                 }
+                CSVExporter.WriteToCSVRating(RatingList, BuySellRatingCsvFilePath + "/RatingFile.csv");
+                log.Info("Rating:Write To CSV  ");
+
+                BuySellRatingDAO.InsertRating(BuySellRatingCsvFilePath);
+                log.Info("Rating:Inserted Rating in to DB: ");
+
+                log.Info("Rating: Calculating Avg Rating For SnP");
+                BuySellRating SnPAvgRating = CalculateAvgRatingForSnP(Constants.GSPCSymbol);
+
+                BuySellRatingDAO.InsertSnPAvgRating(SnPAvgRating);
+                log.Info("Rating: inserted in DB (historybuysellrating, symbolanalytics tables), Avg Rating For SnP");
 
 
+                BuySellRatingDAO.insertTopRatingAddRemoveHist();
+                log.Info("Rating: Calculate Top Rating Symbols Hist for  added/removed symbols ");
             }
             catch (Exception ex)
             {
-                log.Error(ex);
+                log.Error("Error: " + ex);
 
             }
-            CSVExporter.WriteToCSVRating(RatingList, BuySellRatingCsvFilePath + "/RatingFile.csv");
-            BuySellRatingDAO.InsertRating(BuySellRatingCsvFilePath);
-
-            BuySellRating SnPAvgRating = CalculateAvgRatingForSnP(Constants.GSPCSymbol);
-            BuySellRatingDAO.InsertSnPAvgRating(SnPAvgRating);
-        
-        
-        
-        
+           
         }
 
+       
         private static BuySellRating CalculateAvgRatingForSnP(string symbol)
         {
             BuySellRating snpAvgRatingObj = new BuySellRating();
-            Dictionary<string, double> symbolsWeight = BuySellRatingDAO.GetSymbolsWeight();
-            Dictionary<string, double> symbolsRatingValue = BuySellRatingDAO.GetSymbolsRating();
-
-            int TotalSymbols = 0;
-            double TotalRatingValue = 0;
-            double avgRatingValue = 0;
-
-            foreach (KeyValuePair<string, double> pair in symbolsWeight)
+            try
             {
-                if (symbolsRatingValue.ContainsKey(pair.Key))
+                Dictionary<string, double> symbolsWeight = BuySellRatingDAO.GetSymbolsWeight();
+                Dictionary<string, double> symbolsRatingValue = BuySellRatingDAO.GetSymbolsRating();
+
+                int TotalSymbols = 0;
+                double TotalRatingValue = 0;
+                double avgRatingValue = 0;
+
+                foreach (KeyValuePair<string, double> pair in symbolsWeight)
                 {
-                    TotalRatingValue = TotalRatingValue + (pair.Value * symbolsRatingValue[pair.Key]);
-                    TotalSymbols++;
+                    if (symbolsRatingValue.ContainsKey(pair.Key))
+                    {
+                        TotalRatingValue = TotalRatingValue + (pair.Value * symbolsRatingValue[pair.Key]);
+                        TotalSymbols++;
+                    }
+                    else
+                    {
+                        log.Warn("Rating: " + pair.Key + " not found in Calculating eAvg Rating For SnP");
+                    }
+
                 }
 
+                avgRatingValue = TotalRatingValue / TotalSymbols;
+                RatingEnum rating = calculateBSRatingEnum(avgRatingValue);
+                snpAvgRatingObj.symbol = Constants.GSPCSymbol;//GSPCGoogleSymbol;
+                snpAvgRatingObj.rating = (int)rating;
+                snpAvgRatingObj.ratingValue = avgRatingValue;
             }
+            catch (Exception ex)
+            {
 
-            avgRatingValue = TotalRatingValue / TotalSymbols;
-            RatingEnum rating = calculateBSRatingEnum(avgRatingValue);
-            snpAvgRatingObj.symbol = Constants.GSPCSymbol;//GSPCGoogleSymbol;
-            snpAvgRatingObj.rating = (int)rating;
-            snpAvgRatingObj.ratingValue = avgRatingValue;
+                log.Error("Error: " + ex);
+            }
 
 
             return snpAvgRatingObj;
@@ -135,25 +166,33 @@ namespace ChartLabFinCalculation
         public static RatingEnum calculateBSRatingEnum(double p)
         {
             RatingEnum r;
-            if (p > -.3 && p <= .3)
+            try
             {
-                r = RatingEnum.Neutral;
+                if (p > -.3 && p <= .3)
+                {
+                    r = RatingEnum.Neutral;
+                }
+                else if (p > .3 && p <= .6)
+                {
+                    r = RatingEnum.Buy;
+                }
+                else if (p > -.6 && p <= -.3)
+                {
+                    r = RatingEnum.Sell;
+                }
+                else if (p > .6)
+                {
+                    r = RatingEnum.StrongBuy;
+                }
+                else
+                {
+                    r = RatingEnum.StrongSell;
+                }
             }
-            else if (p > .3 && p <= .6)
+            catch (Exception)
             {
-                r = RatingEnum.Buy;
-            }
-            else if (p > -.6 && p <= -.3)
-            {
-                r = RatingEnum.Sell;
-            }
-            else if (p > .6)
-            {
-                r = RatingEnum.StrongBuy;
-            }
-            else
-            {
-                r = RatingEnum.StrongSell;
+
+                throw;
             }
             return r;
         }
@@ -161,11 +200,22 @@ namespace ChartLabFinCalculation
         public static void BuySellChangeHistory()
         {
 
-            List<BuySellRating> historyBuySellRatingList = BuySellRatingDAO.getBuySellRatingHistroyFromDB();
-            List<BuySellRatingChangeHist> ChangeBuySellRatingHist = getBuySellRatingChangelist(historyBuySellRatingList);
-            CSVExporter.WriteToCSVChangeRatingHistory(ChangeBuySellRatingHist, BuySellRatingChangeHistCsvFilePath + "/ChangeRatingHistoryFile.csv");
-            BuySellRatingDAO.InsertChangeRatingHistoryCSVToDB(BuySellRatingChangeHistCsvFilePath, "buySellRatingChangeHistory");
+            try
+            {
+                log.Info("Rating: getting BuySell Rating Histroy From DB");
+                List<BuySellRating> historyBuySellRatingList = BuySellRatingDAO.getBuySellRatingHistroyFromDB();
+                log.Info("Rating: getting Change BuySell Rating Hist");
+                List<BuySellRatingChangeHist> ChangeBuySellRatingHist = getBuySellRatingChangelist(historyBuySellRatingList);
+                CSVExporter.WriteToCSVChangeRatingHistory(ChangeBuySellRatingHist, BuySellRatingChangeHistCsvFilePath + "/ChangeRatingHistoryFile.csv");
+                log.Info("Rating: Write To CSV Change Rating History");
+                BuySellRatingDAO.InsertChangeRatingHistoryCSVToDB(BuySellRatingChangeHistCsvFilePath, "buySellRatingChangeHistory");
+                log.Info("Rating: Inserted Change Rating History CSV To DB ");
+            }
+            catch (Exception ex)
+            {
 
+                log.Error("Error: Problem in Buy Sell ChangeHistory" + ex);
+            }
         }
         public static List<BuySellRatingChangeHist> getBuySellRatingChangelist(List<BuySellRating> historyBuySellRatingList)
         {
@@ -192,7 +242,7 @@ namespace ChartLabFinCalculation
                                     ratingDate = historyBuySellRatingList[i].ratingDate
 
 
-                        });
+                                });
                         }
                     }
 
@@ -201,7 +251,7 @@ namespace ChartLabFinCalculation
             }
             catch (Exception ex)
             {
-                log.Error("Problem in calculating Buy sell rating change hist");
+                log.Error("Error: Problem in calculating Buy sell rating change hist" + ex);
             }
             return ChangeBuySellRatingHist;
         }
@@ -214,8 +264,80 @@ namespace ChartLabFinCalculation
             }
             catch (Exception ex)
             {
-                
-                log.Error("Problem in calculating Buy sell rating for ETFs"+ex);
+
+                log.Error("Error: Problem in calculating Buy sell rating for ETFs" + ex);
+            }
+        }
+
+        internal static void backupBSRatingFiles(String BuySellRatingFTPFilesPath)
+        {
+
+
+            try
+            {
+                log.Info("Rating: Copying ratings files to backup folder...");
+                const String STOCK_PWTS = "STOCK_PWTS.TXT";
+                const String STOCK_PWTS_S1 = "STOCK_PWTS_S1.TXT";
+                const String STOCK_PWTS_S2 = "STOCK_PWTS_S2.TXT";
+
+                string backupPath = BuySellRatingFTPFilesPath + "\\BuySellRatingsBackup\\";
+                string prefix = DateTime.Now.ToString("yyyyMMddhhmm") + "_";
+
+
+                if (!Directory.Exists(backupPath))
+                {
+                    Directory.CreateDirectory(backupPath);
+                }
+
+                FileInfo STOCK_PWTS_INFO = new FileInfo(BuySellRatingFTPFilesPath + "\\" + STOCK_PWTS);
+                if (STOCK_PWTS_INFO.Exists)
+                {
+                    STOCK_PWTS_INFO.CopyTo(string.Format("{0}{1}", backupPath, prefix + STOCK_PWTS));
+                }
+
+                FileInfo STOCK_PWTS_S1_INFO = new FileInfo(BuySellRatingFTPFilesPath + "\\" + STOCK_PWTS_S1);
+                if (STOCK_PWTS_S1_INFO.Exists)
+                {
+                    STOCK_PWTS_S1_INFO.CopyTo(string.Format("{0}{1}", backupPath, prefix + STOCK_PWTS_S1));
+                }
+
+                FileInfo STOCK_PWTS_S2_INFO = new FileInfo(BuySellRatingFTPFilesPath + "\\" + STOCK_PWTS_S2);
+                if (STOCK_PWTS_INFO.Exists)
+                {
+                    STOCK_PWTS_S2_INFO.CopyTo(string.Format("{0}{1}", backupPath, prefix + STOCK_PWTS_S2));
+                }
+                log.Info("Rating: done ! Copying ratings files to backup folder.");
+            }
+            catch (Exception ex)
+            {
+
+                log.Error("Error: " + ex);
+            }
+        }
+
+        internal static void SaveTopRatingSymbolsHist()
+        {
+            try
+            {
+                throw new NotImplementedException();
+            }
+            catch (Exception ex)
+            {
+
+                log.Error("Error: " + ex);
+            }
+        }
+
+        internal static void SaveTopRatingAddRemoveSymbolsHist()
+        {
+            try
+            {
+                throw new NotImplementedException();
+            }
+            catch (Exception ex)
+            {
+
+                log.Error("Error: " + ex);
             }
         }
     }

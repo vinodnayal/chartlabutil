@@ -12,7 +12,16 @@ namespace ChartLabFinCalculation
 
         public static void UpdateADPerformance()
         {
-            AggresiveDefensivePerformanceDAO.UpdatePerformance();
+            try
+            {
+                log.Info("Process: Update Performance in DB using SP aggresivePerformance and defensivePerformance");
+                AggresiveDefensivePerformanceDAO.UpdatePerformance();
+            }
+            catch (Exception ex)
+            {
+
+                log.Error("Error: " + ex);
+            }
         }
     }
 }

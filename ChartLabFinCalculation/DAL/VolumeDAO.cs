@@ -32,11 +32,16 @@ namespace ChartLabFinCalculation
                 insertCommand.ExecuteReader();
                 log.Info("Daily Average Volume File Saved....");
 
-                con.Close();
+
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
@@ -64,11 +69,15 @@ namespace ChartLabFinCalculation
                 updateCommand.ExecuteReader();
                 log.Info("Volume Table Updated...");
 
-                con.Close();
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
@@ -82,10 +91,6 @@ namespace ChartLabFinCalculation
             OdbcCommand insertDailyVolAlertCommand = new OdbcCommand("INSERT INTO historicalvolumealerts (symbol,changedate,volume,pctchange,volumealerttype,avgvolume) " +
                                    "SELECT symbol,( SELECT `Date` FROM historicaldates WHERE DateType='" + Constants.P + "'),previousvolume,percentagechange,volumealertid,avgvolume FROM volume WHERE percentagechange>45", con);
 
-
-
-
-
             try
             {
                 con.Open();
@@ -93,13 +98,17 @@ namespace ChartLabFinCalculation
                 insertDailyVolAlertCommand.ExecuteReader();
                 log.Info("Volume Alerts Table Updated...");
 
-                con.Close();
+
             }
             catch (OdbcException ex)
             {
                 throw ex;
             }
-
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
         }
 
         public static List<VolumeHistoryList> GetDataForAlertFromDB(string symbol)
@@ -107,10 +116,10 @@ namespace ChartLabFinCalculation
 
             List<VolumeHistoryList> DateVolumeList = new List<VolumeHistoryList>();
             log.Info("\n\n\n\n\n Getting Data from DB for symbol " + symbol);
-
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
             try
             {
-                OdbcConnection con = new OdbcConnection(Constants.MyConString);
+
 
                 OdbcCommand com = new OdbcCommand("SELECT DISTINCT date,close,volume from  symbolshistorical where symbol = '" + symbol + "' order by date desc", con);
                 //OdbcCommand com = new OdbcCommand("SELECT date,close,volume from  symbolshistorical where symbol = 'SPY' order by date desc", con);
@@ -128,12 +137,17 @@ namespace ChartLabFinCalculation
 
                 }
                 dr.Close();
-                con.Close();
+
 
             }
             catch (Exception ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
             return DateVolumeList;
 
@@ -147,8 +161,6 @@ namespace ChartLabFinCalculation
 
             OdbcCommand deleteCommand = new OdbcCommand("DELETE from historicalvolumealerts", con);
 
-
-
             try
             {
                 con.Open();
@@ -161,6 +173,11 @@ namespace ChartLabFinCalculation
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
@@ -176,8 +193,6 @@ namespace ChartLabFinCalculation
                                                 "LINES TERMINATED BY '\n' " +
                                                 "(symbol,changedate,volume,pctchange,volumealerttype,avgvolume);", con);
 
-
-
             try
             {
                 con.Open();
@@ -190,6 +205,11 @@ namespace ChartLabFinCalculation
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
@@ -205,8 +225,6 @@ namespace ChartLabFinCalculation
                                                 "LINES TERMINATED BY '\n' " +
                                                 "(`symbol`,2days,5days,30days,90days);", con);
 
-
-
             try
             {
                 con.Open();
@@ -215,11 +233,15 @@ namespace ChartLabFinCalculation
                 insertCommand.ExecuteReader();
                 log.Info("\n Historical Volume Alert Performance Updated....");
 
-                con.Close();
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
     }
