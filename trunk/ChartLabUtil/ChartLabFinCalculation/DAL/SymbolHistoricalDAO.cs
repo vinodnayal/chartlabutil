@@ -41,14 +41,18 @@ namespace ChartLabFinCalculation
                         barData.Add(bar);
                     }
                     dr.Close();
-                    con.Close();
+
 
                 }
                 catch (OdbcException ex)
                 {
                     throw ex;
                 }
-
+                finally
+                {
+                    if (con != null)
+                        con.Close();
+                }
                 return barData;
             }
             catch (Exception ex)
@@ -63,37 +67,48 @@ namespace ChartLabFinCalculation
 
         public static void DeleteData(String symbol)
         {
+            OdbcConnection con = null;
             try
             {
-                OdbcConnection con = new OdbcConnection(Constants.MyConString);
+                con = new OdbcConnection(Constants.MyConString);
                 OdbcCommand com = new OdbcCommand("Delete from  symbolshistorical where symbol = '" + symbol + "'", con);
-               
+
                 con.Open();
                 com.ExecuteNonQuery();
-                con.Close();
+
 
             }
             catch (Exception ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
         internal static void DeleteData()
         {
+            OdbcConnection con = null;
             try
             {
-                OdbcConnection con = new OdbcConnection(Constants.MyConString);
+                con = new OdbcConnection(Constants.MyConString);
                 OdbcCommand com = new OdbcCommand("Delete from  symbolshistorical", con);
 
                 con.Open();
                 com.ExecuteNonQuery();
-                con.Close();
 
             }
             catch (Exception ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
         internal static List<string> GetIndexMFFromDB()
@@ -119,17 +134,21 @@ namespace ChartLabFinCalculation
                     lstSymbols.Add(dr.GetString(0));
                 }
                 dr.Close();
-                con.Close();
+
             }
             catch (OdbcException ex)
             {
                 throw ex;
             }
-
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
             return lstSymbols;
         }
 
-      
+
         internal static List<string> GetsymbolListFromDB()
         {
             return GetsymbolListFromDB(1, Constants.MAX_ID_DB);
@@ -149,8 +168,6 @@ namespace ChartLabFinCalculation
 
             //Now we will create a command
             OdbcCommand com = new OdbcCommand("SELECT distinct symbol FROM equitiesFundamental where (id BETWEEN " + from + " AND " + to + ") AND isnew=0", con);
-            // OdbcCommand com = new OdbcCommand("SELECT distinct symbol FROM equitiesFundamental where symbol in ('FDUS')", con);
-            //  OdbcCommand com = new OdbcCommand("SELECT distinct symbol FROM tempnewsymbols where id BETWEEN " + from + " AND " + to, con);
             try
             {
                 con.Open();
@@ -161,13 +178,17 @@ namespace ChartLabFinCalculation
                     lstSymbols.Add(dr.GetString(0));
                 }
                 dr.Close();
-                con.Close();
+
             }
             catch (OdbcException ex)
             {
                 throw ex;
             }
-
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
             return lstSymbols;
         }
 
@@ -182,7 +203,7 @@ namespace ChartLabFinCalculation
             //Now we will create a command
             // OdbcCommand com = new OdbcCommand("SELECT distinct symbol FROM equitiesFundamental where symbol='ZION'", con);
             OdbcCommand com = new OdbcCommand("SELECT distinct symbol FROM equitiesFundamental where isnew=1", con);
-           // OdbcCommand com = new OdbcCommand("call newSymbols", con);
+            // OdbcCommand com = new OdbcCommand("call newSymbols", con);
             // OdbcCommand com = new OdbcCommand("SELECT distinct symbol FROM equitiesFundamental where symbol in( 'WYN', 'NWSA', 'XRX', 'XRAY', 'WHR', 'YUM', 'WM') ", con);
 
             try
@@ -195,11 +216,16 @@ namespace ChartLabFinCalculation
                     lstSymbols.Add(dr.GetString(0));
                 }
                 dr.Close();
-                con.Close();
+                
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return lstSymbols;
@@ -210,12 +236,12 @@ namespace ChartLabFinCalculation
             SaveHistoricalDataCSVToDB(filename, null);
         }
 
-        public static void SaveHistoricalDataCSVToDB(string filename,string symbol)
+        public static void SaveHistoricalDataCSVToDB(string filename, string symbol)
         {
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
 
-            
-            OdbcCommand deleteCommand = new OdbcCommand("DELETE from symbolshistorical where symbol='"+symbol+"'", con);
+
+            OdbcCommand deleteCommand = new OdbcCommand("DELETE from symbolshistorical where symbol='" + symbol + "'", con);
             OdbcCommand insertCommand = new OdbcCommand("LOAD DATA LOCAL INFILE '" + filename + "' " +
                                                 "INTO TABLE symbolshistorical " +
                                                 "FIELDS TERMINATED BY ',' " +
@@ -232,11 +258,15 @@ namespace ChartLabFinCalculation
                 insertCommand.ExecuteReader();
                 log.Info("Historical File " + filename + " Saved....");
 
-                con.Close();
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
@@ -252,11 +282,16 @@ namespace ChartLabFinCalculation
                 updateCommand.ExecuteReader();
                 log.Info("EquitiesFundamental Table Updated...");
 
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
@@ -264,8 +299,8 @@ namespace ChartLabFinCalculation
         {
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand searchCommand = new OdbcCommand("SELECT * FROM dividendhistory WHERE symbol='"+symbol+"'", con);
-            bool shouldUpdateHistoricalData=false;
+            OdbcCommand searchCommand = new OdbcCommand("SELECT * FROM dividendhistory WHERE symbol='" + symbol + "'", con);
+            bool shouldUpdateHistoricalData = false;
 
             try
             {
@@ -273,7 +308,7 @@ namespace ChartLabFinCalculation
                 int dividendrowpresent = searchCommand.ExecuteNonQuery();
                 if (dividendrowpresent > 0)
                 {
-                    OdbcCommand searchForDateCommand = new OdbcCommand("SELECT * FROM dividendhistory WHERE symbol='"+symbol+"' AND '"+currentdividendDate.Date.ToString("yyyy-MM-dd")+"'>=historicalupdatedate", con);
+                    OdbcCommand searchForDateCommand = new OdbcCommand("SELECT * FROM dividendhistory WHERE symbol='" + symbol + "' AND '" + currentdividendDate.Date.ToString("yyyy-MM-dd") + "'>=historicalupdatedate", con);
                     int dividendNotUpdated = searchForDateCommand.ExecuteNonQuery();
                     if (dividendNotUpdated > 0)
                     {
@@ -290,11 +325,16 @@ namespace ChartLabFinCalculation
                     shouldUpdateHistoricalData = true;
                 }
 
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return shouldUpdateHistoricalData;
@@ -305,17 +345,22 @@ namespace ChartLabFinCalculation
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             OdbcCommand deleteCommand = new OdbcCommand("DELETE FROM dividendhistory WHERE symbol='" + symbol + "'", con);
-            
+
 
             try
             {
                 con.Open();
                 deleteCommand.ExecuteNonQuery();
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
         }
@@ -331,11 +376,16 @@ namespace ChartLabFinCalculation
             {
                 con.Open();
                 insertCommand.ExecuteNonQuery();
-                con.Close();
+                
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
         }

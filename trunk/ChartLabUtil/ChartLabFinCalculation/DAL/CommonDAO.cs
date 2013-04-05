@@ -37,11 +37,15 @@ namespace ChartLabFinCalculation
                     historicalDateslist.Add(historicalDate);
                 }
                 dr.Close();
-                con.Close();
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             // string mycon = System.Configuration.ConfigurationSettings.AppSettings.["sqlcon"].ConnectionString;

@@ -13,11 +13,11 @@ namespace ChartLabFinCalculation
         internal static Dictionary<string, double> GetSymbolPrice()
         {
             Dictionary<string, double> symbolPriceList = new Dictionary<string, double>();
-
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
             try
             {
 
-                OdbcConnection con = new OdbcConnection(Constants.MyConString);
+              
 
                 OdbcCommand com = new OdbcCommand("SELECT DISTINCT symbol, CLOSE,date FROM symbolshistorical WHERE DATE=(SELECT DATE FROM historicaldates WHERE DateType='" + Constants.P + "')", con);
 
@@ -42,12 +42,17 @@ namespace ChartLabFinCalculation
 
                 }
                 dr.Close();
-                con.Close();
+               
 
             }
             catch (Exception ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return symbolPriceList;
@@ -55,11 +60,9 @@ namespace ChartLabFinCalculation
 
         internal static void InsertSymbolPrice(string symbol, double price)
         {
-
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
             try
             {
-
-                OdbcConnection con = new OdbcConnection(Constants.MyConString);
 
                 OdbcCommand com = new OdbcCommand("INSERT INTO symbolperformance (symbol,Previousdayprice) values('" + symbol + "'," + price + ")", con);
 
@@ -75,15 +78,20 @@ namespace ChartLabFinCalculation
             {
                 log.Error(ex);
             }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
 
         }
 
         internal static void DeleteSymbolPerformance()
         {
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
+
             try
             {
-
-                OdbcConnection con = new OdbcConnection(Constants.MyConString);
 
                 OdbcCommand com = new OdbcCommand("DELETE from symbolperformance", con);
 
@@ -99,6 +107,11 @@ namespace ChartLabFinCalculation
             {
                 log.Error(ex);
             }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
         }
 
 
@@ -107,13 +120,9 @@ namespace ChartLabFinCalculation
 
         internal static void UpdateSymbolPerformance()
         {
-
-
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
             try
             {
-
-                OdbcConnection con = new OdbcConnection(Constants.MyConString);
-
                 OdbcCommand com = new OdbcCommand("UPDATE symbolperformance temp1, "+
                                                 "(SELECT p.symbol,(p.Previousdayprice-a.YTD)*100/a.YTD AS ytd,(p.Previousdayprice-a.WTD)*100/a.WTD AS wtd,(p.Previousdayprice-a.MTD)*100/a.MTD AS mtd,(p.Previousdayprice-a.QTD)*100/a.QTD AS qtd " +
                                                 "FROM symbolperformance AS p JOIN symbolanalytics AS a  "+
@@ -126,14 +135,17 @@ namespace ChartLabFinCalculation
                 com.ExecuteNonQuery();
                 log.Info("\nData updated in symbolperformance table....... \n");
 
-                con.Close();
-
+                
             }
             catch (Exception ex)
             {
                 log.Error(ex);
             }
-
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
         }
     }
 }

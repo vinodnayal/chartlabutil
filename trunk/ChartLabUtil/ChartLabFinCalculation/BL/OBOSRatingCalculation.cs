@@ -14,23 +14,31 @@ namespace ChartLabFinCalculation
 
         public static void CalculateOBOSRating(bool isHistorical)
         {
-           
-            
-            string type = null;
-            if (isHistorical)
-            {
-                type = "history";
-            }
-            else
-            {
-                type = "current date";
-            }
 
-            log.Info("Calculaitng OBOSCount for  "+type+"....");
-            List<DateOBOSCount> listObOsCount = calculateOBOS(isHistorical);
-            CSVExporter.WriteToCSVOBOS(listObOsCount, OBOSRatingPath + "/OBOSCount.csv");
+            try
+            {
 
-            OBOSRatingDAO.OBOSPercentage(OBOSRatingPath, isHistorical);
+                string type = null;
+                if (isHistorical)
+                {
+                    type = "history";
+                }
+                else
+                {
+                    type = "current date";
+                }
+
+                log.Info("Process: Calculaitng OBOSCount for  " + type + "....");
+                List<DateOBOSCount> listObOsCount = calculateOBOS(isHistorical);
+                CSVExporter.WriteToCSVOBOS(listObOsCount, OBOSRatingPath + "/OBOSCount.csv");
+
+                OBOSRatingDAO.OBOSPercentage(OBOSRatingPath, isHistorical);
+            }
+            catch (Exception ex )
+            {
+
+                log.Error("Error:"+ex);
+            }
 
 
         }
@@ -39,122 +47,103 @@ namespace ChartLabFinCalculation
           private  static List<DateOBOSCount> calculateOBOS(bool historical)
         {
             FinCalculator fincalc = new FinCalculator();
-
-            DateTime fromdate = DateTime.Now.AddDays(-Constants.HIST_DAYS_LENGTH_FOR_SA);
-            DateTime toDate = DateTime.Now;
-            List<String> symbolList =  OBOSRatingDAO.GetSnPSymbols();
-
-              
-
-            int count = 0;
             List<DateOBOSCount> listOBOSCount = new List<DateOBOSCount>();
-            foreach (string symbol in symbolList)
+            try
             {
-                log.Info("Calculating for symbol=" + symbol);
-                List<BarData> barlist = null;
-                try
-                {
+                DateTime fromdate = DateTime.Now.AddDays(-Constants.HIST_DAYS_LENGTH_FOR_SA);
+                DateTime toDate = DateTime.Now;
+                List<String> symbolList = OBOSRatingDAO.GetSnPSymbols();
 
-                    barlist = SymbolHistoricalMongoDAO.GetHistoricalDataFromMongo(fromdate, toDate, symbol);
-                }
-                catch (Exception ex)
-                {
 
-                    throw (ex);
-                }
-                if (barlist == null || barlist.Count == 0)
-                {
 
-                    log.Info("Empty List Returned From Provider" + symbol);
-                }
-                else
+                int count = 0;
+                log.Info("Process: Calculating for symbols list count=" + symbolList.Count);
+                foreach (string symbol in symbolList)
                 {
-
-                    List<DateOBOS> listOBOS = fincalc.CalculateOBOSForRange(barlist);
-                    if (listOBOS.Count > 1)
+                    log.Info("Calculating for symbol=" + symbol);
+                    List<BarData> barlist = null;
+                    try
                     {
-                        if (!historical)
+
+                        barlist = SymbolHistoricalMongoDAO.GetHistoricalDataFromMongo(fromdate, toDate, symbol);
+                    }
+                    catch (Exception ex)
+                    {
+
+                        log.Error("Error" + ex);
+                    }
+                    if (barlist == null || barlist.Count == 0)
+                    {
+
+                        log.Warn("Warn: Empty List Returned From Provider" + symbol);
+                    }
+                    else
+                    {
+
+                        List<DateOBOS> listOBOS = fincalc.CalculateOBOSForRange(barlist);
+                        if (listOBOS.Count > 1)
                         {
-                            listOBOS = listOBOS.GetRange(listOBOS.Count - 1, 1);
-
-                            if (count == 0)
+                            if (!historical)
                             {
-                                listOBOSCount = calculateOBSOfirstTime(listOBOS, symbolList);
+                                listOBOS = listOBOS.GetRange(listOBOS.Count - 1, 1);
+
+                                if (count == 0)
+                                {
+                                    listOBOSCount = calculateOBSOfirstTime(listOBOS, symbolList);
 
 
+                                }
+
+                                else
+                                {
+                                    calculateOBOSNext(listOBOSCount, listOBOS, symbolList);
+
+                                }
+                                count++;
                             }
 
                             else
                             {
-                                calculateOBOSNext(listOBOSCount, listOBOS, symbolList);
+                                if (count == 0)
+                                {
+                                    listOBOSCount = calculateOBSOfirstTime(listOBOS, symbolList);
 
+
+                                }
+
+                                else
+                                {
+                                    calculateOBOSNext(listOBOSCount, listOBOS, symbolList);
+
+
+
+                                }
+                                count++;
                             }
-                            count++;
+
                         }
-
-                        else
-                        {
-                            if (count == 0)
-                            {
-                                listOBOSCount = calculateOBSOfirstTime(listOBOS, symbolList);
-
-
-                            }
-
-                            else
-                            {
-                                calculateOBOSNext(listOBOSCount, listOBOS, symbolList);
-
-
-
-                            }
-                            count++;
-                        }
-
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+
+                log.Error("Error:" + ex);
             }
             return listOBOSCount;
         }
 
           private static List<DateOBOSCount> calculateOBSOfirstTime(List<DateOBOS> listOBOS, List<string> symbols)
           {
+              log.Info("Process: calculate OBSO first Time");
               List<DateOBOSCount> listOBOSCount = new List<DateOBOSCount>();
 
-              foreach (DateOBOS obos in listOBOS)
+              try
               {
-                  DateOBOSCount obosCount = new DateOBOSCount();
-                  obosCount.Date = obos.Date;
-                  if (obos.obos == obosEnum.OS)
+                  foreach (DateOBOS obos in listOBOS)
                   {
-
-                      obosCount.osCount++;
-                      obosCount.osPer = (obosCount.osCount * 100) / symbols.Count;
-                  }
-                  else if (obos.obos == obosEnum.OB)
-                  {
-
-                      obosCount.obCount++;
-                      obosCount.obPer = (obosCount.obCount * 100) / symbols.Count;
-
-                  }
-                  listOBOSCount.Add(obosCount);
-              }
-              return listOBOSCount;
-          }
-
-          private static void calculateOBOSNext(List<DateOBOSCount> listOBOSCount, List<DateOBOS> listOBOS, List<string> symbols)
-          {
-
-              // int index = listOBOSCount.Count-1;
-              int countlistOBOS = listOBOS.Count;
-              //DateOBOSCount obosCount in listOBOSCount
-              for (int index = listOBOSCount.Count - 1; index >= 0; index--)
-              {
-                  DateOBOSCount obosCount = listOBOSCount[index];
-                  if (countlistOBOS - 1 >= index)
-                  {
-                      DateOBOS obos = listOBOS[index];
+                      DateOBOSCount obosCount = new DateOBOSCount();
+                      obosCount.Date = obos.Date;
                       if (obos.obos == obosEnum.OS)
                       {
 
@@ -166,16 +155,60 @@ namespace ChartLabFinCalculation
 
                           obosCount.obCount++;
                           obosCount.obPer = (obosCount.obCount * 100) / symbols.Count;
+
+                      }
+                      listOBOSCount.Add(obosCount);
+                  }
+              }
+              catch (Exception ex)
+              {
+
+                  log.Error("Error:" + ex);
+              }
+              return listOBOSCount;
+          }
+
+          private static void calculateOBOSNext(List<DateOBOSCount> listOBOSCount, List<DateOBOS> listOBOS, List<string> symbols)
+          {
+             
+              try
+              {
+                  // int index = listOBOSCount.Count-1;
+                  int countlistOBOS = listOBOS.Count;
+                  //DateOBOSCount obosCount in listOBOSCount
+                  for (int index = listOBOSCount.Count - 1; index >= 0; index--)
+                  {
+                      DateOBOSCount obosCount = listOBOSCount[index];
+                      if (countlistOBOS - 1 >= index)
+                      {
+                          DateOBOS obos = listOBOS[index];
+                          if (obos.obos == obosEnum.OS)
+                          {
+
+                              obosCount.osCount++;
+                              obosCount.osPer = (obosCount.osCount * 100) / symbols.Count;
+                          }
+                          else if (obos.obos == obosEnum.OB)
+                          {
+
+                              obosCount.obCount++;
+                              obosCount.obPer = (obosCount.obCount * 100) / symbols.Count;
+                          }
+
+                      }
+                      else
+                      {
+                          break;
                       }
 
+
+
                   }
-                  else
-                  {
-                      break;
-                  }
+              }
+              catch (Exception ex)
+              {
 
-
-
+                  log.Error("Error:" + ex);
               }
 
           }

@@ -20,7 +20,7 @@ namespace ChartLabFinCalculation
                 DateTime fromdate = DateTime.Now.AddDays(-Constants.HIST_DAYS_LENGTH_FOR_SA);
                 DateTime toDate = DateTime.Now;
                 List<HistoricalDates> listHistoricalDates = CommonDAO.getHistoricalDatesFromDB();
-                log.Info("Calculating OB and OS count for S&P symbols --- ");
+                log.Info("Process: Calculating OB and OS count for S&P symbols --- ");
                 List<DateOBOSCount> obosCountList = MarketInternalsDAO.getOBOSCountFromDB(listHistoricalDates);
                 int weeklyOSCount = 0;
                 int weeklyOBCount = 0;
@@ -37,14 +37,14 @@ namespace ChartLabFinCalculation
 
 
 
-                log.Info("Calculating % positive time for S&P symbols --- ");
+                log.Info("Process: Calculating % positive time for S&P symbols --- ");
                 List<String> topOS_Symbols = MarketInternalsDAO.GetSnPTopOSSymbols();
                 List<String> topOB_Symbols = MarketInternalsDAO.GetSnPTopOBSymbols();
                 calculatePerPositiveTime(topOS_Symbols, "oSIndexTopSymbols");
                 calculatePerPositiveTime(topOB_Symbols, "oBIndexTopSymbols");
 
 
-                log.Info("Calculating 50days MA for S&P --- ");
+                log.Info("Process: Calculating 50days MA for S&P --- ");
 
                 String symbol = Constants.GSPCSymbol;
 
@@ -68,11 +68,11 @@ namespace ChartLabFinCalculation
                 }
                 else
                 {
-                    log.Info("Empty List Returned From Provider" + symbol);
+                    log.Warn("Warn: Empty List Returned From Provider" + symbol);
 
 
                 }
-                log.Info("Calculating 10 day A/D line for S&P symbols --- ");
+                log.Info("Process: Calculating 10 day A/D line for S&P symbols --- ");
                 List<String> symbolList = OBOSRatingDAO.GetSnPSymbols();
 
                 List<DateADCount> listDateADCount = calculate10DaysADLine(symbolList);
@@ -91,7 +91,7 @@ namespace ChartLabFinCalculation
                 }
                 catch (Exception ex)
                 {
-                    log.Error(ex);
+                    log.Error("Error: " + ex);
                 }
                 currentADLine10Days = currentADLine10Days / 10;
                 int count = 1;
@@ -131,7 +131,7 @@ namespace ChartLabFinCalculation
             }
             catch (Exception ex)
             {
-                log.Error("Error in market internal calculations \n"+ex);
+                log.Error("Error: in market internal calculations \n"+ex);
             }
         }
 
@@ -163,7 +163,7 @@ namespace ChartLabFinCalculation
                     if (barlist == null || barlist.Count == 0)
                     {
 
-                        log.Info("Empty List Returned From Provider" + symbol);
+                        log.Warn(" Warn : Empty List Returned From Provider" + symbol);
                     }
                     else
                     {
@@ -176,7 +176,7 @@ namespace ChartLabFinCalculation
             }
             catch (Exception ex)
             {
-                log.Error(ex);
+                log.Error("Error: "+ex);
             }
 
         }
@@ -229,7 +229,7 @@ namespace ChartLabFinCalculation
             }
             catch (Exception ex)
             {
-                log.Info(ex);
+                log.Error("Error: " + ex);
                 return listDateADCount;
 
             }

@@ -43,13 +43,17 @@ namespace ChartLabFinCalculation
                    {
                        datePriceDict.Add(pair.Key, price);
                    }
+                   else
+                   {
+                       log.Warn("Process:  pair.Key.Date not found on Calculating SnP Price " + DateTime.Now);
+                   }
                }
            }
            catch (Exception ex)
            {
                log.Error(ex);
            }
-
+           log.Info("Process:  SNP price inserted for Watchlict CreateDate for return inception compare");
            CSVExporter.WriteToCSVSnPPriceList(datePriceDict, SnPSpecificDatePricesPath + "/SnPPriceList.csv");
            SnPPriceDAO.SnPSpecificDatePriceImport(SnPSpecificDatePricesPath + "/SnPPriceList.csv");
         }

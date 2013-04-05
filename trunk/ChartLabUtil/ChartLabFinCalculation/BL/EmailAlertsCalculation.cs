@@ -22,11 +22,14 @@ namespace ChartLabFinCalculation.BL
            List<UserAlerts> watchlistAlerts = new List<UserAlerts>();
             try
             {
-
+                log.Info("EmailAlert: getting subscribed user list");
                 List<int> UserList = EmailAlertsDAO.getAllUsers();
                 foreach (int userId in UserList)
                 {
-                    watchlistAlerts = calculateWatchlistAlerts(userId, watchlistAlerts); 
+                    log.Info("EmailAlert: Calculating watchlist alerts for user id : " + userId);
+                    watchlistAlerts = calculateWatchlistAlerts(userId, watchlistAlerts);
+
+                    log.Info("EmailAlert: Calculating portfolio alerts for user id : " + userId);
                     String portfolioAlerts = calculatePortAlerts(userId);
 
                     portAlerts.Add(new UserAlerts
@@ -79,7 +82,7 @@ namespace ChartLabFinCalculation.BL
         }
         public static void calculateCommonSubsAlerts()
         {
-
+            log.Info("EmailAlert: Calculating common model portfolio alerts");
             try
             {
                 Dictionary<int, int> commonSubs = EmailAlertsDAO.getCommonSubscriptions();
@@ -112,7 +115,7 @@ namespace ChartLabFinCalculation.BL
             }
             catch (Exception ex)
             {
-                log.Error("Error in calculaing portfolio alerts ");
+                log.Error("Error in calculaing portfolio alerts for user ID "+userId);
                 log.Error(ex);
             }
             return alertString;
@@ -164,7 +167,7 @@ namespace ChartLabFinCalculation.BL
         {
             try
             {
-
+                log.Info("EmailAlert: Geting subscribed user list");
                 Dictionary<int, string> usersEmailDict = EmailAlertsDAO.GetUniqueSubsUser();
 
 
@@ -176,6 +179,7 @@ namespace ChartLabFinCalculation.BL
                     emailCounter++;
                     int userId = user.Key;
                     String To = user.Value;
+                    log.Info("EmailAlert: Geting user's alert from DB");
                     String AlertsString = getUserAlerts(userId);
                     if (emailCounter % 10 == 0)
                     {
@@ -185,7 +189,7 @@ namespace ChartLabFinCalculation.BL
                     {
                         String Body = Constants.HtmlStartString + AlertsString + Constants.HtmlEndString;
                         MailUtility.SendMail(Subject, Body, From, To);
-                        log.Info("Alerts Mail sent to mail id :" + To);
+                        log.Info("EmailAlert: Alerts Mail sent to mail id :" + To);
                        
                     }
                 }
@@ -194,7 +198,7 @@ namespace ChartLabFinCalculation.BL
             }
             catch (Exception ex)
             {
-                log.Error("Error in Sending  email alerts ");
+                log.Error("Error:  in Sending  email alerts ");
                 log.Error(ex);
             }
 

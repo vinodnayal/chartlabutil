@@ -32,12 +32,18 @@ namespace ChartLabFinCalculation.DAL
                     }
                 }
                 dr.Close();
-                con.Close();
+
             }
             catch (OdbcException ex)
             {
                 throw ex;
             }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+
 
             // string mycon = System.Configuration.ConfigurationSettings.AppSettings.["sqlcon"].ConnectionString;
             return users;
@@ -62,19 +68,33 @@ namespace ChartLabFinCalculation.DAL
             {
                 con.Open();
                 OdbcDataReader ratingChangeDr = ratingChangeCom.ExecuteReader();
-                symolAlertListDict = getSymbolBSRatingAlertObj(ratingChangeDr, symolAlertListDict,false);
+                symolAlertListDict = getSymbolBSRatingAlertObj(ratingChangeDr, symolAlertListDict, false);
 
-                con.Close();
-
-                con.Open();
-                OdbcDataReader ctRatingDr = ctRatingChangeCom.ExecuteReader();
-                symolAlertListDict = getSymbolCTRatingAlert(ctRatingDr, symolAlertListDict, false);
-
-                con.Close();
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+            try
+            {
+                con.Open();
+                OdbcDataReader ctRatingDr = ctRatingChangeCom.ExecuteReader();
+                symolAlertListDict = getSymbolCTRatingAlert(ctRatingDr, symolAlertListDict, false);
+
+            }
+            catch (OdbcException ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             // string mycon = System.Configuration.ConfigurationSettings.AppSettings.["sqlcon"].ConnectionString;
@@ -98,105 +118,120 @@ namespace ChartLabFinCalculation.DAL
                                                         + "INNER JOIN ctratingchangehistory ct ON ct.symbol=wm.symbol "
                                                         + "LEFT JOIN equitiesfundamental ef ON ef.symbol=wm.symbol "
                                                         + "WHERE  u.userid=" + userId + "  AND ct.changeDate=(SELECT MAX(changedate) FROM ctratingchangehistory)", con);
+
             try
             {
 
-
                 con.Open();
                 OdbcDataReader ratingChangeDr = ratingChangeCom.ExecuteReader();
-                symolAlertListDict = getSymbolBSRatingAlertObj(ratingChangeDr, symolAlertListDict,true);
-                
-                con.Close();
-
-                con.Open();
-                OdbcDataReader ctRatingDr = ctRatingChangeCom.ExecuteReader();
-                symolAlertListDict = getSymbolCTRatingAlert(ctRatingDr, symolAlertListDict, true);
-                
-                con.Close();
+                symolAlertListDict = getSymbolBSRatingAlertObj(ratingChangeDr, symolAlertListDict, true);
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+
+            try
+            {
+                con.Open();
+                OdbcDataReader ctRatingDr = ctRatingChangeCom.ExecuteReader();
+                symolAlertListDict = getSymbolCTRatingAlert(ctRatingDr, symolAlertListDict, true);
+
+
+            }
+            catch (OdbcException ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             // string mycon = System.Configuration.ConfigurationSettings.AppSettings.["sqlcon"].ConnectionString;
             return symolAlertListDict;
         }
 
-        private static Dictionary<string, SymbolAlerts> getSymbolCTRatingAlert(OdbcDataReader ctRatingDr, Dictionary<string, SymbolAlerts> symolAlertListDict,bool isWatchlistAlert)
+        private static Dictionary<string, SymbolAlerts> getSymbolCTRatingAlert(OdbcDataReader ctRatingDr, Dictionary<string, SymbolAlerts> symolAlertListDict, bool isWatchlistAlert)
         {
-             try
+            try
             {
-            while (ctRatingDr.Read())
+                while (ctRatingDr.Read())
+                {
+                    int ctRatingAlertType = 0; //negative alert or positive
+                    int prevCTRating = 0;
+                    if (ctRatingDr.GetValue(1) != DBNull.Value)
+                    {
+                        prevCTRating = ctRatingDr.GetInt32(1);
+                    }
+                    int currCTRating = 0;
+                    if (ctRatingDr.GetValue(2) != DBNull.Value)
+                    {
+                        currCTRating = ctRatingDr.GetInt32(2);
+                    }
+
+                    if (currCTRating > prevCTRating)
+                    {
+                        ctRatingAlertType = 1;
+                    }
+                    String watchlistName = "Portfolio";
+                    if (isWatchlistAlert)
+                    {
+                        if (ctRatingDr.GetValue(6) != DBNull.Value)
+                        {
+                            watchlistName = ctRatingDr.GetString(6);
+                        }
+                    }
+                    String symbol = "";
+
+                    if (ctRatingDr.GetValue(0) != DBNull.Value)
+                    {
+                        symbol = ctRatingDr.GetString(0);
+                    }
+                    String companyName = "";
+
+                    if (ctRatingDr.GetValue(3) != DBNull.Value)
+                    {
+                        companyName = ctRatingDr.GetString(3);
+                    }
+                    if (!symolAlertListDict.ContainsKey(symbol))
+                    {
+                        symolAlertListDict.Add(symbol, new SymbolAlerts
+                        {
+                            Symbol = symbol,
+                            preCTRating = prevCTRating,
+                            curCTRating = currCTRating,
+                            companyName = companyName,
+                            ctRatingAlertType = ctRatingAlertType,
+                            watchlistName = watchlistName
+                        });
+                    }
+                    else
+                    {
+                        SymbolAlerts symAlert = symolAlertListDict[symbol];
+                        symAlert.preCTRating = prevCTRating;
+                        symAlert.curCTRating = currCTRating;
+                        symAlert.companyName = companyName;
+                        symAlert.ctRatingAlertType = ctRatingAlertType;
+                    }
+                }
+                ctRatingDr.Close();
+            }
+            catch (OdbcException ex)
             {
-                int ctRatingAlertType = 0; //negative alert or positive
-                int prevCTRating = 0;
-                if (ctRatingDr.GetValue(1) != DBNull.Value)
-                {
-                    prevCTRating = ctRatingDr.GetInt32(1);
-                }
-                int currCTRating = 0;
-                if (ctRatingDr.GetValue(2) != DBNull.Value)
-                {
-                    currCTRating = ctRatingDr.GetInt32(2);
-                }
-               
-                if (currCTRating > prevCTRating)
-                {
-                    ctRatingAlertType = 1;
-                }
-                String watchlistName = "Portfolio";
-                if (isWatchlistAlert)
-                {
-                    if (ctRatingDr.GetValue(6) != DBNull.Value)
-                    {
-                        watchlistName = ctRatingDr.GetString(6);
-                    } 
-                }
-                String symbol = "";
-
-                if (ctRatingDr.GetValue(0) != DBNull.Value)
-                {
-                    symbol = ctRatingDr.GetString(0);
-                }
-                String companyName = "";
-
-                if (ctRatingDr.GetValue(3) != DBNull.Value)
-                {
-                    companyName = ctRatingDr.GetString(3);
-                }
-                if (!symolAlertListDict.ContainsKey(symbol))
-                {
-                    symolAlertListDict.Add(symbol, new SymbolAlerts
-                    {
-                        Symbol = symbol,
-                        preCTRating = prevCTRating,
-                        curCTRating = currCTRating,
-                        companyName = companyName,
-                        ctRatingAlertType = ctRatingAlertType,
-                        watchlistName = watchlistName
-                    });
-                }
-                else
-                {
-                    SymbolAlerts symAlert = symolAlertListDict[symbol];
-                    symAlert.preCTRating = prevCTRating;
-                    symAlert.curCTRating = currCTRating;
-                    symAlert.companyName = companyName;
-                    symAlert.ctRatingAlertType = ctRatingAlertType;
-                }
+                throw ex;
             }
-            ctRatingDr.Close();
-            }
-             catch (OdbcException ex)
-             {
-                 throw ex;
-             }
 
-             return symolAlertListDict;
+            return symolAlertListDict;
         }
 
-        private static Dictionary<string, SymbolAlerts> getSymbolBSRatingAlertObj(OdbcDataReader ratingChangeDr, Dictionary<string, SymbolAlerts> symolAlertListDict,bool isWatchlistAlert)
+        private static Dictionary<string, SymbolAlerts> getSymbolBSRatingAlertObj(OdbcDataReader ratingChangeDr, Dictionary<string, SymbolAlerts> symolAlertListDict, bool isWatchlistAlert)
         {
             try
             {
@@ -208,7 +243,7 @@ namespace ChartLabFinCalculation.DAL
                     int prevRating = 0;
                     if (ratingChangeDr.GetValue(1) != DBNull.Value)
                     {
-                       prevRating = ratingChangeDr.GetInt32(1);
+                        prevRating = ratingChangeDr.GetInt32(1);
                     }
                     int currRating = 0;
                     if (ratingChangeDr.GetValue(2) != DBNull.Value)
@@ -230,7 +265,7 @@ namespace ChartLabFinCalculation.DAL
                             }
                         }
                     }
-                    String symbol="";
+                    String symbol = "";
 
                     if (ratingChangeDr.GetValue(0) != DBNull.Value)
                     {
@@ -289,19 +324,24 @@ namespace ChartLabFinCalculation.DAL
                 {
                     subsId.Add(dr.GetInt32(1));
                 }
-                dr.Close();
-                con.Close();
+
+
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return subsId;
 
         }
 
-        internal static void updateMyAlertsInDB(int userId,int subscriptionId, string alertString)
+        internal static void updateMyAlertsInDB(int userId, int subscriptionId, string alertString)
         {
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             OdbcCommand updateCommand = new OdbcCommand("UPDATE alerts SET portalertstext='" + alertString + "' WHERE userid=" + userId, con);
@@ -316,6 +356,12 @@ namespace ChartLabFinCalculation.DAL
             {
                 log.Error(ex);
             }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+
         }
 
         internal static Dictionary<String, SymbolAlerts> GetSpecificWLAlerts(int watchlistId)
@@ -324,9 +370,9 @@ namespace ChartLabFinCalculation.DAL
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             OdbcCommand ratingChangeCom = new OdbcCommand("SELECT DISTINCT wm.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate,wm.watchlistid,wl.watchlistname FROM watchlist wl "
-                                                           +"LEFT JOIN watchlistsymbolmapping wm ON wm.watchlistid=wl.watchlistid "
-                                                           +"INNER JOIN buysellratingchangehistory bs ON bs.symbol=wm.symbol "
-                                                           +"LEFT JOIN equitiesfundamental ef ON ef.symbol=wm.symbol "
+                                                           + "LEFT JOIN watchlistsymbolmapping wm ON wm.watchlistid=wl.watchlistid "
+                                                           + "INNER JOIN buysellratingchangehistory bs ON bs.symbol=wm.symbol "
+                                                           + "LEFT JOIN equitiesfundamental ef ON ef.symbol=wm.symbol "
                                                             + "WHERE  wl.watchlistid=" + watchlistId + " AND bs.ratingDate=(SELECT MAX(ratingDate) FROM buysellratingchangehistory)", con);
 
             OdbcCommand ctRatingChangeCom = new OdbcCommand("SELECT DISTINCT wm.symbol,ct.ctratingprev,ct.ctratingcurr ,ef.companyName,ct.changeDate,wm.watchlistid,wl.watchlistname FROM watchlist wl "
@@ -340,20 +386,35 @@ namespace ChartLabFinCalculation.DAL
 
                 con.Open();
                 OdbcDataReader ratingChangeDr = ratingChangeCom.ExecuteReader();
-                symolAlertListDict = getSymbolBSRatingAlertObj(ratingChangeDr, symolAlertListDict,true);
-
-                con.Close();
-
-                con.Open();
-                OdbcDataReader ctRatingDr = ctRatingChangeCom.ExecuteReader();
-                symolAlertListDict = getSymbolCTRatingAlert(ctRatingDr, symolAlertListDict,true);
-
-                con.Close();
+                symolAlertListDict = getSymbolBSRatingAlertObj(ratingChangeDr, symolAlertListDict, true);
             }
             catch (OdbcException ex)
             {
                 throw ex;
             }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+
+            try
+            {
+                con.Open();
+                OdbcDataReader ctRatingDr = ctRatingChangeCom.ExecuteReader();
+                symolAlertListDict = getSymbolCTRatingAlert(ctRatingDr, symolAlertListDict, true);
+
+            }
+            catch (OdbcException ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+
 
             // string mycon = System.Configuration.ConfigurationSettings.AppSettings.["sqlcon"].ConnectionString;
             return symolAlertListDict;
@@ -374,6 +435,11 @@ namespace ChartLabFinCalculation.DAL
             {
                 log.Error(ex);
             }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
         }
 
         internal static Dictionary<int, string> GetUniqueSubsUser()
@@ -393,11 +459,16 @@ namespace ChartLabFinCalculation.DAL
                     users.Add(Convert.ToInt32(dr.GetString(0)), dr.GetString(1));
                 }
                 dr.Close();
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return users;
@@ -418,14 +489,19 @@ namespace ChartLabFinCalculation.DAL
                 {
                     userAlert.userId = dr.GetInt32(0);
                     userAlert.portfolioAlerts = dr.GetString(1);
-                   
+
                 }
                 dr.Close();
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return userAlert;
@@ -453,16 +529,21 @@ namespace ChartLabFinCalculation.DAL
                         String subsType = dr.GetString(2);
                         if (text != "" && text != null)
 
-                            alertText.Append("<b>"+subsType + ":</b><br>");
+                            alertText.Append("<b>" + subsType + ":</b><br>");
                         alertText.Append(EmailAlertsCalculation.formateAlertText(text));
                     }
                 }
                 dr.Close();
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return alertText.ToString();
@@ -484,11 +565,16 @@ namespace ChartLabFinCalculation.DAL
                     commonSubsList.Add(dr.GetInt32(0), dr.GetInt32(1));
                 }
                 dr.Close();
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return commonSubsList;
@@ -514,11 +600,16 @@ namespace ChartLabFinCalculation.DAL
                     }
                 }
                 dr.Close();
-                con.Close();
+                
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return users;
@@ -544,15 +635,19 @@ namespace ChartLabFinCalculation.DAL
                 insertCommand.ExecuteReader();
                 log.Info("Alerts Data File Saved....");
 
-                con.Close();
             }
             catch (OdbcException ex)
             {
                 log.Error("ERROR \n" + "============ \n" + ex.ToString());
             }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
         }
 
-        internal static Dictionary<int, String>  getUserWatchLists(int userId)
+        internal static Dictionary<int, String> getUserWatchLists(int userId)
         {
             Dictionary<int, String> userWatchlists = new Dictionary<int, string>();
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
@@ -567,11 +662,16 @@ namespace ChartLabFinCalculation.DAL
                     userWatchlists.Add((dr.GetInt32(0)), dr.GetString(1));
                 }
                 dr.Close();
-                con.Close();
+              
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return userWatchlists;
@@ -602,19 +702,24 @@ namespace ChartLabFinCalculation.DAL
             {
                 log.Error(ex);
             }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
         }
 
         internal static Dictionary<string, string> getSubscribedWlAlert(int userId, List<int> watchlistIds)
         {
-            
 
-             string watchlistString = string.Join(",", watchlistIds);
-           // String.Join(',',watchlistIds);
-             Dictionary<string, string> watchlistAlerts = new Dictionary<string, string>();
-          
+
+            string watchlistString = string.Join(",", watchlistIds);
+            // String.Join(',',watchlistIds);
+            Dictionary<string, string> watchlistAlerts = new Dictionary<string, string>();
+
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             OdbcCommand com = new OdbcCommand("SELECT userid,watchlistname,alerttext FROM watchlist "
-                                                +" WHERE  watchlistid in ( "+watchlistString+")", con);
+                                                + " WHERE  watchlistid in ( " + watchlistString + ")", con);
             try
             {
                 con.Open();
@@ -623,15 +728,20 @@ namespace ChartLabFinCalculation.DAL
                 while (dr.Read())
                 {
                     if (dr.GetValue(2) != DBNull.Value)
-                    watchlistAlerts.Add(dr.GetString(1), dr.GetString(2));
-                   
+                        watchlistAlerts.Add(dr.GetString(1), dr.GetString(2));
+
                 }
                 dr.Close();
-                con.Close();
+              
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return watchlistAlerts;
@@ -639,7 +749,7 @@ namespace ChartLabFinCalculation.DAL
         internal static void updateWatchlistAlertInDB(int userId, int watchlistId, string alertString)
         {
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-           
+
 
             OdbcCommand updateCommand = new OdbcCommand("UPDATE watchlist " +
                                                   " SET watchlist.alerttext = '" + alertString
@@ -653,6 +763,11 @@ namespace ChartLabFinCalculation.DAL
             catch (Exception ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
     }

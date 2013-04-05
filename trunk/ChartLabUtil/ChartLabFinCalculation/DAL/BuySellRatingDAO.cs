@@ -42,11 +42,18 @@ namespace ChartLabFinCalculation
             //  OdbcCommand insertTempPrevRatingCmd = new OdbcCommand("prevRating", con);
 
             OdbcCommand deletetopRatingSymbols = new OdbcCommand("DELETE from topRatingSymbols", con);
-            OdbcCommand insertTop10symbols = new OdbcCommand("INSERT INTO topRatingSymbols (symbol,ratingvalue) " +
+            OdbcCommand insertTop20symbols = new OdbcCommand("INSERT INTO topRatingSymbols (symbol,ratingvalue) " +
                                     "SELECT t.symbol, t.ratingvalue FROM temp_buySellRating AS t LEFT JOIN equitiesfundamental AS e " +
                                     "ON t.symbol=e.symbol " +
                                     "WHERE e.sectorId IS NOT NULL " +
-                                    "ORDER BY ratingvalue DESC LIMIT 20", con);
+                                    "ORDER BY ratingvalue DESC,symbol LIMIT 20", con);
+
+            OdbcCommand deletetopRatingSymbolsHist = new OdbcCommand("DELETE from topRatingSymbolshist where ratingdate='" + DateTime.Now.ToString("yyyy-MM-dd") + "'", con);
+            OdbcCommand insertTop20symbolsHist = new OdbcCommand("INSERT INTO topRatingSymbolshist (symbol,ratingvalue,ratingdate) " +
+                                    "SELECT t.symbol, t.ratingvalue,'" + DateTime.Now.ToString("yyyy-MM-dd") + "' FROM temp_buySellRating AS t LEFT JOIN equitiesfundamental AS e " +
+                                    "ON t.symbol=e.symbol " +
+                                    "WHERE e.sectorId IS NOT NULL " +
+                                    "ORDER BY ratingvalue DESC,symbol LIMIT 20", con);
 
             OdbcCommand deleteSnPStrongestWatchlistSymbols = new OdbcCommand("DELETE from watchlistsymbolmapping where watchlistid=1", con);
             OdbcCommand insertSnPStrongestWatchlistSymbols = new OdbcCommand("INSERT INTO watchlistsymbolmapping (watchlistid,symbol,quantity,price)" +
@@ -86,7 +93,11 @@ namespace ChartLabFinCalculation
                 inserthistoryBuySellRatingCmd.ExecuteNonQuery();
                 insertTempPrevRatingCmd.ExecuteReader();
                 deletetopRatingSymbols.ExecuteNonQuery();
-                insertTop10symbols.ExecuteReader();
+                insertTop20symbols.ExecuteReader();
+
+                deletetopRatingSymbolsHist.ExecuteNonQuery();
+                insertTop20symbolsHist.ExecuteReader();
+
                 deleteSnPStrongestWatchlistSymbols.ExecuteNonQuery();
                 insertSnPStrongestWatchlistSymbols.ExecuteNonQuery();
 
@@ -100,11 +111,16 @@ namespace ChartLabFinCalculation
                 insertSnPrapidlyMovWatchlistSymbols.ExecuteNonQuery();
 
                 log.Info("BuySellRating Updated....");
-                con.Close();
+
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
         }
@@ -148,11 +164,16 @@ namespace ChartLabFinCalculation
                 update1Command.ExecuteReader();
                 update2Command.ExecuteReader();
                 log.Info("\nSymbol Analytics ChangeDate Updated\n");
-                con.Close();
+
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
@@ -177,11 +198,16 @@ namespace ChartLabFinCalculation
                 con.Open();
                 updateCommand.ExecuteReader();
                 log.Info("\nSymbol Analytics ChangeDatePrice Updated\n");
-                con.Close();
+
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
@@ -215,11 +241,16 @@ namespace ChartLabFinCalculation
                     });
                 }
                 dr.Close();
-                con.Close();
+
             }
             catch (Exception ex)
             {
                 log.Error("ERROR \n" + "============ \n" + ex.ToString());
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
             return buySellRatingHist;
         }
@@ -247,11 +278,16 @@ namespace ChartLabFinCalculation
                 insertCommand.ExecuteReader();
                 log.Info("Historical BuySell Change rating File " + filename + " Saved....");
 
-                con.Close();
+
             }
             catch (OdbcException ex)
             {
                 log.Error("ERROR \n" + "============ \n" + ex.ToString());
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
@@ -260,10 +296,10 @@ namespace ChartLabFinCalculation
 
             Dictionary<DateTime, double> DatePriceList = new Dictionary<DateTime, double>();
             log.Info("\n\n\n\n\n Getting Data from DB for symbol " + symbol);
-
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
             try
             {
-                OdbcConnection con = new OdbcConnection(Constants.MyConString);
+
 
                 OdbcCommand com = new OdbcCommand("SELECT date,close from  symbolshistorical where date>='2012-02-22' and symbol = '" + symbol + "'", con);
                 //OdbcCommand com = new OdbcCommand("SELECT date,close,volume from  symbolshistorical where symbol = 'SPY' order by date desc", con);
@@ -286,12 +322,17 @@ namespace ChartLabFinCalculation
 
                 }
                 dr.Close();
-                con.Close();
+
 
             }
             catch (Exception ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
             return DatePriceList;
 
@@ -326,11 +367,16 @@ namespace ChartLabFinCalculation
                     });
                 }
                 dr.Close();
-                con.Close();
+
             }
             catch (Exception ex)
             {
                 log.Info("ERROR \n" + "============ \n" + ex.ToString());
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
             return DateListForAlert;
         }
@@ -374,11 +420,16 @@ namespace ChartLabFinCalculation
                     }
                 }
                 dr.Close();
-                con.Close();
+
             }
             catch (Exception ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return historyList;
@@ -408,11 +459,16 @@ namespace ChartLabFinCalculation
                 insertCommand.ExecuteReader();
                 log.Info("\nCounter Trend History for S&P Saved....\n");
 
-                con.Close();
+
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
         public static void UpdateCTRatingPerf(string foldername)
@@ -435,21 +491,25 @@ namespace ChartLabFinCalculation
                 insertCommand.ExecuteReader();
                 log.Info("\nCounter Trend Performance for S&P Updated....\n");
 
-                con.Close();
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
         internal static List<DateTime> GetDistinctRatingDatesFromDB()
         {
             List<DateTime> DateList = new List<DateTime>();
-
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
             try
             {
-                OdbcConnection con = new OdbcConnection(Constants.MyConString);
+
 
                 OdbcCommand com = new OdbcCommand(" SELECT DISTINCT ratingDate FROM historybuysellrating", con);
                 //OdbcCommand com = new OdbcCommand("SELECT date,close,volume from  symbolshistorical where symbol = 'SPY' order by date desc", con);
@@ -467,12 +527,17 @@ namespace ChartLabFinCalculation
 
                 }
                 dr.Close();
-                con.Close();
+
 
             }
             catch (Exception ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
             return DateList;
 
@@ -511,16 +576,21 @@ namespace ChartLabFinCalculation
                     }
                 }
                 dr.Close();
-                con.Close();
+
             }
             catch (Exception ex)
             {
                 log.Error("ERROR \n" + "============ \n" + ex.ToString());
             }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
             return ctRatingHist;
         }
 
-        internal static void InsertChangeCTRatingHistoryCSVToDB(string foldername,String ctRatingChangeTableName)
+        internal static void InsertChangeCTRatingHistoryCSVToDB(string foldername, String ctRatingChangeTableName)
         {
             //Delete
 
@@ -542,11 +612,16 @@ namespace ChartLabFinCalculation
                 insertCommand.ExecuteReader();
                 log.Info("Historical CT Change rating File Saved....");
 
-                con.Close();
+
             }
             catch (OdbcException ex)
             {
                 log.Error("ERROR \n" + "============ \n" + ex.ToString());
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
@@ -579,12 +654,17 @@ namespace ChartLabFinCalculation
 
                 }
                 dr.Close();
-                con.Close();
+
 
             }
             catch (Exception ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
             return symbolsWeightDict;
 
@@ -618,12 +698,16 @@ namespace ChartLabFinCalculation
 
                 }
                 dr.Close();
-                con.Close();
 
             }
             catch (Exception ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
             return symbolsRatingDict;
         }
@@ -648,6 +732,11 @@ namespace ChartLabFinCalculation
             catch (Exception ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
@@ -676,12 +765,15 @@ namespace ChartLabFinCalculation
 
                 }
                 dr.Close();
-                con.Close();
-
             }
             catch (Exception ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
             return SymbolRatingchanges;
         }
@@ -699,7 +791,7 @@ namespace ChartLabFinCalculation
 
                 while (dr.Read())
                 {
-                    
+
                     symbolRating.symbol = dr.GetString(0);
                     if (dr.GetValue(1) != DBNull.Value)
                         symbolRating.prevrating = dr.GetInt32(0);
@@ -708,19 +800,23 @@ namespace ChartLabFinCalculation
                     symbolRating.ratingChangeDate = DateTime.Parse(dr.GetString(3));
                 }
                 dr.Close();
-                con.Close();
 
             }
             catch (Exception ex)
             {
                 throw ex;
             }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
             return symbolRating;
         }
 
-       internal static void updateETFRatingsfromHistBSRatingTbl()
+        internal static void updateETFRatingsfromHistBSRatingTbl()
         {
-            
+
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             OdbcCommand deleteComm = new OdbcCommand(@" delete from etfhistbsctrating  WHERE ratingdate= (SELECT MAX(ratingdate) FROM historybuysellrating)", con);
 
@@ -733,14 +829,54 @@ namespace ChartLabFinCalculation
                 con.Open();
                 deleteComm.ExecuteNonQuery();
                 insertComm.ExecuteNonQuery();
-                con.Close();
+
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-           
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+
         }
-        
+
+
+        internal static void insertTopRatingAddRemoveHist()
+        {
+
+             OdbcConnection con = new OdbcConnection(Constants.MyConString);
+             OdbcCommand deleteCmd = new OdbcCommand("delete from topratingsymbolsaddremove where date=DATE(NOW())", con);
+             OdbcCommand addedSymbolsCommand = new OdbcCommand(@"INSERT INTO topratingsymbolsaddremove(DATE,symbol,isadded)
+SELECT t2.ratingdate,t2.symbol,1 FROM topratingsymbolshist  t2
+LEFT JOIN (SELECT symbol,ratingdate FROM topratingsymbolshist WHERE ratingdate = (SELECT ratingdate FROM topratingsymbolshist GROUP BY ratingdate  ORDER BY ratingdate DESC  LIMIT 1,1)) AS t1 ON t1.symbol=t2.symbol
+WHERE t2.ratingdate=(SELECT MAX(ratingdate) FROM topratingsymbolshist) AND t1.symbol IS NULL", con);
+
+             OdbcCommand removedSymbolsCommand = new OdbcCommand(@"INSERT INTO topratingsymbolsaddremove(DATE,symbol,isadded)
+SELECT (SELECT MAX(ratingdate) FROM topratingsymbolshist),t2.symbol,0  FROM topratingsymbolshist  t2
+LEFT JOIN (SELECT symbol,ratingdate FROM topratingsymbolshist WHERE ratingdate = (SELECT MAX(ratingdate) FROM topratingsymbolshist) ) AS t1 ON t1.symbol=t2.symbol
+WHERE t2.ratingdate=(SELECT ratingdate FROM topratingsymbolshist GROUP BY ratingdate  ORDER BY ratingdate DESC  LIMIT 1,1) AND t1.symbol IS NULL", con);
+     try
+            {
+                con.Open();
+                deleteCmd.ExecuteNonQuery();
+                addedSymbolsCommand.ExecuteNonQuery();
+                removedSymbolsCommand.ExecuteNonQuery();
+
+                log.Info("insert Top Rating Symbols Hist....");
+
+            }
+            catch (OdbcException ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+        }
     }
 }

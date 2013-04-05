@@ -21,7 +21,7 @@ namespace ChartLabFinCalculation
             List<DayWiseAvgReturnForSymbol> alertPerformanceList = new List<DayWiseAvgReturnForSymbol>();
             try
             {
-
+                log.Info("Process:  Volume Alert Historical for symbols  " + symbolList.Count);
                 for (int i = 0; i < symbolList.Count; i++)
                 {
                     string symbol = symbolList[i];
@@ -35,7 +35,7 @@ namespace ChartLabFinCalculation
                             {
                                 if (dict.ContainsKey(volumeAlertHistory[k].ChangeDate))
                                 {
-                                    log.Warn("Duplicate Data in symbolshistorical Symbol : " + symbol + "  Date : " + volumeAlertHistory[k].ChangeDate);
+                                    log.Warn("Warn: Duplicate Data in symbolshistorical Symbol : " + symbol + "  Date : " + volumeAlertHistory[k].ChangeDate);
                                 }
                                 else
                                 {
@@ -85,17 +85,17 @@ namespace ChartLabFinCalculation
                     }
 
                 }
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error: " + ex);
-            }
+            
             CSVExporter.WriteToCSVHistoricalVolume(totalAlertDateList, HistoricalVolumePath + "/HistoricalVolume.csv");
             VolumeDAO.DeleteFromHistoricalVolAlerts();
             VolumeDAO.SaveHistoricalVolumeAlertData(HistoricalVolumePath);
             CSVExporter.WriteToCSVVolumePerformance(alertPerformanceList, HistoricalVolumeAlertPerfPath + "/HistoricalVolumePerformance.csv");
             VolumeDAO.InsertHistoricalVolumeAlertPerf(HistoricalVolumeAlertPerfPath);
-           
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error: " + ex);
+            }
            
 
         }
@@ -182,21 +182,30 @@ namespace ChartLabFinCalculation
         }
         public static void CalculateDailyAverageVolume(string DailyAvgVolumeFolderPath)
         {
+            try
+            {
+                log.Info("Process: Getting symbol List From DB");
+                List<String> symbolList = SymbolHistoricalDAO.GetsymbolListFromDB(1, Constants.MAX_ID_DB);
+                log.Info("Process: Getting Daily Avg Volume for symbol list for symbol count " + symbolList.Count);
+                List<DailyAverageVolume> dailyAvgVolumeList = GetDailyAvgVolume(symbolList);
+                log.Info("Process: Write To CSV Daily Avg Volume");
+                CSVExporter.WriteToCSVDailyAvgVolume(dailyAvgVolumeList, DailyAvgVolumeFolderPath + "/DailyAvgVolume.csv");
+                log.Info("Process: Save Daily Avg Volume Data");
+                VolumeDAO.SaveDailyAvgVolumeData(DailyAvgVolumeFolderPath);
+                log.Info("Process: Update Volume Table");
+                VolumeDAO.UpdateVolumeTable();
 
-                    List<String> symbolList = SymbolHistoricalDAO.GetsymbolListFromDB(1, Constants.MAX_ID_DB);
-                    List<DailyAverageVolume> dailyAvgVolumeList = GetDailyAvgVolume(symbolList);
-                    CSVExporter.WriteToCSVDailyAvgVolume(dailyAvgVolumeList, DailyAvgVolumeFolderPath + "/DailyAvgVolume.csv");
-                    VolumeDAO.SaveDailyAvgVolumeData(DailyAvgVolumeFolderPath);
-                    VolumeDAO.UpdateVolumeTable();
-                 
+            }
+            catch (Exception ex)
+            {
+                
+                log.Error("Error: "+ex);
+            }
 
 
         }
 
-       
-
-        
-         private static List<DailyAverageVolume> GetDailyAvgVolume(List<String> symbolList)
+        private static List<DailyAverageVolume> GetDailyAvgVolume(List<String> symbolList)
         {
             List<DailyAverageVolume> dailyAvgVolumeList = new List<DailyAverageVolume>();
             List<String> subsetSymbolList = new List<String>();
@@ -231,9 +240,7 @@ namespace ChartLabFinCalculation
                 return dailyAvgVolumeList;
         }
 
-
-
-         private static List<DayWiseAvgReturnForSymbol> GetAverageReturn(Dictionary<DateTime, double> dict, List<AlertDateList> volumeAlertDateList, String symbol)
+        private static List<DayWiseAvgReturnForSymbol> GetAverageReturn(Dictionary<DateTime, double> dict, List<AlertDateList> volumeAlertDateList, String symbol)
          {
              List<DayWiseAvgReturnForSymbol> AvgReturnList = new List<DayWiseAvgReturnForSymbol>();
              List<double> currentDate = new List<double>();
@@ -307,16 +314,25 @@ namespace ChartLabFinCalculation
              }
              catch (Exception ex)
              {
-                 throw (ex);
+                 log.Error("Error: " + ex);
              }
              return AvgReturnList;
 
          }
 
 
-         public static void InsertVolumeAlertDaily()
+        public static void InsertVolumeAlertDaily()
          {
-             VolumeDAO.InsertDailyVolumeAlert();
+             try
+             {
+                 log.Info("Process: Insert Daily Volume Alert in historicalvolumealerts");
+                 VolumeDAO.InsertDailyVolumeAlert();
+             }
+             catch (Exception ex)
+             {
+                 
+                 log.Error("Error: "+ex);
+             }
          }
     }
 }

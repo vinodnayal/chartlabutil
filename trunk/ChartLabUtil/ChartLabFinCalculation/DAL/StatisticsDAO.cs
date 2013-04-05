@@ -30,11 +30,16 @@ using FinLib.Model;
                 insertCommand.ExecuteReader();
                 log.Info("Statistics Data File Saved....");
 
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 log.Error("ERROR \n" + "============ \n" + ex.ToString());
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
@@ -50,11 +55,16 @@ using FinLib.Model;
                 calRatingStatsPerfCom.ExecuteNonQuery();
                 log.Info("statsperformance inserted....");
 
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 log.Error("ERROR \n" + "============ \n" + ex.ToString());
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
@@ -110,11 +120,16 @@ using FinLib.Model;
                     }
                 }
                 dr.Close();
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return PositiveTimeDict;
@@ -134,11 +149,16 @@ using FinLib.Model;
                 
                 log.Info("Statistics positive time percentage updated....");
 
-                con.Close();
+              
             }
             catch (OdbcException ex)
             {
                 log.Error("ERROR \n" + "============ \n" + ex.ToString());
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
     }

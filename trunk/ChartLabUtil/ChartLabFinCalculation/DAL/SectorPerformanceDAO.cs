@@ -44,11 +44,16 @@ namespace ChartLabFinCalculation
 
                 insert.ExecuteNonQuery();
                 log.Info("Data inserted into sectorstocksymbols Table...");
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
 
@@ -93,11 +98,16 @@ namespace ChartLabFinCalculation
 
                 insert.ExecuteNonQuery();
                 log.Info("Data inserted into sectorstocksymbols Table...");
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
 
@@ -116,11 +126,16 @@ namespace ChartLabFinCalculation
                 deleteCommand.ExecuteNonQuery();
                 insertCommand.ExecuteNonQuery();
                 log.Info("Data Inserted into sectorperfmnce Table...");
-                con.Close();
+              
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
@@ -135,11 +150,16 @@ namespace ChartLabFinCalculation
                 con.Open();
                 updateCommand.ExecuteNonQuery();
                 log.Info("Data Updating in sectorperfmnce Table...");
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
@@ -153,11 +173,16 @@ namespace ChartLabFinCalculation
                 con.Open();
                 updateCommand.ExecuteNonQuery();
                 log.Info("Data Updating in sectorperfmnce Table...");
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
@@ -202,11 +227,16 @@ namespace ChartLabFinCalculation
                 }
                 dr.Close();
 
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
 
@@ -224,11 +254,16 @@ namespace ChartLabFinCalculation
                 con.Open();
                 updateCommand.ExecuteNonQuery();
                 log.Info("Data Updating in sectorperfmnce Table...");
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
         }
@@ -263,12 +298,15 @@ namespace ChartLabFinCalculation
                    
                 }
                 dr.Close();
-
-                con.Close();
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
             return ratingValue;
@@ -298,23 +336,25 @@ namespace ChartLabFinCalculation
 
                 log.Info("Sector Performance File Saved....");
 
-                con.Close();
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
 
         internal static List<DateTime> GetCurrentDate()
         {
             List<DateTime> DateList = new   List<DateTime>();
-           
-
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
             try
             {
-                OdbcConnection con = new OdbcConnection(Constants.MyConString);
-
+                
                 OdbcCommand com = new OdbcCommand("SELECT Date,historicalDatesId FROM historicaldates where DateType='"+Constants.C+"'", con);
                 //OdbcCommand com = new OdbcCommand("SELECT date,close,volume from  symbolshistorical where symbol = 'SPY' order by date desc", con);
                 con.Open();
@@ -329,12 +369,16 @@ namespace ChartLabFinCalculation
                    
                 }
                 dr.Close();
-                con.Close();
 
             }
             catch (Exception ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
             return DateList;
         }
@@ -350,11 +394,15 @@ namespace ChartLabFinCalculation
                 con.Open();
                 deleteCommand.ExecuteNonQuery();
                 log.Info("Data deleted from sectorstocksymbols Table...");
-                con.Close();
             }
             catch (OdbcException ex)
             {
                 log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
         }
     }

@@ -116,11 +116,16 @@ namespace ChartLabFinCalculation
                 insertSnPsymbol.ExecuteNonQuery();
                 log.Info("\n Data Updated in table longshortAlerts\n");
 
-                con.Close();
+               
             }
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
             }
 
         }
