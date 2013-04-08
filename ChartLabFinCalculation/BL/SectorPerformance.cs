@@ -72,7 +72,7 @@ namespace ChartLabFinCalculation
                 if (isHistorical)
                 {
                     log.Info("Process: Getting historical Dates From DB: " );
-                    dateList = BuySellRatingDAO.GetDistinctRatingDatesFromDB();
+                    dateList = BuySellRatingDAO.GetDistinctRatingDatesFromDB(new DateTime(),0);
                 }
                 else
                 {

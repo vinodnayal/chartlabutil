@@ -347,16 +347,17 @@ namespace ChartLabFinCalculation
                     case "B":
 
                         #region Buy Sell Rating
-                        log.Info("Rating: Starting Buy Sell Rating Programme at: " + DateTime.Now);
+                        logTime.Info("Rating: Starting Buy Sell Rating Programme at: " + DateTime.Now);
 
                         BuySellRatingCalculation.BuySellRatingFilePath = BuySellRatingFilePath;
                         BuySellRatingCalculation.BuySellRatingCsvFilePath = BuySellRatingCsvFilePath;
 
                         BuySellRatingCalculation.calculateBuySellRating();
-                       
+                        logTime.Info("Rating: updating ETF Ratings from HistBuySellRating Tbl" + DateTime.Now);
+                        BuySellRatingCalculation.updateETFRatings();
                         BuySellRatingCalculation.backupBSRatingFiles(BuySellRatingFTPFilesPath);
-                        log.Info("Rating: backup BS Rating Files Programme at: " + DateTime.Now);
-                        log.Info("Rating: Done! Buy Sell Rating Programme at: " + DateTime.Now);
+                        logTime.Info("Rating: backup BS Rating Files Programme at: " + DateTime.Now);
+                        logTime.Info("Rating: Done! Buy Sell Rating Programme at: " + DateTime.Now);
                         break;
 
                         #endregion
@@ -615,7 +616,7 @@ namespace ChartLabFinCalculation
                     case "TRH":
 
                         #region Top Rating symbols Hist
-                        logTime.Info("Process:  Top Rating symbols Hist: " + DateTime.Now);
+                        logTime.Info("Rating:  Top Rating symbols Hist: " + DateTime.Now);
                         BuySellRatingCalculation.SaveTopRatingSymbolsHist();
                         BuySellRatingCalculation.SaveTopRatingAddRemoveSymbolsHist();
                        
