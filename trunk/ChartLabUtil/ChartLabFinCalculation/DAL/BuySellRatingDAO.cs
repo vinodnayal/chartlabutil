@@ -503,32 +503,35 @@ namespace ChartLabFinCalculation
             }
         }
 
-        internal static List<DateTime> GetDistinctRatingDatesFromDB()
+        internal static List<DateTime> GetDistinctRatingDatesFromDB(DateTime fromDate, int backDateCount)
         {
             List<DateTime> DateList = new List<DateTime>();
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             try
             {
+                String sqlQuery = "";
+                if (fromDate == DateTime.MinValue)
+                {
+                    if (backDateCount== 0)
+                        sqlQuery = " SELECT DISTINCT ratingDate FROM historybuysellrating order by ratingDate";
+                    else
+                        sqlQuery = " SELECT DISTINCT ratingDate FROM historybuysellrating order by ratingDate desc limit 2";
+                }
+                else
+                {
+                    sqlQuery = " SELECT DISTINCT ratingDate FROM historybuysellrating where ratingDate>='" + fromDate.ToString("yyyy-MM-dd") + "' order by ratingDate";
+                }
+                OdbcCommand com = new OdbcCommand(sqlQuery, con);
 
-
-                OdbcCommand com = new OdbcCommand(" SELECT DISTINCT ratingDate FROM historybuysellrating", con);
-                //OdbcCommand com = new OdbcCommand("SELECT date,close,volume from  symbolshistorical where symbol = 'SPY' order by date desc", con);
                 con.Open();
                 OdbcDataReader dr = com.ExecuteReader();
 
                 while (dr.Read())
                 {
-
                     DateTime date = DateTime.Parse(dr.GetString(0));
-
                     DateList.Add(date);
-
-
-
                 }
                 dr.Close();
-
-
             }
             catch (Exception ex)
             {
@@ -540,9 +543,6 @@ namespace ChartLabFinCalculation
                     con.Close();
             }
             return DateList;
-
-
-
         }
 
         internal static List<CTRatingHistory> getCTRatingHistroyFromDB()
@@ -551,21 +551,16 @@ namespace ChartLabFinCalculation
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             OdbcCommand historyBuySellRating = new OdbcCommand("SELECT symbol,ratingdate,ctrating FROM historyBuySellRating ORDER BY symbol,ratingdate", con);
-
-
             try
             {
-
                 con.Open();
                 OdbcDataReader dr = historyBuySellRating.ExecuteReader();
-
                 while (dr.Read())
                 {
                     object ctr = dr.GetValue(2);
 
                     if (!Convert.IsDBNull(ctr))
                     {
-
                         ctRatingHist.Add(new CTRatingHistory
                         {
                             symbol = dr.GetString(0),
@@ -603,8 +598,6 @@ namespace ChartLabFinCalculation
                                               " FIELDS TERMINATED BY ',' " +
                                               "LINES TERMINATED BY '\n' " +
                                               "(symbol,ctratingcurr,ctratingprev,changedate);", con);
-
-
             try
             {
                 con.Open();
@@ -629,9 +622,6 @@ namespace ChartLabFinCalculation
         {
 
             Dictionary<string, double> symbolsWeightDict = new Dictionary<string, double>();
-
-
-
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             OdbcCommand com = new OdbcCommand("SELECT symbol,weight from  snpsymbolsweightage", con);
 
@@ -650,8 +640,6 @@ namespace ChartLabFinCalculation
                     {
                         symbolsWeightDict.Add(symbol, weight);
                     }
-
-
                 }
                 dr.Close();
 
@@ -673,9 +661,6 @@ namespace ChartLabFinCalculation
         internal static Dictionary<string, double> GetSymbolsRating()
         {
             Dictionary<string, double> symbolsRatingDict = new Dictionary<string, double>();
-
-
-
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             OdbcCommand com = new OdbcCommand("SELECT symbol,rating from  temp_buysellrating", con);
 
@@ -844,21 +829,23 @@ namespace ChartLabFinCalculation
         }
 
 
-        internal static void insertTopRatingAddRemoveHist()
+        internal static void insertTopRatingAddRemoveHist(DateTime curdate, DateTime preDayDate)
         {
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
 
-             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-             OdbcCommand deleteCmd = new OdbcCommand("delete from topratingsymbolsaddremove where date=DATE(NOW())", con);
-             OdbcCommand addedSymbolsCommand = new OdbcCommand(@"INSERT INTO topratingsymbolsaddremove(DATE,symbol,isadded)
+            OdbcCommand deleteCmd = new OdbcCommand("delete from topratingsymbolsaddremove where date='" + curdate.ToString("yyyy-MM-dd") + "'", con);
+            OdbcCommand addedSymbolsCommand = new OdbcCommand(@"INSERT INTO topratingsymbolsaddremove(DATE,symbol,isadded)
 SELECT t2.ratingdate,t2.symbol,1 FROM topratingsymbolshist  t2
-LEFT JOIN (SELECT symbol,ratingdate FROM topratingsymbolshist WHERE ratingdate = (SELECT ratingdate FROM topratingsymbolshist GROUP BY ratingdate  ORDER BY ratingdate DESC  LIMIT 1,1)) AS t1 ON t1.symbol=t2.symbol
-WHERE t2.ratingdate=(SELECT MAX(ratingdate) FROM topratingsymbolshist) AND t1.symbol IS NULL", con);
+LEFT JOIN (SELECT symbol,ratingdate FROM topratingsymbolshist WHERE ratingdate = '" + preDayDate.ToString("yyyy-MM-dd") + "') AS t1 ON t1.symbol=t2.symbol" +
+" WHERE t2.ratingdate= '" + curdate.ToString("yyyy-MM-dd") + "' AND t1.symbol IS NULL", con);
 
-             OdbcCommand removedSymbolsCommand = new OdbcCommand(@"INSERT INTO topratingsymbolsaddremove(DATE,symbol,isadded)
-SELECT (SELECT MAX(ratingdate) FROM topratingsymbolshist),t2.symbol,0  FROM topratingsymbolshist  t2
-LEFT JOIN (SELECT symbol,ratingdate FROM topratingsymbolshist WHERE ratingdate = (SELECT MAX(ratingdate) FROM topratingsymbolshist) ) AS t1 ON t1.symbol=t2.symbol
-WHERE t2.ratingdate=(SELECT ratingdate FROM topratingsymbolshist GROUP BY ratingdate  ORDER BY ratingdate DESC  LIMIT 1,1) AND t1.symbol IS NULL", con);
-     try
+            OdbcCommand removedSymbolsCommand = new OdbcCommand(@"INSERT INTO topratingsymbolsaddremove(DATE,symbol,isadded) " +
+" SELECT '" + curdate.ToString("yyyy-MM-dd") + "',t2.symbol,0  FROM topratingsymbolshist  t2 " +
+"  LEFT JOIN (SELECT symbol,ratingdate FROM topratingsymbolshist WHERE ratingdate = '" + curdate.ToString("yyyy-MM-dd") + "' ) AS t1 ON t1.symbol=t2.symbol " +
+" WHERE t2.ratingdate= '" + preDayDate.ToString("yyyy-MM-dd") + "' AND t1.symbol IS NULL", con);
+
+
+            try
             {
                 con.Open();
                 deleteCmd.ExecuteNonQuery();
@@ -871,6 +858,76 @@ WHERE t2.ratingdate=(SELECT ratingdate FROM topratingsymbolshist GROUP BY rating
             catch (OdbcException ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+        }
+
+        internal static List<Rating> getTopRatigSymbolOnSpecificDate(DateTime date)
+        {
+            List<Rating> topRatingSymbolsList = new List<Rating>();
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
+            OdbcCommand com = new OdbcCommand(@"SELECT t.symbol, t.ratingvalue, t.ratingdate FROM historybuysellrating AS t LEFT JOIN equitiesfundamental AS e ON t.symbol=e.symbol WHERE t.ratingdate='" + date.ToString("yyyy-MM-dd") + "' ORDER BY ratingvalue DESC,symbol LIMIT 20", con);
+
+            try
+            {
+                con.Open();
+                OdbcDataReader dr = com.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    Rating symbolRating = new Rating();
+                    if (dr.GetValue(0) != DBNull.Value)
+                        symbolRating.symbol = dr.GetString(0);
+                    if (dr.GetValue(1) != DBNull.Value)
+                        symbolRating.ratingValue = dr.GetFloat(1);
+                    if (dr.GetValue(2) != DBNull.Value)
+                        symbolRating.ratingDate = dr.GetDateTime(2);
+                    topRatingSymbolsList.Add(symbolRating);
+                }
+                dr.Close();
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+            return topRatingSymbolsList;
+        }
+
+        internal static void InsertTopRatingSymbolsHistCSVToDB(string BuySellRatingCsvFilePath)
+        {
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
+
+            OdbcCommand deleteCommand = new OdbcCommand("DELETE from  topratingsymbolshist", con);
+
+            OdbcCommand insertCommand = new OdbcCommand("LOAD DATA LOCAL INFILE" + " '" + BuySellRatingCsvFilePath + "/TopRatingSymbolsHist.csv' " +
+                                              "INTO TABLE  topratingsymbolshist" +
+                                              " FIELDS TERMINATED BY ',' " +
+                                              "LINES TERMINATED BY '\n' " +
+                                              "(symbol,ratingvalue,ratingdate);", con);
+
+
+            try
+            {
+                con.Open();
+                deleteCommand.ExecuteReader();
+                insertCommand.ExecuteReader();
+                log.Info("Rating: topratingsymbolshist table updated....");
+
+
+            }
+            catch (OdbcException ex)
+            {
+                log.Error("ERROR \n" + "============ \n" + ex.ToString());
             }
             finally
             {

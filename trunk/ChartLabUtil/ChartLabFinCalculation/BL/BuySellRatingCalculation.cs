@@ -18,17 +18,13 @@ namespace ChartLabFinCalculation
 
         public static void calculateBuySellRating()
         {
-
-
             try
             {
                 List<BuySellRating> BuySellRatingList = new List<BuySellRating>();
                 List<Rating> RatingList = new List<Rating>();
-
                 StreamReader readFile = new StreamReader(BuySellRatingFilePath + "\\STOCK_PWTS.TXT");
                 try
                 {
-
                     string line;
                     string[] row;
                     int flag = 0;
@@ -41,7 +37,6 @@ namespace ChartLabFinCalculation
 
                         for (int i = 1; i < row.Length; i++)
                         {
-
                             if (row[i] != "" && flag == 0)
                             {
                                 // log.Info("Rating: Calculating BuySell Rating for symbol: " + row[i]);
@@ -59,8 +54,6 @@ namespace ChartLabFinCalculation
                             if (i == row.Length - 1)
                                 BuySellRatingList.Add(ratingObject);
                         }
-
-
 
                     }
                     log.Info("Rating: Calculated BuySell Rating for symbols count: " + BuySellRatingList.Count);
@@ -106,19 +99,21 @@ namespace ChartLabFinCalculation
                 BuySellRatingDAO.InsertSnPAvgRating(SnPAvgRating);
                 log.Info("Rating: inserted in DB (historybuysellrating, symbolanalytics tables), Avg Rating For SnP");
 
-
-                BuySellRatingDAO.insertTopRatingAddRemoveHist();
-                log.Info("Rating: Calculate Top Rating Symbols Hist for  added/removed symbols ");
+                List<DateTime> datelist = BuySellRatingDAO.GetDistinctRatingDatesFromDB(new DateTime(), 2);
+                DateTime curdate = datelist[0];
+                DateTime predate = datelist[1];
+                BuySellRatingDAO.insertTopRatingAddRemoveHist(curdate, predate);
+                log.Info("Rating: Calculated added/removed Top Rating symbols from pre day ");
             }
             catch (Exception ex)
             {
                 log.Error("Error: " + ex);
 
             }
-           
+
         }
 
-       
+
         private static BuySellRating CalculateAvgRatingForSnP(string symbol)
         {
             BuySellRating snpAvgRatingObj = new BuySellRating();
@@ -260,7 +255,9 @@ namespace ChartLabFinCalculation
         {
             try
             {
+               
                 BuySellRatingDAO.updateETFRatingsfromHistBSRatingTbl();
+                log.Info("Rating: updated ETF Ratings from HistBuySellRating Tbl");
             }
             catch (Exception ex)
             {
@@ -319,7 +316,21 @@ namespace ChartLabFinCalculation
         {
             try
             {
-                throw new NotImplementedException();
+                log.Info("Rating: getting daily top rating symbols");
+                List<Rating> totalTopSymbolsList = new List<Rating>();
+                List<DateTime> ratingDatesList = BuySellRatingDAO.GetDistinctRatingDatesFromDB(DateTime.Now.AddDays(-300), 0);
+                foreach (DateTime date in ratingDatesList)
+                {
+                    log.Info("Rating: getting top symbols for date " + date);
+                    List<Rating> topSymbolsList = BuySellRatingDAO.getTopRatigSymbolOnSpecificDate(date);
+                    totalTopSymbolsList.AddRange(topSymbolsList);
+                }
+
+                CSVExporter.WriteToCSVTopRatingSymbolsHist(totalTopSymbolsList, BuySellRatingCsvFilePath + "/TopRatingSymbolsHist.csv");
+                log.Info("Rating: Write  To CSV Top Rating Symbols Hist");
+                BuySellRatingDAO.InsertTopRatingSymbolsHistCSVToDB(BuySellRatingCsvFilePath);
+                log.Info("Rating: Inserted Top Rating Symbols Hist CSV To DB ");
+
             }
             catch (Exception ex)
             {
@@ -332,7 +343,21 @@ namespace ChartLabFinCalculation
         {
             try
             {
-                throw new NotImplementedException();
+                log.Info("Rating: 14 days add remove symbols");
+                List<DateTime> ratingDatesList = BuySellRatingDAO.GetDistinctRatingDatesFromDB(DateTime.Now.AddDays(-300),0);
+                int count = 0;
+                DateTime predayDate = new DateTime();
+                foreach (DateTime date in ratingDatesList)
+                {
+                    if (count != 0)
+                    {
+                        log.Info("Rating: insert TopRating Add/Remove Hist for date " + date);
+                        BuySellRatingDAO.insertTopRatingAddRemoveHist(date, predayDate);
+                    }
+                    predayDate = date;
+                    count++;
+
+                }
             }
             catch (Exception ex)
             {
