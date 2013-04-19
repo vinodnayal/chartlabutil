@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Net.Mail;
+using System.Configuration;
 
 namespace ChartLabFinCalculation.UTIL
 {
@@ -10,13 +11,20 @@ namespace ChartLabFinCalculation.UTIL
     {
         static log4net.ILog log = log4net.LogManager.GetLogger(typeof(MailUtility));
 
+        static  String _SMTPServer = ConfigurationManager.AppSettings["SMTPServer"];
+        static String _adminEmail = ConfigurationManager.AppSettings["AdminEmail"];
+        static String _adminMailPassword = ConfigurationManager.AppSettings["AdminPassword"];
+        static int _SmtpPort = Convert.ToInt32(ConfigurationManager.AppSettings["SMTPPort"]);
+
         internal static void SendMail(string Subject, string Body, string From, string To)
         {
+           
+
             bool retry = true;
             MailMessage mail = new MailMessage();
-            SmtpClient SmtpServer = new SmtpClient(Constants.SmtpServer);
-            SmtpServer.Port = Constants.SmtpPort;
-            SmtpServer.Credentials = new System.Net.NetworkCredential(Constants.AdminEmail, Constants.AdminMailPassword);
+            SmtpClient SmtpServer = new SmtpClient(_SMTPServer);
+            SmtpServer.Port = _SmtpPort;
+            SmtpServer.Credentials = new System.Net.NetworkCredential(_adminEmail, _adminMailPassword);
             SmtpServer.EnableSsl = true;
            try
             {

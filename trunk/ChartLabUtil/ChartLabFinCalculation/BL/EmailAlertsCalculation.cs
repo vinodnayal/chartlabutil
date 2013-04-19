@@ -172,7 +172,7 @@ namespace ChartLabFinCalculation.BL
 
 
                 String Subject = "ChartLab Alerts";
-                String From = Constants.AdminEmail;
+                String From = ConfigurationManager.AppSettings["AdminEmail"];
                 int emailCounter = 0;
                 foreach (KeyValuePair<int, String> user in usersEmailDict)
                 {
