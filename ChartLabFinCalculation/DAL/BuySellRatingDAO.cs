@@ -44,16 +44,16 @@ namespace ChartLabFinCalculation
             OdbcCommand deletetopRatingSymbols = new OdbcCommand("DELETE from topRatingSymbols", con);
             OdbcCommand insertTop20symbols = new OdbcCommand("INSERT INTO topRatingSymbols (symbol,ratingvalue) " +
                                     "SELECT t.symbol, t.ratingvalue FROM temp_buySellRating AS t LEFT JOIN equitiesfundamental AS e " +
-                                    "ON t.symbol=e.symbol " +
+                                    "ON t.symbol=e.symbol LEFT JOIN symbolanalytics sa ON sa.symbol= t.symbol " +
                                     "WHERE e.sectorId IS NOT NULL " +
-                                    "ORDER BY ratingvalue DESC,symbol LIMIT 20", con);
+                                    "ORDER BY ratingvalue DESC,DATEDIFF(CURDATE(),sa.preSBRatingDate) DESC,ctratingvalue,symbol LIMIT 20", con);
 
             OdbcCommand deletetopRatingSymbolsHist = new OdbcCommand("DELETE from topRatingSymbolshist where ratingdate='" + DateTime.Now.ToString("yyyy-MM-dd") + "'", con);
             OdbcCommand insertTop20symbolsHist = new OdbcCommand("INSERT INTO topRatingSymbolshist (symbol,ratingvalue,ratingdate) " +
                                     "SELECT t.symbol, t.ratingvalue,'" + DateTime.Now.ToString("yyyy-MM-dd") + "' FROM temp_buySellRating AS t LEFT JOIN equitiesfundamental AS e " +
-                                    "ON t.symbol=e.symbol " +
+                                    "ON t.symbol=e.symbol LEFT JOIN symbolanalytics sa ON sa.symbol= t.symbol " +
                                     "WHERE e.sectorId IS NOT NULL " +
-                                    "ORDER BY ratingvalue DESC,symbol LIMIT 20", con);
+                                    "ORDER BY  ratingvalue DESC,DATEDIFF(CURDATE(),sa.preSBRatingDate) DESC,ctratingvalue,symbol LIMIT 20", con);
 
             OdbcCommand deleteSnPStrongestWatchlistSymbols = new OdbcCommand("DELETE from watchlistsymbolmapping where watchlistid=1", con);
             OdbcCommand insertSnPStrongestWatchlistSymbols = new OdbcCommand("INSERT INTO watchlistsymbolmapping (watchlistid,symbol,quantity,price)" +
@@ -870,7 +870,13 @@ LEFT JOIN (SELECT symbol,ratingdate FROM topratingsymbolshist WHERE ratingdate =
         {
             List<Rating> topRatingSymbolsList = new List<Rating>();
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand com = new OdbcCommand(@"SELECT t.symbol, t.ratingvalue, t.ratingdate FROM historybuysellrating AS t LEFT JOIN equitiesfundamental AS e ON t.symbol=e.symbol WHERE t.ratingdate='" + date.ToString("yyyy-MM-dd") + "' ORDER BY ratingvalue DESC,symbol LIMIT 20", con);
+// for testing
+//SELECT t.symbol, t.ratingvalue, t.ratingdate,ctratingvalue,DATEDIFF(CURDATE(),sa.preSBRatingDate) FROM historybuysellrating AS t 
+//LEFT JOIN equitiesfundamental AS e ON t.symbol=e.symbol 
+//LEFT JOIN symbolanalytics sa ON sa.symbol= t.symbol
+//WHERE t.ratingdate='2012-09-27' ORDER BY ratingvalue DESC,DATEDIFF(CURDATE(),sa.preSBRatingDate) DESC,ctratingvalue,symbol LIMIT 20
+
+            OdbcCommand com = new OdbcCommand(@"SELECT t.symbol, t.ratingvalue, t.ratingdate FROM historybuysellrating AS t LEFT JOIN equitiesfundamental AS e ON t.symbol=e.symbol LEFT JOIN symbolanalytics sa ON sa.symbol= t.symbol  WHERE t.ratingdate='" + date.ToString("yyyy-MM-dd") + "' ORDER BY ratingvalue DESC,DATEDIFF(CURDATE(),sa.preSBRatingDate) DESC,ctratingvalue,symbol LIMIT 20", con);
 
             try
             {

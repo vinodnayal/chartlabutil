@@ -11,6 +11,7 @@ using FinLib.Model;
 using log4net.Config;
 using ChartLabFinCalculation.BL;
 using ChartLabFinCalculation.DAL;
+using ChartLabFinCalculation.UTIL;
 
 namespace ChartLabFinCalculation
 {
@@ -615,7 +616,9 @@ namespace ChartLabFinCalculation
 
                     case "TRH":
 
+                       
                         #region Top Rating symbols Hist
+                        
                         logTime.Info("Rating:  Top Rating symbols Hist: " + DateTime.Now);
                         BuySellRatingCalculation.SaveTopRatingSymbolsHist();
                         BuySellRatingCalculation.SaveTopRatingAddRemoveSymbolsHist();
@@ -629,6 +632,16 @@ namespace ChartLabFinCalculation
                         #region Validation check for data
                         logTime.Info("Process: starting Validation check for data: " + DateTime.Now);
                         ValidationDataHelper.ValidateData();
+
+                        break;
+
+                        #endregion
+
+                    case "MailTest":
+
+                        #region MailTest
+                         String From = ConfigurationManager.AppSettings["AdminEmail"];
+                         MailUtility.SendMail("testing", "testing", From, "om.omshiv@gmail.com");
 
                         break;
 
