@@ -79,6 +79,7 @@
     <Compile Include="BL\HistoricalDataImporter.cs" />
     <Compile Include="BL\LongShortAlerts.cs" />
     <Compile Include="BL\MarketInternalsCalculation.cs" />
+    <Compile Include="BL\ModelPortfolioHelper.cs" />
     <Compile Include="BL\OBOSRatingCalculation.cs" />
     <Compile Include="BL\RulesCalculation.cs" />
     <Compile Include="BL\SectorPerformance.cs" />

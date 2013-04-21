@@ -648,6 +648,14 @@ namespace ChartLabFinCalculation
                         #endregion
 
 
+                    case "MPA":
+
+                        #region Model portfolio Signal Alert
+                        
+                        break;
+
+                        #endregion
+
                     //case "ETFRating":
 
                     //    #region ETFRating calculations
