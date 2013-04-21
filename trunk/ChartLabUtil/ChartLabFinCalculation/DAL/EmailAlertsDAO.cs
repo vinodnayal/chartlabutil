@@ -770,5 +770,15 @@ namespace ChartLabFinCalculation.DAL
                     con.Close();
             }
         }
+
+        internal static Dictionary<int, string> getModelPortfolioIdsFromDB()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static Dictionary<int, string> GetModelPortUniqueUser(int watchListId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
