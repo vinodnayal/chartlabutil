@@ -48,7 +48,7 @@ namespace ChartLabFinCalculation
                 {
                     if (ratingList.ContainsKey(sectorId))
                     {
-                        SectorPerformanceDAO.updateAvgRating(sectorId, ratingList[sectorId].rating, ratingList[sectorId].ctrating);
+                        SectorPerformanceDAO.updateAvgRating(sectorId, ratingList[sectorId].rating, ratingList[sectorId].ctrating, ratingList[sectorId].ratingValue, ratingList[sectorId].ctRatingValue);
                     }
 
                 }
