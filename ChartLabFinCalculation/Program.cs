@@ -656,6 +656,26 @@ namespace ChartLabFinCalculation
 
                         #endregion
 
+                    case "WR":
+
+                        #region calculate Returns for weekly report
+
+                        WeeklyReturnCaculation.calculateWeeklyReturns();
+
+                        break;
+
+                        #endregion
+
+                    case "U":
+
+                        #region unsubscribe Free trial user with promocode 
+                        logTime.Info("Process:  update Free Trial Users Programme at: " + DateTime.Now);
+                        UsersManager.ManageFreeTrialUsers();
+
+                        break;
+
+                        #endregion
+
                     //case "ETFRating":
 
                     //    #region ETFRating calculations

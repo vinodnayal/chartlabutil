@@ -215,10 +215,10 @@ namespace ChartLabFinCalculation
 
                         RatingEnum rating = BuySellRatingCalculation.calculateBSRatingEnum(ratingValue);
                         ratingObj.rating = (int)rating;
-
+                        ratingObj.ratingValue = ratingValue;
                         CTRatingEnum ctrating = CTRatingCalculation.calculateCTRatingEnum(ctratingValue);
                         ratingObj.ctrating = (int)ctrating;
-
+                        ratingObj.ctRatingValue = ctratingValue;
                         if (!sectorRatingList.ContainsKey(secId))
                         {
                             sectorRatingList.Add(secId, ratingObj);
@@ -243,11 +243,11 @@ namespace ChartLabFinCalculation
             return sectorRatingList;
         }
 
-        internal static void updateAvgRating(int sectorId, int rating, int ctrating)
+        internal static void updateAvgRating(int sectorId, int rating, int ctrating, double ratingValue, double ctRatingValue)
         {
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand updateCommand = new OdbcCommand("UPDATE sectorperfmnce SET bsrating=" + rating + " ,ctrating="+ctrating+" WHERE sectorid=" + sectorId, con);
+            OdbcCommand updateCommand = new OdbcCommand("UPDATE sectorperfmnce SET bsrating=" + rating + " ,ctrating=" + ctrating + ", bsratingvalue=" + ratingValue + " ,ctratingvalue=" + ctRatingValue + " WHERE sectorid=" + sectorId, con);
 
             try
             {

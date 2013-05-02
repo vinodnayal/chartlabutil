@@ -9,5 +9,9 @@ namespace FinLib
     {
         public int rating { get; set; }
         public int ctrating { get; set; }
+
+        public double ctRatingValue { get; set; }
+
+        public double ratingValue { get; set; }
     }
 }
