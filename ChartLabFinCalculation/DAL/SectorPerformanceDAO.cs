@@ -323,7 +323,7 @@ namespace ChartLabFinCalculation
                                                 "INTO TABLE sectorhistperfmnce " +
                                                 "FIELDS TERMINATED BY ',' " +
                                                 "LINES TERMINATED BY '\n' " +
-                                                "(sectorid,date,rating);", con);
+                                                "(sectorid,date,rating,ratingvalue);", con);
 
             try
             {

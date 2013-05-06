@@ -659,7 +659,7 @@ namespace ChartLabFinCalculation
                     case "WR":
 
                         #region calculate Returns for weekly report
-
+                        logTime.Info("Process:  calculate Returns for weekly report " + DateTime.Now);
                         WeeklyReturnCaculation.calculateWeeklyReturns();
 
                         break;

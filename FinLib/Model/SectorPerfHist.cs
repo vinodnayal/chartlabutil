@@ -10,5 +10,7 @@ namespace FinLib
         public int sectorId { get; set; }
         public int rating { get; set; }
         public DateTime date { get; set; }
+
+        public double ratingValue { get; set; }
     }
 }
