@@ -98,6 +98,7 @@ namespace ChartLabFinCalculation
                                 double ratingValue = SectorPerformanceDAO.getSectorWiseAvgRating(date, secId);
                                 RatingEnum rating = BuySellRatingCalculation.calculateBSRatingEnum(ratingValue);
                                 sectorPerf.rating = (int)rating;
+                                sectorPerf.ratingValue = ratingValue;
                                 sectorPerf.date = date;
                                 sectorPerf.sectorId = secId;
 

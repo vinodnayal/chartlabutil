@@ -513,7 +513,7 @@ namespace ChartLabFinCalculation
                 if (fromDate == DateTime.MinValue)
                 {
                     if (backDateCount== 0)
-                        sqlQuery = " SELECT DISTINCT ratingDate FROM historybuysellrating order by ratingDate";
+                        sqlQuery = " SELECT DISTINCT ratingDate FROM historybuysellrating where ratingDate >='2012-02-02'  order by ratingDate";
                     else
                         sqlQuery = " SELECT DISTINCT ratingDate FROM historybuysellrating order by ratingDate desc limit 2";
                 }

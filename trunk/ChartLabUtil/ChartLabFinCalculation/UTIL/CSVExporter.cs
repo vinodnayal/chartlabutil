@@ -743,6 +743,8 @@ namespace ChartLabFinCalculation
                     writer.Write(row.date.Date.ToString("yyyy-MM-dd"));
                     writer.Write(',');
                     writer.Write(row.rating);
+                    writer.Write(',');
+                    writer.Write(row.ratingValue);
                     writer.Write('\n');
 
                 }

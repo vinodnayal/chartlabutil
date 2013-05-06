@@ -14,7 +14,7 @@ namespace ChartLabFinCalculation.DAL
         internal static void updateWeeklyReturns(String tableName)
         {
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            String sqlQuery = @"UPDATE " + tableName + " as t, (SELECT w.symbol, IFNULL((t1.close- t2.close)*100/t1.close,0) AS returnPct FROM " + tableName + " w "
+            String sqlQuery = @"UPDATE " + tableName + " as t, (SELECT w.symbol, IFNULL((t2.close- t1.close)*100/t1.close,0) AS returnPct FROM " + tableName + " w "
                             +" LEFT JOIN "
                             +" (SELECT sh.symbol,sh.close FROM symbolshistorical  sh "
                             +" WHERE  sh.date = (SELECT DATE FROM historicaldates WHERE dateType='Weekly')) AS t1 ON t1.symbol=w.symbol "
