@@ -83,6 +83,7 @@
     <Compile Include="BL\OBOSRatingCalculation.cs" />
     <Compile Include="BL\RulesCalculation.cs" />
     <Compile Include="BL\SectorPerformance.cs" />
+    <Compile Include="BL\SectorStrenghtCalculation.cs" />
     <Compile Include="BL\SectorWiseTopBottomSymbols.cs" />
     <Compile Include="BL\SentimentIndicator.cs" />
     <Compile Include="BL\SnPPriceCalculation.cs" />

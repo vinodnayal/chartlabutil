@@ -745,6 +745,8 @@ namespace ChartLabFinCalculation
                     writer.Write(row.rating);
                     writer.Write(',');
                     writer.Write(row.ratingValue);
+                    writer.Write(',');
+                    writer.Write(row.ratingChangePct);
                     writer.Write('\n');
 
                 }
