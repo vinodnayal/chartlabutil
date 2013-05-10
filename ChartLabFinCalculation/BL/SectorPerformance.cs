@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using FinLib;
+using ChartLabFinCalculation.BL;
 
 namespace ChartLabFinCalculation
 {
@@ -25,7 +26,7 @@ namespace ChartLabFinCalculation
                 log.Info("Process: Getting five days before Top Rating Symbol Stocks");
                 Dictionary<int, int> fivedaysStockList = SectorPerformanceDAO.getfiveDaysTopRatingSymbolStocks();
 
-                
+
                 SectorPerformanceDAO.insertSectorPerf();
                 log.Info("Process: calculating sector perf for sectors count " + sectorIdList.Count);
                 foreach (int sectorId in sectorIdList)
@@ -43,12 +44,21 @@ namespace ChartLabFinCalculation
                 }
 
                 Dictionary<int, SectorPerfRating> ratingList = SectorPerformanceDAO.getRatingAvgValue();
+                Dictionary<int, double> ratingValueChangePctDict = SectorPerformanceDAO.getRatingValueChangePct();
 
                 foreach (int sectorId in sectorIdList)
                 {
                     if (ratingList.ContainsKey(sectorId))
                     {
-                        SectorPerformanceDAO.updateAvgRating(sectorId, ratingList[sectorId].rating, ratingList[sectorId].ctrating, ratingList[sectorId].ratingValue, ratingList[sectorId].ctRatingValue);
+                        double ratingValueChangePct = 0;
+                        int signalId = 0;
+                        if (ratingValueChangePctDict.ContainsKey(sectorId))
+                        {
+                            ratingValueChangePct = ratingValueChangePctDict[sectorId];
+                            signalId = SectorStrenghtCalculation.calculateSectStrengthAlertId(ratingList[sectorId].ratingValue, ratingList[sectorId].ctRatingValue, ratingValueChangePct);
+                        }
+
+                        SectorPerformanceDAO.updateAvgRating(sectorId, ratingList[sectorId].rating, ratingList[sectorId].ctrating, ratingList[sectorId].ratingValue, ratingList[sectorId].ctRatingValue, ratingValueChangePct, signalId);
                     }
 
                 }
@@ -65,44 +75,55 @@ namespace ChartLabFinCalculation
         {
             try
             {
-                
+
                 List<int> sectorIdList = SectorWiseSymbolsDAO.GetSectorId();
                 List<DateTime> dateList = new List<DateTime>();
-               
+
                 if (isHistorical)
                 {
-                    log.Info("Process: Getting historical Dates From DB: " );
-                    dateList = BuySellRatingDAO.GetDistinctRatingDatesFromDB(new DateTime(),0);
+                    log.Info("Process: Getting historical Dates From DB: ");
+                    dateList = BuySellRatingDAO.GetDistinctRatingDatesFromDB(new DateTime(), 0);
                 }
                 else
                 {
                     log.Info("Process: Getting  Current Date From DB ");
-                    dateList = SectorPerformanceDAO.GetCurrentDate();
+                    dateList = BuySellRatingDAO.GetDistinctRatingDatesFromDB(new DateTime(), 1);
+                    //dateList = SectorPerformanceDAO.GetCurrentDate();
 
                 }
                 List<SectorPerfHist> sectorHistPerfList = new List<SectorPerfHist>();
-
+               
                 try
                 {
-                    foreach (DateTime date in dateList)
+                    //log.Info("Process: Getting Avg Rating For Date " + date + "\n");
+                    foreach (int secId in sectorIdList)
                     {
-
                         try
                         {
-                            log.Info("Process: Getting Avg Rating For Date " + date + "\n");
 
-                            foreach (int secId in sectorIdList)
+                            int count = 0;
+                            SectorPerfHist lastSectPerf = new SectorPerfHist();
+                            foreach (DateTime date in dateList)
                             {
-                                SectorPerfHist sectorPerf = new SectorPerfHist();
 
+
+                                SectorPerfHist sectorPerf = new SectorPerfHist();
                                 double ratingValue = SectorPerformanceDAO.getSectorWiseAvgRating(date, secId);
                                 RatingEnum rating = BuySellRatingCalculation.calculateBSRatingEnum(ratingValue);
                                 sectorPerf.rating = (int)rating;
                                 sectorPerf.ratingValue = ratingValue;
                                 sectorPerf.date = date;
                                 sectorPerf.sectorId = secId;
+                                sectorPerf.ratingChangePct = calculateRatingChangePct(lastSectPerf.ratingValue, sectorPerf.ratingValue);
 
-                                sectorHistPerfList.Add(sectorPerf);
+                                if (count!= 0)
+                                {
+                                    
+                                    sectorHistPerfList.Add(sectorPerf);
+                                }
+                                
+                                lastSectPerf = sectorPerf;
+                                count++;
                             }
                         }
                         catch (Exception ex)
@@ -139,6 +160,24 @@ namespace ChartLabFinCalculation
 
                 log.Error("Error: " + ex);
             }
+        }
+
+        private static double calculateRatingChangePct(double lastDayRatingVAlue, double curRatingValue)
+        {
+            double changePct = 0;
+            try
+            {
+                if (lastDayRatingVAlue != 0 && curRatingValue != 0)
+                {
+                    changePct = (curRatingValue - lastDayRatingVAlue) * 100 * Math.Sign(lastDayRatingVAlue) / lastDayRatingVAlue;
+                }
+            }
+            catch (Exception ex)
+            {
+
+                log.Error("Error: " + ex);
+            }
+            return changePct;
         }
     }
 }

@@ -515,7 +515,8 @@ namespace ChartLabFinCalculation
                     if (backDateCount== 0)
                         sqlQuery = " SELECT DISTINCT ratingDate FROM historybuysellrating where ratingDate >='2012-02-02'  order by ratingDate";
                     else
-                        sqlQuery = " SELECT DISTINCT ratingDate FROM historybuysellrating order by ratingDate desc limit 2";
+                        sqlQuery = @" SELECT ratingDate FROM (SELECT DISTINCT ratingDate FROM historybuysellrating ORDER BY ratingDate DESC LIMIT 2) temp
+                                      ORDER BY  ratingDate";
                 }
                 else
                 {
@@ -531,6 +532,8 @@ namespace ChartLabFinCalculation
                     DateTime date = DateTime.Parse(dr.GetString(0));
                     DateList.Add(date);
                 }
+
+               
                 dr.Close();
             }
             catch (Exception ex)

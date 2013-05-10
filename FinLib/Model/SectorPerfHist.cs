@@ -12,5 +12,7 @@ namespace FinLib
         public DateTime date { get; set; }
 
         public double ratingValue { get; set; }
+
+        public double ratingChangePct { get; set; }
     }
 }

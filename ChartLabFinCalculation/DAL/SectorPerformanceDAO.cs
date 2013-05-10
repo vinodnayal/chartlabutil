@@ -17,13 +17,13 @@ namespace ChartLabFinCalculation
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             OdbcCommand com = new OdbcCommand("SELECT temp3.sectorId,COUNT(*) AS stocks FROM " +
-                                            "(SELECT t.symbol,t.ratingValue,e.sectorId FROM topratingsymbols AS t JOIN equitiesfundamental AS e "+
-                                            "ON t.symbol=e.symbol) temp3 "+
+                                            "(SELECT t.symbol,t.ratingValue,e.sectorId FROM topratingsymbols AS t JOIN equitiesfundamental AS e " +
+                                            "ON t.symbol=e.symbol) temp3 " +
                                             "GROUP BY temp3.sectorId ", con);
 
-            OdbcCommand insert=new OdbcCommand("INSERT INTO sectorstocksymbols (sectorid,symbol,stockdayid) "+
-                                            "(SELECT e.sectorId,t.symbol,1 FROM topratingsymbols AS t JOIN equitiesfundamental AS e "+
-                                            "ON t.symbol=e.symbol) ",con);
+            OdbcCommand insert = new OdbcCommand("INSERT INTO sectorstocksymbols (sectorid,symbol,stockdayid) " +
+                                            "(SELECT e.sectorId,t.symbol,1 FROM topratingsymbols AS t JOIN equitiesfundamental AS e " +
+                                            "ON t.symbol=e.symbol) ", con);
 
             try
             {
@@ -33,7 +33,7 @@ namespace ChartLabFinCalculation
                 log.Info("\nGetting Todays Stock List...\n");
                 while (dr.Read())
                 {
-                    int secId =dr.GetInt32(0);
+                    int secId = dr.GetInt32(0);
                     int stocks = dr.GetInt32(1);
                     if (!topTodayRatingSymbolList.ContainsKey(secId))
                     {
@@ -44,7 +44,7 @@ namespace ChartLabFinCalculation
 
                 insert.ExecuteNonQuery();
                 log.Info("Data inserted into sectorstocksymbols Table...");
-               
+
             }
             catch (OdbcException ex)
             {
@@ -66,17 +66,17 @@ namespace ChartLabFinCalculation
             Dictionary<int, int> topfiveDaysRatingSymbolList = new Dictionary<int, int>();
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand com = new OdbcCommand("SELECT temp1.sectorId,COUNT(*) AS stocks FROM "+
-                                            "(SELECT h.symbol,h.ratingValue,e.sectorId  FROM historybuysellrating AS h JOIN equitiesfundamental AS e "+
+            OdbcCommand com = new OdbcCommand("SELECT temp1.sectorId,COUNT(*) AS stocks FROM " +
+                                            "(SELECT h.symbol,h.ratingValue,e.sectorId  FROM historybuysellrating AS h JOIN equitiesfundamental AS e " +
                                             "ON h.symbol=e.symbol LEFT JOIN symbolanalytics sa ON sa.symbol= h.symbol " +
-                                            "WHERE h.ratingdate=(SELECT DATE FROM historicaldates WHERE Datetype='"+Constants.D_5+"')  "+
+                                            "WHERE h.ratingdate=(SELECT DATE FROM historicaldates WHERE Datetype='" + Constants.D_5 + "')  " +
                                             "ORDER BY h.ratingvalue DESC,DATEDIFF(CURDATE(),sa.preSBRatingDate) DESC,ctratingvalue,symbol LIMIT 20) temp1 " +
                                             "GROUP BY temp1.sectorId", con);
 
-            OdbcCommand insert = new OdbcCommand("INSERT INTO sectorstocksymbols (sectorid,symbol,stockdayid) "+
-                                                "(SELECT e.sectorId,h.symbol,2 FROM historybuysellrating AS h JOIN equitiesfundamental AS e "+
+            OdbcCommand insert = new OdbcCommand("INSERT INTO sectorstocksymbols (sectorid,symbol,stockdayid) " +
+                                                "(SELECT e.sectorId,h.symbol,2 FROM historybuysellrating AS h JOIN equitiesfundamental AS e " +
                                                 "ON h.symbol=e.symbol LEFT JOIN symbolanalytics sa ON sa.symbol= h.symbol " +
-                                                "WHERE h.ratingdate=(SELECT DATE FROM historicaldates WHERE Datetype='5days')  "+
+                                                "WHERE h.ratingdate=(SELECT DATE FROM historicaldates WHERE Datetype='5days')  " +
                                                 "ORDER BY h.ratingvalue DESC,DATEDIFF(CURDATE(),sa.preSBRatingDate) DESC,ctratingvalue,symbol LIMIT 20)", con);
 
             try
@@ -88,7 +88,7 @@ namespace ChartLabFinCalculation
                 while (dr.Read())
                 {
                     int secId = dr.GetInt32(0);
-                    int stocks=dr.GetInt32(1);
+                    int stocks = dr.GetInt32(1);
                     if (!topfiveDaysRatingSymbolList.ContainsKey(secId))
                     {
                         topfiveDaysRatingSymbolList.Add(secId, stocks);
@@ -98,7 +98,7 @@ namespace ChartLabFinCalculation
 
                 insert.ExecuteNonQuery();
                 log.Info("Data inserted into sectorstocksymbols Table...");
-               
+
             }
             catch (OdbcException ex)
             {
@@ -126,7 +126,7 @@ namespace ChartLabFinCalculation
                 deleteCommand.ExecuteNonQuery();
                 insertCommand.ExecuteNonQuery();
                 log.Info("Data Inserted into sectorperfmnce Table...");
-              
+
             }
             catch (OdbcException ex)
             {
@@ -143,14 +143,14 @@ namespace ChartLabFinCalculation
         internal static void updateTodaysStock(int sectorId, int todayStocks)
         {
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand updateCommand = new OdbcCommand("UPDATE sectorperfmnce SET today_nuofstocks="+todayStocks+" WHERE sectorid="+sectorId, con);
-         
+            OdbcCommand updateCommand = new OdbcCommand("UPDATE sectorperfmnce SET today_nuofstocks=" + todayStocks + " WHERE sectorid=" + sectorId, con);
+
             try
             {
                 con.Open();
                 updateCommand.ExecuteNonQuery();
                 log.Info("Data Updating in sectorperfmnce Table...");
-               
+
             }
             catch (OdbcException ex)
             {
@@ -167,13 +167,13 @@ namespace ChartLabFinCalculation
         {
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             OdbcCommand updateCommand = new OdbcCommand("UPDATE sectorperfmnce SET 5days_nuofstocks=" + fivedayStocks + " WHERE sectorid=" + sectorId, con);
-      
+
             try
             {
                 con.Open();
                 updateCommand.ExecuteNonQuery();
                 log.Info("Data Updating in sectorperfmnce Table...");
-               
+
             }
             catch (OdbcException ex)
             {
@@ -192,8 +192,8 @@ namespace ChartLabFinCalculation
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             OdbcCommand com = new OdbcCommand("SELECT sectorId,AVG(ratingvalue) AS ratingaverage,AVG(ctratingvalue) AS ctratingaverage FROM " +
-                                            "(SELECT t.symbol,t.ratingvalue,t.ctratingvalue,e.sectorId FROM temp_buysellrating AS t JOIN equitiesfundamental AS e "+
-                                            "ON t.symbol=e.symbol) temp "+
+                                            "(SELECT t.symbol,t.ratingvalue,t.ctratingvalue,e.sectorId FROM temp_buysellrating AS t JOIN equitiesfundamental AS e " +
+                                            "ON t.symbol=e.symbol) temp " +
                                             "GROUP BY sectorId ", con);
 
 
@@ -227,7 +227,7 @@ namespace ChartLabFinCalculation
                 }
                 dr.Close();
 
-               
+
             }
             catch (OdbcException ex)
             {
@@ -243,18 +243,19 @@ namespace ChartLabFinCalculation
             return sectorRatingList;
         }
 
-        internal static void updateAvgRating(int sectorId, int rating, int ctrating, double ratingValue, double ctRatingValue)
+        internal static void updateAvgRating(int sectorId, int rating, int ctrating, double ratingValue, double ctRatingValue,double ratingChangePct,int signalId)
         {
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand updateCommand = new OdbcCommand("UPDATE sectorperfmnce SET bsrating=" + rating + " ,ctrating=" + ctrating + ", bsratingvalue=" + ratingValue + " ,ctratingvalue=" + ctRatingValue + " WHERE sectorid=" + sectorId, con);
+            OdbcCommand updateCommand = new OdbcCommand("UPDATE sectorperfmnce SET bsrating=" + rating + " ,ctrating=" + ctrating + ", bsratingvalue=" + ratingValue + " ,ctratingvalue=" + ctRatingValue +
+                                                        " ,ratingchangepct=" + ratingChangePct + " ,strengthalertid=" + signalId + " WHERE sectorid=" + sectorId, con);
 
             try
             {
                 con.Open();
                 updateCommand.ExecuteNonQuery();
                 log.Info("Data Updating in sectorperfmnce Table...");
-               
+
             }
             catch (OdbcException ex)
             {
@@ -270,14 +271,14 @@ namespace ChartLabFinCalculation
 
         internal static double getSectorWiseAvgRating(DateTime date, int secId)
         {
-            
+
             string dbDate = date.Date.ToString("yyyy-MM-dd");
             double ratingValue = 0;
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             OdbcCommand com = new OdbcCommand("SELECT e.sectorId,h.ratingdate,AVG(h.ratingValue) AS rating FROM historybuysellrating AS h JOIN equitiesfundamental AS e " +
-                                             "ON h.symbol=e.symbol "+
-                                             "WHERE h.ratingdate='" + dbDate + "' AND e.sectorId="+secId, con);
+                                             "ON h.symbol=e.symbol " +
+                                             "WHERE h.ratingdate='" + dbDate + "' AND e.sectorId=" + secId, con);
 
 
             try
@@ -286,16 +287,16 @@ namespace ChartLabFinCalculation
 
                 OdbcDataReader dr = com.ExecuteReader();
 
-               
+
                 while (dr.Read())
                 {
                     object rating = dr.GetValue(2);
-                   
+
                     if (!Convert.IsDBNull(rating))
                     {
                         ratingValue = (Double)dr.GetValue(2);
                     }
-                   
+
                 }
                 dr.Close();
             }
@@ -314,23 +315,28 @@ namespace ChartLabFinCalculation
         }
 
 
-        public static void SaveSectorPerfHistDataCSVToDB(string filename,bool isHistorical)
+        public static void SaveSectorPerfHistDataCSVToDB(string filename, bool isHistorical)
         {
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
 
-            OdbcCommand deleteCommand = new OdbcCommand("DELETE from sectorhistperfmnce", con);
+            OdbcCommand deleteHistCommand = new OdbcCommand("DELETE from sectorhistperfmnce", con);
+            OdbcCommand deleteCurCommand = new OdbcCommand("DELETE from sectorhistperfmnce where date =" + DateTime.Now.ToString("yyyy-MM-dd"), con);
             OdbcCommand insertCommand = new OdbcCommand("LOAD DATA LOCAL INFILE '" + filename + "' " +
                                                 "INTO TABLE sectorhistperfmnce " +
                                                 "FIELDS TERMINATED BY ',' " +
                                                 "LINES TERMINATED BY '\n' " +
-                                                "(sectorid,date,rating,ratingvalue);", con);
+                                                "(sectorid,date,rating,ratingvalue,ratingchangepct);", con);
 
             try
             {
                 con.Open();
                 if (isHistorical)
                 {
-                    deleteCommand.ExecuteReader();
+                    deleteHistCommand.ExecuteReader();
+                }
+                else
+                {
+                    deleteCurCommand.ExecuteReader();
                 }
                 insertCommand.ExecuteReader();
 
@@ -350,12 +356,12 @@ namespace ChartLabFinCalculation
 
         internal static List<DateTime> GetCurrentDate()
         {
-            List<DateTime> DateList = new   List<DateTime>();
+            List<DateTime> DateList = new List<DateTime>();
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             try
             {
-                
-                OdbcCommand com = new OdbcCommand("SELECT Date,historicalDatesId FROM historicaldates where DateType='"+Constants.C+"'", con);
+
+                OdbcCommand com = new OdbcCommand("SELECT Date,historicalDatesId FROM historicaldates where DateType='" + Constants.C + "'", con);
                 //OdbcCommand com = new OdbcCommand("SELECT date,close,volume from  symbolshistorical where symbol = 'SPY' order by date desc", con);
                 con.Open();
                 OdbcDataReader dr = com.ExecuteReader();
@@ -366,7 +372,7 @@ namespace ChartLabFinCalculation
                     DateTime date = DateTime.Parse(dr.GetString(0));
 
                     DateList.Add(date);
-                   
+
                 }
                 dr.Close();
 
@@ -387,7 +393,7 @@ namespace ChartLabFinCalculation
         {
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             OdbcCommand deleteCommand = new OdbcCommand("DELETE FROM sectorstocksymbols", con);
-            
+
 
             try
             {
@@ -404,6 +410,48 @@ namespace ChartLabFinCalculation
                 if (con != null)
                     con.Close();
             }
+        }
+
+        internal static Dictionary<int, double> getRatingValueChangePct()
+        {
+            Dictionary<int, double> ratingValueChangePctDict = new Dictionary<int, double>();
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
+            OdbcCommand com = new OdbcCommand("SELECT sectorid,ratingchangepct FROM sectorhistperfmnce WHERE DATE =(SELECT MAX(DATE) FROM sectorhistperfmnce)", con);
+
+
+            try
+            {
+                con.Open();
+
+                OdbcDataReader dr = com.ExecuteReader();
+
+
+                while (dr.Read())
+                {
+                    object ratingValueChangePct = dr.GetValue(1);
+                    object sectorId = dr.GetValue(0);
+
+                    if (!Convert.IsDBNull(ratingValueChangePct) && !Convert.IsDBNull(ratingValueChangePct))
+                    {
+                        if (!ratingValueChangePctDict.ContainsKey(dr.GetInt32(0)))
+                            ratingValueChangePctDict.Add(dr.GetInt32(0), dr.GetDouble(1));
+
+                    }
+
+                }
+                dr.Close();
+            }
+            catch (OdbcException ex)
+            {
+                log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+
+            return ratingValueChangePctDict;
         }
     }
 }
