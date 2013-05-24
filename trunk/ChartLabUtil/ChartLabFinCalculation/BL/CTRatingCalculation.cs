@@ -125,23 +125,23 @@ namespace ChartLabFinCalculation
             {
                 r = CTRatingEnum.ExtremelyOversold;
             }
-            else if (p > 30 && p <= 54)
+            else if (p > 30 && p <= 55)
             {
                 r = CTRatingEnum.Oversold;
             }
-            else if (p > 19 && p <= 29)
+            else if (p > 20 && p <= 30)
             {
                 r = CTRatingEnum.ApproachingOversold;
             }
-            else if (p > -49 && p <= 20)
+            else if (p > -50 && p <= 20)
             {
                 r = CTRatingEnum.Neutral;
             }
-            else if (p > -69 && p <= -50)
+            else if (p >= -71 && p <= -50)
             {
                 r = CTRatingEnum.ApproachingOverbought;
             }
-            else if (p > -89 && p <= -70)
+            else if (p > -90 && p < -71)
             {
                 r = CTRatingEnum.Overbought;
             }

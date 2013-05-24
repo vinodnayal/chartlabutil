@@ -11,5 +11,6 @@ namespace FinLib
         public Int32 rating { get; set; }
         public double ratingValue { get; set; }
         public DateTime ratingDate { get; set; }
+
     }
 }

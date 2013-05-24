@@ -512,7 +512,7 @@ namespace ChartLabFinCalculation
                 String sqlQuery = "";
                 if (fromDate == DateTime.MinValue)
                 {
-                    if (backDateCount== 0)
+                    if (backDateCount == 0)
                         sqlQuery = " SELECT DISTINCT ratingDate FROM historybuysellrating where ratingDate >='2012-02-02'  order by ratingDate";
                     else
                         sqlQuery = @" SELECT ratingDate FROM (SELECT DISTINCT ratingDate FROM historybuysellrating ORDER BY ratingDate DESC LIMIT 2) temp
@@ -533,7 +533,7 @@ namespace ChartLabFinCalculation
                     DateList.Add(date);
                 }
 
-               
+
                 dr.Close();
             }
             catch (Exception ex)
@@ -700,13 +700,13 @@ namespace ChartLabFinCalculation
             return symbolsRatingDict;
         }
 
-        internal static void InsertSnPAvgRating(BuySellRating SnPAvgRating)
+        internal static void InsertSnPAvgRating(Rating SnPAvgRating)
         {
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             OdbcCommand deleteBuySellRatingCmd = new OdbcCommand("delete from historybuysellrating where ratingdate=DATE(NOW()) and symbol='" + SnPAvgRating.symbol + "'", con);
 
-            OdbcCommand insertCommand = new OdbcCommand("INSERT INTO historybuysellrating (symbol,rating,ratingvalue,ratingdate) Values('" + SnPAvgRating.symbol + "'," + SnPAvgRating.rating + "," + SnPAvgRating.ratingValue + ",(SELECT DATE FROM historicaldates WHERE DateType='" + Constants.C + "'));", con);
+            OdbcCommand insertCommand = new OdbcCommand("INSERT INTO historybuysellrating (symbol,rating,ratingvalue,ctrating,ctratingvalue,ratingdate) Values('" + SnPAvgRating.symbol + "'," + SnPAvgRating.rating + "," + SnPAvgRating.ratingValue +"," + SnPAvgRating.ctRating + "," + SnPAvgRating.ctRatingValue + ",(SELECT DATE FROM historicaldates WHERE DateType='" + Constants.C + "'));", con);
 
             OdbcCommand updateCommand = new OdbcCommand("UPDATE symbolanalytics SET buySellRating=" + SnPAvgRating.rating + " WHERE symbol='" + SnPAvgRating.symbol + "';", con);
 
@@ -873,11 +873,11 @@ LEFT JOIN (SELECT symbol,ratingdate FROM topratingsymbolshist WHERE ratingdate =
         {
             List<Rating> topRatingSymbolsList = new List<Rating>();
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-// for testing
-//SELECT t.symbol, t.ratingvalue, t.ratingdate,ctratingvalue,DATEDIFF(CURDATE(),sa.preSBRatingDate) FROM historybuysellrating AS t 
-//LEFT JOIN equitiesfundamental AS e ON t.symbol=e.symbol 
-//LEFT JOIN symbolanalytics sa ON sa.symbol= t.symbol
-//WHERE t.ratingdate='2012-09-27' ORDER BY ratingvalue DESC,DATEDIFF(CURDATE(),sa.preSBRatingDate) DESC,ctratingvalue,symbol LIMIT 20
+            // for testing
+            //SELECT t.symbol, t.ratingvalue, t.ratingdate,ctratingvalue,DATEDIFF(CURDATE(),sa.preSBRatingDate) FROM historybuysellrating AS t 
+            //LEFT JOIN equitiesfundamental AS e ON t.symbol=e.symbol 
+            //LEFT JOIN symbolanalytics sa ON sa.symbol= t.symbol
+            //WHERE t.ratingdate='2012-09-27' ORDER BY ratingvalue DESC,DATEDIFF(CURDATE(),sa.preSBRatingDate) DESC,ctratingvalue,symbol LIMIT 20
 
             OdbcCommand com = new OdbcCommand(@"SELECT t.symbol, t.ratingvalue, t.ratingdate FROM historybuysellrating AS t LEFT JOIN equitiesfundamental AS e ON t.symbol=e.symbol LEFT JOIN symbolanalytics sa ON sa.symbol= t.symbol  WHERE t.ratingdate='" + date.ToString("yyyy-MM-dd") + "' ORDER BY ratingvalue DESC,DATEDIFF(CURDATE(),sa.preSBRatingDate) DESC,ctratingvalue,symbol LIMIT 20", con);
 
@@ -943,6 +943,42 @@ LEFT JOIN (SELECT symbol,ratingdate FROM topratingsymbolshist WHERE ratingdate =
                 if (con != null)
                     con.Close();
             }
+        }
+
+        internal static Dictionary<int, double> GetCTRatingValueOfSPY()
+        {
+            Dictionary<int, double> spyCtRating = new Dictionary<int, double>();
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
+            OdbcCommand com = new OdbcCommand("SELECT ctrating,ctratingvalue FROM temp_buysellrating WHERE symbol='SPY'", con);
+
+            try
+            {
+                con.Open();
+                OdbcDataReader dr = com.ExecuteReader();
+
+                while (dr.Read())
+                {
+
+
+                    if (dr.GetValue(0) != DBNull.Value && dr.GetValue(1) != DBNull.Value)
+                        spyCtRating.Add(dr.GetInt32(0), dr.GetFloat(1));
+                        
+                    
+                }
+                dr.Close();
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+            return spyCtRating;
+
         }
     }
 }
