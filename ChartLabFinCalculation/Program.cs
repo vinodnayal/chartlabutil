@@ -676,6 +676,16 @@ namespace ChartLabFinCalculation
 
                         #endregion
 
+                    case "Synopsis":
+
+                        #region calculating synopsys id for chart page
+                        logTime.Info("Process:  calculating synopsys id for chart page Programme at: " + DateTime.Now);
+                        UsersManager.ManageFreeTrialUsers();
+
+                        break;
+
+                        #endregion
+
                     //case "ETFRating":
 
                     //    #region ETFRating calculations
