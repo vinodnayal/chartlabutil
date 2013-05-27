@@ -949,6 +949,31 @@ namespace ChartLabFinCalculation
                 throw;
             }
         }
+
+        internal static void WriteToCSVRating(List<SnpAnalytics> snpSymbolsAnalytics, string fileName)
+        {
+            StreamWriter writer = new StreamWriter(fileName);
+            try
+            {
+                foreach (SnpAnalytics row in snpSymbolsAnalytics)
+                {
+                    writer.Write(row.symbol);
+                    writer.Write(',');
+                    writer.Write(row.synopsisRuleId);
+                   
+                    writer.Write('\n');
+
+                }
+
+                writer.Flush();
+                writer.Close();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 
 }

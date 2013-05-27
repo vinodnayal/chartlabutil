@@ -103,7 +103,7 @@
     <Compile Include="DAL\EmailAlertsDAO.cs" />
     <Compile Include="DAL\ETFSymbolsDAO.cs" />
     <Compile Include="DAL\GroupPerformanceDAO.cs" />
-    <Compile Include="DAL\SnPPriceDAO.cs" />
+    <Compile Include="DAL\SNPAnalyticsDAO.cs" />
     <Compile Include="DAL\StatisticsDAO.cs" />
     <Compile Include="DAL\SymbolHistoricalMongoDAO.cs" />
     <Compile Include="DAL\LongShortAlertDAO.cs" />
