@@ -680,7 +680,8 @@ namespace ChartLabFinCalculation
 
                         #region calculating synopsys id for chart page
                         logTime.Info("Process:  calculating synopsys id for chart page Programme at: " + DateTime.Now);
-                        UsersManager.ManageFreeTrialUsers();
+                        SnPSymbolsCalculations.snpDatafilesPath= SnPSpecificDatePricesPath;
+                        SnPSymbolsCalculations.calculateSynosisRuleID();
 
                         break;
 

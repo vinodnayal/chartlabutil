@@ -381,18 +381,18 @@ namespace ChartLabFinCalculation
             return DateListForAlert;
         }
 
-        public static List<CTRatingHistory> GetCtRatingHistoryForSnP(bool isHistorical)
+        public static List<Rating> GetRatingsOfSymbol(String symbol, bool isHistorical)
         {
-            List<CTRatingHistory> historyList = new List<CTRatingHistory>();
+            List<Rating> symbolRatings = new List<Rating>();
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             OdbcCommand com = null;
             if (isHistorical)
             {
-                com = new OdbcCommand("SELECT symbol,ratingdate,ctrating FROM historyBuySellRating WHERE symbol='" + Constants.SnPSymbol + "'", con);
+                com = new OdbcCommand("SELECT symbol,ratingdate,ctrating FROM historyBuySellRating WHERE symbol='" + symbol + "'", con);
             }
             else
             {
-                com = new OdbcCommand("SELECT symbol,ratingdate,ctrating FROM historyBuySellRating WHERE symbol='" + Constants.SnPSymbol + "' AND ratingdate=(SELECT DATE FROM historicaldates WHERE DateType='" + Constants.C + "')", con);
+                com = new OdbcCommand("SELECT symbol,ratingdate,ctrating FROM historyBuySellRating WHERE symbol='" + symbol + "' AND ratingdate=(SELECT DATE FROM historicaldates WHERE DateType='" + Constants.C + "')", con);
             }
 
 
@@ -411,11 +411,11 @@ namespace ChartLabFinCalculation
                         int ratingValue = (int)dr.GetValue(2);
                         if (ratingValue != neutral)
                         {
-                            CTRatingHistory CTratingObj = new CTRatingHistory();
-                            CTratingObj.symbol = dr.GetString(0);
-                            CTratingObj.Date = (DateTime)dr.GetValue(1);
-                            CTratingObj.ctRating = (int)dr.GetValue(2);
-                            historyList.Add(CTratingObj);
+                            Rating ratingObj = new Rating();
+                            ratingObj.symbol = dr.GetString(0);
+                            ratingObj.ratingDate = (DateTime)dr.GetValue(1);
+                            ratingObj.ctRating = (int)dr.GetValue(2);
+                            symbolRatings.Add(ratingObj);
                         }
                     }
                 }
@@ -432,7 +432,7 @@ namespace ChartLabFinCalculation
                     con.Close();
             }
 
-            return historyList;
+            return symbolRatings;
 
         }
 
@@ -765,6 +765,65 @@ namespace ChartLabFinCalculation
             }
             return SymbolRatingchanges;
         }
+
+
+        
+
+    internal static List<SymbolRatingAlert> getSNPSymbolsRatingChange()
+        {
+            List<SymbolRatingAlert> SymbolRatingchanges = new List<SymbolRatingAlert>();
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
+            OdbcCommand com = new OdbcCommand(@"SELECT sa.symbol,sa.previuosBSRating,sa.buySellRating,sa.ctrating,sa.preSBRatingDate FROM symbolanalytics sa
+INNER JOIN temp_buysellrating t ON t.symbol=sa.symbol", con);
+
+            try
+            {
+                con.Open();
+                OdbcDataReader dr = com.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    SymbolRatingAlert symbolalert = new SymbolRatingAlert();
+
+                    if (dr.GetValue(0) != DBNull.Value)
+                    {
+                        symbolalert.symbol = dr.GetString(0);
+                    }
+                    if (dr.GetValue(1) != DBNull.Value)
+                    {
+                        symbolalert.prevrating = Convert.ToInt32(dr.GetValue(1));
+                    }
+                    if (dr.GetValue(2) != DBNull.Value)
+                    {
+                        symbolalert.currating = Convert.ToInt32(dr.GetValue(2));
+                    }
+                    if (dr.GetValue(3) != DBNull.Value)
+                    {
+                        symbolalert.ctrating = Convert.ToInt32(dr.GetValue(3));
+                    }
+                    if (dr.GetValue(4) != DBNull.Value)
+                    {
+                        symbolalert.ratingChangeDate = dr.GetDateTime(4);
+                    }
+
+
+                    SymbolRatingchanges.Add(symbolalert);
+
+                }
+                dr.Close();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+            return SymbolRatingchanges;
+        }
+
 
         internal static SymbolRatingAlert getSymbolCurrentRating(string symbol)
         {
