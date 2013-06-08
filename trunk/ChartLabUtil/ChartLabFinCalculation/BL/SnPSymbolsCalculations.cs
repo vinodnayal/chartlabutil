@@ -24,26 +24,12 @@ namespace ChartLabFinCalculation.BL
                 }
               foreach (SymbolRatingAlert symbolRating in snpSymbolsRatingChanges)
               {
-                  String ruleId="";
-
-                  switch (snpCTRating)
+                  String ruleId= getSynopsisIdOnRatingChange(symbolRating);
+                  if (snpCTRating < 4)
                   {
-                      case (int)CTRatingEnum.Overbought:
-
-                        ruleId=  getSynopsisIdOnRatingChange(symbolRating);
-                        ruleId = "S2" + ruleId;
-                          break;
-                      default:
-                          ruleId = getSynopsisIdOnRatingChange(symbolRating);
-
-                          break;
-
+                      ruleId = "S" + snpCTRating + ruleId;
                   }
-
                   snpSymbolsAnalytics.Add(new SnpAnalytics { symbol = symbolRating.symbol,synopsisRuleId=ruleId });
-
-              
-              
               }
 
               CSVExporter.WriteToCSVRating(snpSymbolsAnalytics, snpDatafilesPath + "/snpAnalyticsFile.csv");
