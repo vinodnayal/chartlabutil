@@ -67,7 +67,7 @@ namespace ChartLabFinCalculation.BL
 
                         }
                         CSVExporter.WriteToCSVRating(RatingList, ETFDataFilesPath + "/RatingFile.csv");
-                        ETFSymbolsDAO.InsertRatingDataInDB(ETFDataFilesPath, etfSymbol, true);
+                        ETFSymbolsDAO.InsertRatingDataInDB(ETFDataFilesPath, "etfhistbsctrating", etfSymbol, true);
                     }
                     catch (Exception ex)
                     {
@@ -85,7 +85,7 @@ namespace ChartLabFinCalculation.BL
 
         }
         //calculate datwise ctrating from historical data for symbol 
-        private static Dictionary<DateTime, CTRating> calculateCTRatings(string etfSymbol, List<FileInfo> symbolCTRatingFiles)
+        internal static Dictionary<DateTime, CTRating> calculateCTRatings(string etfSymbol, List<FileInfo> symbolCTRatingFiles)
         {
             Dictionary<DateTime, CTRating> ctRatingList = new Dictionary<DateTime, CTRating>();
             try
@@ -97,7 +97,7 @@ namespace ChartLabFinCalculation.BL
                 {
                     if (file.Extension.Equals(".CT2") || file.Extension.Equals(".CT3"))
                     {
-                        StreamReader readFile = new StreamReader(file.Directory + "\\" + file);
+                        StreamReader readFile = new StreamReader(file.Directory + "\\" + file.Name);
 
 
                         string line;
@@ -153,12 +153,12 @@ namespace ChartLabFinCalculation.BL
         }
 
         //calculate datwise rating from historical data for symbol 
-        private static List<Rating> CalculateBuySellRatings(string symbol, FileInfo file)
+        internal static List<Rating> CalculateBuySellRatings(string symbol, FileInfo file)
         {
             List<Rating> RatingList = new List<Rating>();
             try
             {
-                StreamReader readFile = new StreamReader(file.Directory + "\\" + file);
+                StreamReader readFile = new StreamReader(file.Directory + "\\" + file.Name);
 
                 string line;
                 string[] row;
@@ -182,7 +182,7 @@ namespace ChartLabFinCalculation.BL
             }
             catch (Exception ex)
             {
-                log.Error("Error in calculating BS Rating data for etf symbols " + symbol);
+                log.Error("Error in calculating BS Rating data for  symbols " + symbol);
                 log.Error(ex);
             }
             return RatingList;
@@ -209,7 +209,7 @@ namespace ChartLabFinCalculation.BL
                     DateTime ratingDate = convertStringToDate(dateString);
                    
                         
-                      bar.open = double.Parse(row[2]);
+                    bar.open = double.Parse(row[2]);
                     bar.high = double.Parse(row[3]);
                     bar.low = double.Parse(row[4]);
                     bar.close = double.Parse(row[5]);
@@ -225,11 +225,11 @@ namespace ChartLabFinCalculation.BL
                 listInputDataForSymbols.Add(_symbolData);
                 String fileName = ETFDataFilesPath + "/" + etfSymbol + "/" + etfSymbol + ".csv";
                 CSVExporter.WriteToCSV(listInputDataForSymbols, fileName);
-                SymbolHistoricalDAO.SaveHistoricalDataCSVToDB(fileName, etfSymbol);
+                SymbolHistoricalDAO.SaveHistoricalDataCSVToDB(fileName, etfSymbol, Constants.SymbolHistoricalTble);
             }
             catch (Exception ex)
             {
-                log.Error("Error in importing price data for etf symbols " + etfSymbol);
+                log.Error("Error in importing price data for  symbols " + etfSymbol);
                 log.Error(ex);
             }
 
@@ -284,5 +284,10 @@ namespace ChartLabFinCalculation.BL
                 log.Error(ex);
             }
         }
+    
+    
+    
+    
+    
     }
 }

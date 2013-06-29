@@ -65,13 +65,13 @@ namespace ChartLabFinCalculation
         }
 
 
-        public static void DeleteData(String symbol)
+        public static void DeleteData(String symbol,String tableName)
         {
             OdbcConnection con = null;
             try
             {
                 con = new OdbcConnection(Constants.MyConString);
-                OdbcCommand com = new OdbcCommand("Delete from  symbolshistorical where symbol = '" + symbol + "'", con);
+                OdbcCommand com = new OdbcCommand("Delete from  " + tableName + " where symbol = '" + symbol + "'", con);
 
                 con.Open();
                 com.ExecuteNonQuery();
@@ -231,20 +231,20 @@ namespace ChartLabFinCalculation
             return lstSymbols;
         }
 
-        public static void SaveHistoricalDataCSVToDB(string filename)
+        public static void SaveHistoricalDataCSVToDB(string filename, String tableName)
         {
-            SaveHistoricalDataCSVToDB(filename, null);
+            SaveHistoricalDataCSVToDB(filename, null, tableName);
         }
 
-        public static void SaveHistoricalDataCSVToDB(string filename, string symbol)
+        public static void SaveHistoricalDataCSVToDB(string filename, string symbol,String tableName)
         {
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
 
 
-            OdbcCommand deleteCommand = new OdbcCommand("DELETE from symbolshistorical where symbol='" + symbol + "'", con);
+            OdbcCommand deleteCommand = new OdbcCommand("DELETE from " + tableName + " where symbol='" + symbol + "'", con);
             OdbcCommand insertCommand = new OdbcCommand("LOAD DATA LOCAL INFILE '" + filename + "' " +
-                                                "INTO TABLE symbolshistorical " +
-                                                "FIELDS TERMINATED BY ',' " +
+                                                "INTO TABLE "+tableName +
+                                                " FIELDS TERMINATED BY ',' " +
                                                 "LINES TERMINATED BY '\n' " +
                                                 "(`symbol`,open,high,low,close,actualclose,date,volume);", con);
 

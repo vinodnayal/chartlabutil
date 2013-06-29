@@ -43,5 +43,48 @@ namespace ChartLabFinCalculation
             }
 
         }
+
+        internal static List<string> getSnpSymbolsList()
+        {
+            List<string> symbolList = new List<string>();
+
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
+            OdbcCommand com;
+            String sqlString = @"SELECT symbol FROM snpsymbols";
+            com = new OdbcCommand(sqlString, con);
+
+            try
+            {
+                con.Open();
+
+                OdbcDataReader dr = com.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    object symbol = dr.GetValue(0);
+
+
+                    if (!Convert.IsDBNull(symbol))
+                    {
+                        symbolList.Add(dr.GetString(0));
+
+                    }
+
+                }
+
+            }
+            catch (OdbcException ex)
+            {
+                log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+
+            return symbolList;
+        }
+
     }
 }

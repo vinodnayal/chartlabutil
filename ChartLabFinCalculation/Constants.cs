@@ -17,6 +17,10 @@ namespace ChartLabFinCalculation
         public const int HIST_DATA_LENGTH=4;
         public const int HIST_DATA_ONE_YEAR = 1;
         public const int HIST_DAYS_LENGTH_FOR_SA = 200;
+
+        public static string SymbolHistoricalTble = "symbolshistorical";
+        public static string SNPSymbolHistoricalTble = "snpsymbolshistorical";
+
         public static string W="Weekly";
         public static string M = "Monthly";
         public static string Q = "Quaterly";

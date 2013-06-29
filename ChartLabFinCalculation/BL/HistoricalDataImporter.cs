@@ -44,7 +44,7 @@ namespace ChartLabFinCalculation
 
                 foreach (String symbol in symbolList)
                 {
-                    errorSymbolList = SaveHistDataSymbol(fromDate, toDate, symbol, isMF, specificSymbols);
+                    errorSymbolList = SaveHistDataSymbol(fromDate, toDate, symbol, isMF, specificSymbols, Constants.SymbolHistoricalTble);
                 }
             }
             catch (Exception ex)
@@ -58,7 +58,7 @@ namespace ChartLabFinCalculation
             }
         }
 
-        public static List<String> SaveHistDataSymbol(DateTime fromDate, DateTime toDate, String symbol, bool isMF, bool specificSymbols)
+        public static List<String> SaveHistDataSymbol(DateTime fromDate, DateTime toDate, String symbol, bool isMF, bool specificSymbols,String tableName)
         {
             List<String> errorSymbolList = new List<string>();
             try
@@ -100,11 +100,11 @@ namespace ChartLabFinCalculation
 
                 if (isMF || specificSymbols)
                 {
-                    SymbolHistoricalDAO.SaveHistoricalDataCSVToDB(fileName, symbol);
+                    SymbolHistoricalDAO.SaveHistoricalDataCSVToDB(fileName, symbol, tableName);
                 }
                 else
                 {
-                    SymbolHistoricalDAO.SaveHistoricalDataCSVToDB(fileName);
+                    SymbolHistoricalDAO.SaveHistoricalDataCSVToDB(fileName, tableName);
                 }
             }
             catch (Exception ex)
@@ -118,7 +118,7 @@ namespace ChartLabFinCalculation
             
         }
 
-        private static List<InputBarData> ImportData(DateTime fromDate, DateTime toDate, string symbol, bool isMF, bool specificSymbols)
+        internal static List<InputBarData> ImportData(DateTime fromDate, DateTime toDate, string symbol, bool isMF, bool specificSymbols)
         {
             
             List<InputBarData> listInputDataForSymbols = new List<InputBarData>();
@@ -202,10 +202,10 @@ namespace ChartLabFinCalculation
 
                         if (shouldUpdateHistoricalData)
                         {
-                            SymbolHistoricalDAO.DeleteData(symbol);
+                            SymbolHistoricalDAO.DeleteData(symbol, Constants.SymbolHistoricalTble);
                             DateTime newfromDate = DateTime.Now.AddYears(-Constants.HIST_DATA_LENGTH).Date;
 
-                            SaveHistDataSymbol(newfromDate, toDate, symbol, isMF, false);
+                            SaveHistDataSymbol(newfromDate, toDate, symbol, isMF, false, Constants.SymbolHistoricalTble);
                             SymbolHistoricalDAO.InsertDividendRow(symbol, dividendhistory.dividendDate, dividendhistory.todaysDate);
                         }
                         else
@@ -227,7 +227,7 @@ namespace ChartLabFinCalculation
                 log.Info("Process: Daily Data Write To CSV");
                 CSVExporter.WriteToCSV(listInputDataForSymbols, fileName);
                 log.Info("Process: Daily Data Write  CSV To DB");
-                SymbolHistoricalDAO.SaveHistoricalDataCSVToDB(fileName);
+                SymbolHistoricalDAO.SaveHistoricalDataCSVToDB(fileName,Constants.SymbolHistoricalTble);
                
                 CSVExporter.SaveErrorSymbols(errorSymbolList, ERRORSymbolsPath + "/Symbol.csv");
                 
@@ -275,8 +275,8 @@ namespace ChartLabFinCalculation
 
                     if (isHistorical)
                     {
-                        SymbolHistoricalDAO.DeleteData(symbol);
-                        errorSymbolList.AddRange(SaveHistDataSymbol(fromDate, toDate, symbol, false, false));
+                        SymbolHistoricalDAO.DeleteData(symbol, Constants.SymbolHistoricalTble);
+                        errorSymbolList.AddRange(SaveHistDataSymbol(fromDate, toDate, symbol, false, false, Constants.SymbolHistoricalTble));
                     }
                     else
                     {
@@ -290,10 +290,10 @@ namespace ChartLabFinCalculation
 
                         if (shouldUpdateHistoricalData)
                         {
-                            SymbolHistoricalDAO.DeleteData(symbol);
+                            SymbolHistoricalDAO.DeleteData(symbol, Constants.SymbolHistoricalTble);
                             DateTime newfromDate = DateTime.Now.AddYears(-Constants.HIST_DATA_LENGTH).Date;
 
-                            errorSymbolList.AddRange(SaveHistDataSymbol(newfromDate, toDate, symbol, false, false));
+                            errorSymbolList.AddRange(SaveHistDataSymbol(newfromDate, toDate, symbol, false, false, Constants.SymbolHistoricalTble));
                             SymbolHistoricalDAO.InsertDividendRow(symbol, dividendhistory.dividendDate, dividendhistory.todaysDate);
                         }
                         else
@@ -324,7 +324,7 @@ namespace ChartLabFinCalculation
                     log.Info("Process: Write To CSV if historical data for error symbols ");
                     CSVExporter.WriteToCSV(listInputDataForSymbols, fileName);
                     log.Info("Process: Write Data CSV To DB ");
-                    SymbolHistoricalDAO.SaveHistoricalDataCSVToDB(fileName);
+                    SymbolHistoricalDAO.SaveHistoricalDataCSVToDB(fileName,Constants.SymbolHistoricalTble);
 
                 }
             }

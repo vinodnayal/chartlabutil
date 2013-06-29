@@ -310,8 +310,8 @@ namespace ChartLabFinCalculation
                                     }
                                     string symbol = args[2];
                                     logTime.Info("Process: Starting Historical Data Import for specific symbol " + symbol);
-                                    SymbolHistoricalDAO.DeleteData(symbol);
-                                    HistoricalDataImporter.SaveHistDataSymbol(fromDate, toDate, symbol, false, true);
+                                    SymbolHistoricalDAO.DeleteData(symbol, "symbolshistorical");
+                                    HistoricalDataImporter.SaveHistDataSymbol(fromDate, toDate, symbol, false, true, "symbolshistorical");
                                     logTime.Info("Process: Done! Historical Data Import for specific symbol " + symbol);
                                     break;
 
@@ -676,16 +676,61 @@ namespace ChartLabFinCalculation
 
                         #endregion
 
-                    case "Synopsis":
+                        case "SNPAnalytics":
 
                         #region calculating synopsys id for chart page
                         logTime.Info("Process:  calculating synopsys id for chart page Programme at: " + DateTime.Now);
-                        SnPSymbolsCalculations.snpDatafilesPath= SnPSpecificDatePricesPath;
-                        SnPSymbolsCalculations.calculateSynosisRuleID();
+                        SnPSymbolsCalculations.snpDatafilesPath = SnPSpecificDatePricesPath;
+                        SnPSymbolsCalculations.calculateSNPSymbolAnalytics();
 
                         break;
 
                         #endregion
+
+                        case "snpcache":
+
+                        #region get current data for s&p 500 symbols in memcheche by calling php code
+                        logTime.Info("Info:  get current data for s&p 500 symbols in memcheche by calling php code: " + DateTime.Now);
+                        WebServices.getSNPSymbolsData();
+
+                        break;
+
+                        #endregion
+
+
+                        case "ETFRating":
+
+                        #region ETFRating calculations
+                        logTime.Info("Starting calculate SNP Rating change hist Programme at: " + DateTime.Now);
+                        ETFSymbolsDataCalculation.CTRatingChangeHistory();
+                        ETFSymbolsDataCalculation.BuySellRatingChangeHistory();
+                        break;
+
+                        #endregion
+
+                        case "SNPRating":
+                        SnPSymbolsCalculations.snpDatafilesPath = SnPSpecificDatePricesPath;
+                        SnPSymbolsCalculations.CalculateSNPSymbolsRatingsData();
+                        break;
+
+
+                        case "SNPPrice":
+                         HistoricalDataImporter.HistoricalDataFilePath = HistoricalDataFilePath;
+                        HistoricalDataImporter.ERRORSymbolsPath = ERRORSymbolsPath;
+                        SnPSymbolsCalculations.snpDatafilesPath = SnPSpecificDatePricesPath;
+                        fromDate = DateTime.Now.AddDays(-400);
+                        if (args.Length > 1)
+                        {
+                            int customHistDataLength = Convert.ToInt32(args[1]);
+                            int year = DateTime.Now.AddYears(-customHistDataLength).Date.Year;
+                            fromDate = new DateTime(year, 1, 1);
+
+                        }
+
+
+                        SnPSymbolsCalculations.ImportSNPSymbolsPriceData(fromDate);
+                        break;
+                        
 
                     //case "ETFRating":
 
