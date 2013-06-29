@@ -52,14 +52,14 @@ namespace ChartLabFinCalculation.DAL
             return symbolList;
         }
 
-        internal static void InsertRatingDataInDB(string ETFDataFilesPath, String symbol, bool isHistorical)
+        internal static void InsertRatingDataInDB(string DataFilesPath,string tableName,String symbol, bool isHistorical)
         {
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
 
-            // OdbcCommand deleteCommand = new OdbcCommand("DELETE from etfhistbsctrating where symbol= '"+symbol+"'", con);
-            OdbcCommand insertCommand = new OdbcCommand("LOAD DATA LOCAL INFILE" + " '" + ETFDataFilesPath + "/RatingFile.csv' " +
-                                             "INTO TABLE historybuysellrating " +
-                                             "FIELDS TERMINATED BY ',' " +
+            OdbcCommand deleteCommand = new OdbcCommand("DELETE from "+tableName+" where symbol= '" + symbol + "'", con);
+            OdbcCommand insertCommand = new OdbcCommand("LOAD DATA LOCAL INFILE" + " '" + DataFilesPath + "/RatingFile.csv' " +
+                                             "INTO TABLE "+tableName+
+                                             " FIELDS TERMINATED BY ',' " +
                                              "LINES TERMINATED BY '\n' " +
                                              "(symbol,rating,ratingvalue,ctrating,ctratingvalue,ratingdate);", con);
 
@@ -67,9 +67,9 @@ namespace ChartLabFinCalculation.DAL
             {
                 con.Open();
 
-                //  deleteCommand.ExecuteNonQuery();
+                deleteCommand.ExecuteNonQuery();
                 insertCommand.ExecuteNonQuery();
-                log.Info(" ETF BuySellRating Updated....");
+                log.Info(" hist BuySellRating and ct ratings saved in table " + tableName + " for ...." + symbol);
 
             }
             catch (OdbcException ex)

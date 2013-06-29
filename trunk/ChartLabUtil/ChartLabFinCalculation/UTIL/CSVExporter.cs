@@ -955,12 +955,22 @@ namespace ChartLabFinCalculation
             StreamWriter writer = new StreamWriter(fileName);
             try
             {
+              
                 foreach (SnpAnalytics row in snpSymbolsAnalytics)
                 {
                     writer.Write(row.symbol);
                     writer.Write(',');
                     writer.Write(row.synopsisRuleId);
-                   
+                    writer.Write(',');
+                    writer.Write(row.proEdgeId);
+                    writer.Write(',');
+                    writer.Write(row.gainPct);
+                    writer.Write(',');
+                    writer.Write(row.confidencePct);
+                    writer.Write(',');
+                    writer.Write(row.riskPct);
+                     writer.Write(',');
+                    writer.Write(row.rules);
                     writer.Write('\n');
 
                 }

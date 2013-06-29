@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Data.Odbc;
+using FinLib.Model;
+using System.Data;
 
 namespace ChartLabFinCalculation
 {
@@ -16,7 +18,7 @@ namespace ChartLabFinCalculation
 
             OdbcCommand deleteCommand = new OdbcCommand("DELETE from snpuniquedateprice", con);
 
-            OdbcCommand insertCommand = new OdbcCommand("LOAD DATA LOCAL INFILE  '"+fileName+"' " +
+            OdbcCommand insertCommand = new OdbcCommand("LOAD DATA LOCAL INFILE  '" + fileName + "' " +
                                               "INTO TABLE snpuniquedateprice " +
                                               "FIELDS TERMINATED BY ',' " +
                                               "LINES TERMINATED BY '\n' " +
@@ -30,7 +32,7 @@ namespace ChartLabFinCalculation
                 insertCommand.ExecuteReader();
                 log.Info("SNP price inserted for Watchlict CreateDate ....");
 
-               
+
             }
             catch (OdbcException ex)
             {
@@ -52,7 +54,7 @@ namespace ChartLabFinCalculation
                                                 "INTO TABLE snpsymbolsanalytics " +
                                                 "FIELDS TERMINATED BY ',' " +
                                                 "LINES TERMINATED BY '\n' " +
-                                                "(symbol,synopsisid);", con);
+                                                "(symbol,synopsisid,proedgeid,gainpct,confidencepct,riskpct,proedgerules);", con);
 
             try
             {
@@ -70,6 +72,42 @@ namespace ChartLabFinCalculation
                 if (con != null)
                     con.Close();
             }
+        }
+
+        internal static SnpAnalytics getSnpSymbolsGainLossProb(SnpAnalytics snpAnalytics, string symbol, int wlId)
+        {
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
+            OdbcCommand selectCmd = con.CreateCommand();
+            selectCmd.CommandText = "{call getsnpgainlossProb(?,?)}";
+            selectCmd.CommandType = CommandType.StoredProcedure;
+            selectCmd.Parameters.AddWithValue("@symbol", symbol);
+            selectCmd.Parameters.AddWithValue("@wlId", wlId);
+            //selectCmd.Parameters["@symbolparam"].Value = symbol;
+            //selectCmd.Parameters["@watchlistIdparam"].Value = wlId;
+           
+             try
+            {
+            con.Open();
+           
+            OdbcDataReader dr = selectCmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    snpAnalytics.riskPct = Convert.ToDouble(dr.GetString(0));
+                    snpAnalytics.confidencePct = Convert.ToDouble(dr.GetString(1));
+                    snpAnalytics.gainPct = Convert.ToDouble(dr.GetString(2));
+                }
+                 }
+            catch (OdbcException ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+             return snpAnalytics; 
         }
     }
 }

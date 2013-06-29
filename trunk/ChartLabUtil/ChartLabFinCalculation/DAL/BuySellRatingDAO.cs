@@ -706,7 +706,7 @@ namespace ChartLabFinCalculation
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             OdbcCommand deleteBuySellRatingCmd = new OdbcCommand("delete from historybuysellrating where ratingdate=DATE(NOW()) and symbol='" + SnPAvgRating.symbol + "'", con);
 
-            OdbcCommand insertCommand = new OdbcCommand("INSERT INTO historybuysellrating (symbol,rating,ratingvalue,ctrating,ctratingvalue,ratingdate) Values('" + SnPAvgRating.symbol + "'," + SnPAvgRating.rating + "," + SnPAvgRating.ratingValue +"," + SnPAvgRating.ctRating + "," + SnPAvgRating.ctRatingValue + ",(SELECT DATE FROM historicaldates WHERE DateType='" + Constants.C + "'));", con);
+            OdbcCommand insertCommand = new OdbcCommand("INSERT INTO historybuysellrating (symbol,rating,ratingvalue,ctrating,ctratingvalue,ratingdate) Values('" + SnPAvgRating.symbol + "'," + SnPAvgRating.rating + "," + SnPAvgRating.ratingValue + "," + SnPAvgRating.ctRating + "," + SnPAvgRating.ctRatingValue + ",(SELECT DATE FROM historicaldates WHERE DateType='" + Constants.C + "'));", con);
 
             OdbcCommand updateCommand = new OdbcCommand("UPDATE symbolanalytics SET buySellRating=" + SnPAvgRating.rating + " WHERE symbol='" + SnPAvgRating.symbol + "';", con);
 
@@ -766,10 +766,7 @@ namespace ChartLabFinCalculation
             return SymbolRatingchanges;
         }
 
-
-        
-
-    internal static List<SymbolRatingAlert> getSNPSymbolsRatingChange()
+        internal static List<SymbolRatingAlert> getSNPSymbolsRatingChange()
         {
             List<SymbolRatingAlert> SymbolRatingchanges = new List<SymbolRatingAlert>();
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
@@ -1021,8 +1018,8 @@ LEFT JOIN (SELECT symbol,ratingdate FROM topratingsymbolshist WHERE ratingdate =
 
                     if (dr.GetValue(0) != DBNull.Value && dr.GetValue(1) != DBNull.Value)
                         spyCtRating.Add(dr.GetInt32(0), dr.GetFloat(1));
-                        
-                    
+
+
                 }
                 dr.Close();
 
@@ -1038,6 +1035,80 @@ LEFT JOIN (SELECT symbol,ratingdate FROM topratingsymbolshist WHERE ratingdate =
             }
             return spyCtRating;
 
+        }
+
+        internal static Dictionary<String, List<Rating>> getSNPSymbolsHistRatings()
+        {
+            Dictionary<String, List<Rating>> symbolsRatingsDict = new Dictionary<string, List<Rating>>();
+
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
+            OdbcCommand com;
+            string sqlString = @"SELECT  s.symbol,bs.ratingvalue,bs.ctratingvalue,bs.ratingdate,1 AS assetid FROM temp_buysellrating s
+                                LEFT JOIN historybuysellrating bs ON s.symbol=bs.symbol
+                                WHERE bs.ratingdate <= NOW() AND bs.ratingdate > DATE_ADD(NOW(),INTERVAL -300 DAY) ORDER BY symbol ASC, bs.ratingdate DESC ";
+
+            com = new OdbcCommand(sqlString, con);
+
+            try
+            {
+                con.Open();
+
+                OdbcDataReader dr = com.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    Rating rating = new Rating();
+
+                    if (!Convert.IsDBNull(dr.GetValue(0)))
+                    {
+                        rating.symbol = dr.GetString(0);
+
+                    }
+
+                    if (!Convert.IsDBNull(dr.GetValue(1)))
+                    {
+                        rating.ratingValue = dr.GetFloat(1);
+
+                    }
+                    if (!Convert.IsDBNull(dr.GetValue(2)))
+                    {
+                        rating.ctRatingValue = dr.GetFloat(2);
+
+                    }
+                    if (!Convert.IsDBNull(dr.GetValue(3)))
+                    {
+                        rating.ratingDate = dr.GetDateTime(3);
+
+                    }
+                    if (symbolsRatingsDict.ContainsKey(rating.symbol))
+                    {
+                        symbolsRatingsDict[rating.symbol].Add(rating);
+
+                    }
+                    else
+                    {
+                        List<Rating> symbolRating = new List<Rating>();
+                        symbolRating.Add(rating);
+                        symbolsRatingsDict.Add(rating.symbol, symbolRating);
+                    }
+
+
+                }
+
+
+
+            }
+            catch (OdbcException ex)
+            {
+                log.Error(ex);
+            }
+            finally
+            {
+                con.Close();
+            }
+
+
+            return symbolsRatingsDict;
         }
     }
 }

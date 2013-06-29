@@ -133,9 +133,14 @@ namespace ChartLabFinCalculation
                 Dictionary<string, double> symbolsWeight = BuySellRatingDAO.GetSymbolsWeight();
                 Dictionary<string, double> symbolsRatingValue = BuySellRatingDAO.GetSymbolsRating();
                 Dictionary<int, double> spyCtRating  = BuySellRatingDAO.GetCTRatingValueOfSPY();
-                int snpCtRating = spyCtRating.Keys.First();
-                double snpCtRatingValue = spyCtRating[spyCtRating.Keys.First()];
+                int snpCtRating = 4; //neutral
+                double snpCtRatingValue = 0;
+                if (spyCtRating.Count > 0)
+                {
+                   snpCtRating = spyCtRating.Keys.First();
 
+                   snpCtRatingValue = spyCtRating[spyCtRating.Keys.First()];
+                }
                 int TotalSymbols = 0;
                 double TotalRatingValue = 0;
                 double avgRatingValue = 0;

@@ -8,7 +8,7 @@ namespace ChartLabFinCalculation
 {
     class RestartCache
     {
-       static log4net.ILog log = log4net.LogManager.GetLogger(typeof(Program));
+        static log4net.ILog log = log4net.LogManager.GetLogger(typeof(RestartCache));
        public static void RestartingMemCache()
        {
            string url = string.Format("http://chartlabpro.com/restartCache.php");
