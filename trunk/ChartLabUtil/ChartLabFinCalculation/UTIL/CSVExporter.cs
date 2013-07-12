@@ -950,7 +950,7 @@ namespace ChartLabFinCalculation
             }
         }
 
-        internal static void WriteToCSVRating(List<SnpAnalytics> snpSymbolsAnalytics, string fileName)
+        internal static void WriteToCSVSynopsisID(List<SnpAnalytics> snpSymbolsAnalytics, string fileName)
         {
             StreamWriter writer = new StreamWriter(fileName);
             try
@@ -961,18 +961,65 @@ namespace ChartLabFinCalculation
                     writer.Write(row.symbol);
                     writer.Write(',');
                     writer.Write(row.synopsisRuleId);
+                    writer.Write('\n');
+
+                }
+
+                writer.Flush();
+                writer.Close();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        internal static void WriteToCSVProEdgeID(List<SnpAnalytics> snpSymbolsAnalytics, string fileName)
+        {
+            StreamWriter writer = new StreamWriter(fileName);
+            try
+            {
+               // symbol,proedgeid,triggeredruleid,triggereddate
+                foreach (SnpAnalytics row in snpSymbolsAnalytics)
+                {
+                    writer.Write(row.symbol);
                     writer.Write(',');
                     writer.Write(row.proEdgeId);
                     writer.Write(',');
-                    writer.Write(row.gainPct);
+                    writer.Write(row.triggerRuleId);
                     writer.Write(',');
-                    writer.Write(row.confidencePct);
-                    writer.Write(',');
-                    writer.Write(row.riskPct);
-                     writer.Write(',');
-                    writer.Write(row.rules);
+                    writer.Write(row.proEdgeTriggerDate.ToString("yyyy-MM-dd"));
                     writer.Write('\n');
+                }
 
+                writer.Flush();
+                writer.Close();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        internal static void WriteToCSVSynopsisID(Dictionary<string, SnpAnalytics> snpSymbolsAnalytics, string fileName)
+        {
+            StreamWriter writer = new StreamWriter(fileName);
+            try
+            {
+               
+                foreach (KeyValuePair<string, SnpAnalytics> symbolAnalytics in snpSymbolsAnalytics)
+                {
+                    SnpAnalytics row = symbolAnalytics.Value;
+                    writer.Write(row.symbol);
+                    writer.Write(',');
+                    writer.Write(row.synopsisRuleId);
+                    writer.Write(',');
+                    writer.Write(row.proEdgeId);
+                    writer.Write(',');
+                    writer.Write(row.proEdgeTriggerDate.ToString("yyyy-MM-dd"));
+                    writer.Write('\n');
                 }
 
                 writer.Flush();
