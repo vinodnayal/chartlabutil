@@ -1037,15 +1037,19 @@ LEFT JOIN (SELECT symbol,ratingdate FROM topratingsymbolshist WHERE ratingdate =
 
         }
 
-        internal static Dictionary<String, List<Rating>> getSNPSymbolsHistRatings()
+        /// <summary>
+        /// getting snp symbols hist ratings
+        /// </summary>
+        /// <returns> symbol wise rating Dict</returns>
+        internal static Dictionary<String, List<Rating>> getSNPSymbolsHistRatings(DateTime date)
         {
             Dictionary<String, List<Rating>> symbolsRatingsDict = new Dictionary<string, List<Rating>>();
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             OdbcCommand com;
-            string sqlString = @"SELECT  s.symbol,bs.ratingvalue,bs.ctratingvalue,bs.ratingdate,1 AS assetid FROM temp_buysellrating s
+            string sqlString = @"SELECT  s.symbol,bs.ratingvalue,bs.ctratingvalue,bs.ratingdate,1 AS assetid,bs.rating FROM temp_buysellrating s
                                 LEFT JOIN historybuysellrating bs ON s.symbol=bs.symbol
-                                WHERE bs.ratingdate <= NOW() AND bs.ratingdate > DATE_ADD(NOW(),INTERVAL -300 DAY) ORDER BY symbol ASC, bs.ratingdate DESC ";
+                                WHERE bs.ratingdate <= '" + date.ToString("yyyy-MM-dd") + "' AND bs.ratingdate > DATE_ADD('" + date.ToString("yyyy-MM-dd") + "',INTERVAL -25 DAY) ORDER BY symbol ASC, bs.ratingdate DESC ";
 
             com = new OdbcCommand(sqlString, con);
 
@@ -1078,6 +1082,11 @@ LEFT JOIN (SELECT symbol,ratingdate FROM topratingsymbolshist WHERE ratingdate =
                     if (!Convert.IsDBNull(dr.GetValue(3)))
                     {
                         rating.ratingDate = dr.GetDateTime(3);
+
+                    }
+                    if (!Convert.IsDBNull(dr.GetValue(5)))
+                    {
+                        rating.rating = dr.GetInt32(5);
 
                     }
                     if (symbolsRatingsDict.ContainsKey(rating.symbol))

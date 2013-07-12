@@ -135,7 +135,6 @@ namespace ChartLabFinCalculation
             }
         }
 
-
         private static void calculatePerPositiveTime(List<String> symbolList, String tableName)
         {
            

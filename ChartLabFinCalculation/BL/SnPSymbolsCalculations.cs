@@ -9,18 +9,19 @@ using ChartLabFinCalculation.DAL;
 
 namespace ChartLabFinCalculation.BL
 {
-    internal class SnPSymbolsCalculations
+    internal class SNPSymbolsCalculations
     {
-        static log4net.ILog log = log4net.LogManager.GetLogger(typeof(SnPSymbolsCalculations));
+        static log4net.ILog log = log4net.LogManager.GetLogger(typeof(SNPSymbolsCalculations));
 
         public static string snpDatafilesPath { get; set; }
         /// <summary>
         /// calculate synopsis rule id for chart page synopsis section 
         /// </summary>
-        internal static void calculateSNPSymbolAnalytics()
+        internal static void calculateSNPSymbolsSynopsis()
         {
             try
             {
+                log.Info("Process :Calcualating synopsis ids for 500 symbols ");
                 List<SymbolRatingAlert> snpSymbolsRatingChanges = BuySellRatingDAO.getSNPSymbolsRatingChange();
                 List<SnpAnalytics> snpSymbolsAnalytics = new List<SnpAnalytics>();
                 int snpCTRating = 4; //neutral trend
@@ -31,7 +32,7 @@ namespace ChartLabFinCalculation.BL
                 }
                 foreach (SymbolRatingAlert symbolRating in snpSymbolsRatingChanges)
                 {
-                    SnpAnalytics snpAnalytics= new SnpAnalytics();
+                    SnpAnalytics snpAnalytics = new SnpAnalytics();
                     snpAnalytics.symbol = symbolRating.symbol;
                     String ruleId = getSynopsisIdOnRatingChange(symbolRating);
                     if (snpCTRating < 4)
@@ -40,19 +41,17 @@ namespace ChartLabFinCalculation.BL
                     }
                     snpAnalytics.synopsisRuleId = ruleId;
 
-                    snpAnalytics = SNPAnalyticsDAO.getSnpSymbolsGainLossProb(snpAnalytics,symbolRating.symbol, 11); // 11 for s&P watchlist
-                    
                     snpSymbolsAnalytics.Add(snpAnalytics);
                 }
 
                 //caculating pro edge ID for snp 500 symbols to show in first tab of pro edge portfolio
-                snpSymbolsAnalytics = calculateSNPProEdgeOnRatingsID(snpSymbolsAnalytics);
+                // snpSymbolsAnalytics = calculateSNPProEdgeIDOnRatings(snpSymbolsAnalytics);
 
 
-                CSVExporter.WriteToCSVRating(snpSymbolsAnalytics, snpDatafilesPath + "/snpAnalyticsFile.csv");
+                CSVExporter.WriteToCSVSynopsisID(snpSymbolsAnalytics, snpDatafilesPath + "/snpAnalyticsFile.csv");
                 log.Info("Process :Write snp Analytics To CSV  ");
 
-                SNPAnalyticsDAO.InsertRating(snpDatafilesPath);
+                SNPAnalyticsDAO.InsertSynopsisIDInDB(snpDatafilesPath);
                 log.Info("Process :Inserted snp Analytics csv File in to DB: ");
 
 
@@ -97,58 +96,111 @@ namespace ChartLabFinCalculation.BL
         #endregion
 
         #region proEdge ID
-        private static List<SnpAnalytics> calculateSNPProEdgeOnRatingsID(List<SnpAnalytics> snpSymbolsAnalytics)
+        internal static void calculateSNPProEdgeID(DateTime date)
         {
             try
             {
-                Dictionary<String, List<Rating>> snpSymbolsRatingDict = BuySellRatingDAO.getSNPSymbolsHistRatings();
-                foreach (SnpAnalytics symbolAnaltytics in snpSymbolsAnalytics)
-                {
-                    if (snpSymbolsRatingDict.ContainsKey(symbolAnaltytics.symbol))
-                    {
-                        SnpAnalytics tempAnalytics = getProEdgeId(snpSymbolsRatingDict[symbolAnaltytics.symbol], symbolAnaltytics);
-                        symbolAnaltytics.proEdgeId = tempAnalytics.proEdgeId;
-                        symbolAnaltytics.rules = tempAnalytics.rules;
-                    }
+                log.Info("ProEdge: Calcualating Pro-Edge for s&p 500 symbols for date: " + date);
+                //DateTime currentDate = DateTime.Now;
+                Dictionary<String, SnpAnalytics> snpSymbolsAnalytics = SNPAnalyticsDAO.getCurSnpSymbolsAnalytics();
 
+                List<SnpAnalytics> snpSymbolsProEdgeDetails = new List<SnpAnalytics>();
+                Dictionary<String, List<Rating>> snpSymbolsRatingDict = BuySellRatingDAO.getSNPSymbolsHistRatings(date);
+                foreach (KeyValuePair<String, List<Rating>> symbolDetail in snpSymbolsRatingDict)
+                {
+                    try
+                    {
+                        List<Rating> symbolRatings = symbolDetail.Value;
+                        if (symbolRatings.Count > 1)
+                        {
+                            SnpAnalytics tempAnalytics = getProEdgeId(symbolDetail.Key, symbolRatings);
+                            if (!tempAnalytics.proEdgeId.Equals(""))
+                            {
+                                snpSymbolsProEdgeDetails.Add(tempAnalytics);
+
+                                //update snpsymbolAnalytics table with new alert
+                                if (snpSymbolsAnalytics.ContainsKey(symbolDetail.Key)  )
+                                {
+                                    SnpAnalytics symbolAnalytics = snpSymbolsAnalytics[symbolDetail.Key];
+
+                                    if (tempAnalytics.alertType == 3 && symbolAnalytics.proEdgeTriggerDateDiff <= 10 && symbolAnalytics.proEdgeTriggerDateDiff >0 && (symbolAnalytics.alertType==1 || symbolAnalytics.alertType==2))
+                                    {
+                                    }
+                                    else
+                                    {
+                                        symbolAnalytics.proEdgeId = tempAnalytics.proEdgeId;
+                                        symbolAnalytics.proEdgeTriggerDate = tempAnalytics.proEdgeTriggerDate;
+                                    }
+
+                                }
+                            }
+
+
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
+                        log.Error("Error: When claculation Pro Edge rule Id for snp symbol : " + symbolDetail.Key + ex);
+                    }
                 }
+
+
+
+                CSVExporter.WriteToCSVProEdgeID(snpSymbolsProEdgeDetails, snpDatafilesPath + "/proEdgeFileHIst" + date.ToString("yyyyMMdd")+ ".csv");
+                log.Info("Process :Write pro EdgeFile To CSV  for date  " + date);
+
+                SNPAnalyticsDAO.InsertProEdgeTriggerInDB(snpDatafilesPath, date);
+                log.Info("Process :Inserted proEdge csv File in to DB: for date  " + date);
+
+                CSVExporter.WriteToCSVSynopsisID(snpSymbolsAnalytics, snpDatafilesPath + "/snpProEdgeFile.csv");
+                log.Info("Process :Write snp Analytics To CSV  for date  " + date);
+
+                SNPAnalyticsDAO.InsertSNPSymbolAnalyticsInDB(snpDatafilesPath);
+                log.Info("Process :Inserted snp Analytics csv File in to DB: for date  " + date);
+
+
             }
             catch (Exception ex)
             {
 
                 log.Error("Error: When claculation Pro Edge rule Id for snp symbols, " + ex);
             }
-            return snpSymbolsAnalytics;
+
 
 
         }
-        private static SnpAnalytics getProEdgeId(List<Rating> symbolRatings, SnpAnalytics symbolAnaltytics)
+        #region proEdge ID rules
+        private static SnpAnalytics getProEdgeId(String symbol, List<Rating> symbolRatings)
         {
+            SnpAnalytics symbolAnaltytics = new SnpAnalytics();
+            symbolAnaltytics.symbol = symbol;
+            symbolAnaltytics.proEdgeTriggerDate = symbolRatings[0].ratingDate;
             try
             {
 
                 symbolAnaltytics = checkforRule1(symbolRatings, symbolAnaltytics);
 
-                if (symbolAnaltytics.proEdgeId == 0)
+                if (symbolAnaltytics.proEdgeId.Equals(""))
                     symbolAnaltytics = checkforRule2(symbolRatings, symbolAnaltytics);
 
-                if (symbolAnaltytics.proEdgeId == 0)
+                if (symbolAnaltytics.proEdgeId.Equals(""))
                     symbolAnaltytics = checkforRule3(symbolRatings, symbolAnaltytics);
 
-                if (symbolAnaltytics.proEdgeId == 0)
+                if (symbolAnaltytics.proEdgeId.Equals(""))
                     symbolAnaltytics = checkforRule4(symbolRatings, symbolAnaltytics);
 
-                if (symbolAnaltytics.proEdgeId == 0)
+                if (symbolAnaltytics.proEdgeId.Equals(""))
                     symbolAnaltytics = checkforRule5(symbolRatings, symbolAnaltytics);
 
-                if (symbolAnaltytics.proEdgeId == 0)
-                    symbolAnaltytics = checkforRule6(symbolRatings, symbolAnaltytics);
+                if (symbolAnaltytics.proEdgeId.Equals(""))
+                    symbolAnaltytics = checkforOverboughtRules(symbolRatings, symbolAnaltytics);
 
-                if (symbolAnaltytics.proEdgeId == 0)
+                if (symbolAnaltytics.proEdgeId.Equals(""))
                     symbolAnaltytics = checkforRule7(symbolRatings, symbolAnaltytics);
 
-                if (symbolAnaltytics.proEdgeId == 0)
-                    symbolAnaltytics = checkforRule8to12(symbolRatings, symbolAnaltytics);
+                if (symbolAnaltytics.proEdgeId.Equals(""))
+                    symbolAnaltytics = checkforNeutralRules(symbolRatings, symbolAnaltytics);
 
             }
             catch (Exception ex)
@@ -163,7 +215,7 @@ namespace ChartLabFinCalculation.BL
         {
             try
             {
-                int proEdgeId = 0;
+                String proEdgeId = "";
                 double curDayRating = symbolRatings[0].ratingValue;
                 double preDayRating = symbolRatings[1].ratingValue;
                 StringBuilder sb = new StringBuilder();
@@ -173,8 +225,17 @@ namespace ChartLabFinCalculation.BL
                     if (BuyCheckRatingIncreasePctFromPreDay(symbolRatings, 45.0))
                     {
 
-                        proEdgeId = 1;
+                        proEdgeId = "B1";
                         sb.Append("Buy: If there is a 45% increase in rating that with a minimum rating of .599 rating ,");
+                    }
+                }
+                //Buy: If there are 6 prior consecutive rating increase up to or greater than. 67
+                if (curDayRating >= .67 && preDayRating < .67)
+                {
+                    if (BuyCheckRatingIncreasingByCount(symbolRatings, 6))
+                    {
+                        proEdgeId = "B2";
+                        sb.Append("Buy: If there are 6 prior consecutive rating increase up to or greater than. 65 ,");
                     }
                 }
                 //Buy: If there is a 30% increase the preceeding rating starting with at least a .70 rating
@@ -182,25 +243,21 @@ namespace ChartLabFinCalculation.BL
                 {
                     if (BuyCheckRatingIncreasePctFromPreDay(symbolRatings, 30.0))
                     {
-                        proEdgeId = 1;
+                        proEdgeId = "B3";
                         sb.Append("Buy: If there is a 30% increase the preceeding rating starting with at least a .70 rating ,");
                     }
                 }
-                //Buy: If there are 6 prior consecutive rating increase up to or greater than. 67
-                if (curDayRating >= .67)
-                {
-                    if (BuyCheckRatingIncreasingByCount(symbolRatings, 6))
-                    {
-                        proEdgeId = 1;
-                        sb.Append("Buy: If there are 6 prior consecutive rating increase up to or greater than. 65 ,");
-                    }
-                }
+
                 symbolAnaltytics.proEdgeId = proEdgeId;
+                symbolAnaltytics.alertType = 1;
                 symbolAnaltytics.rules = sb.ToString();
+                if (proEdgeId != "") 
+                    log.Info("ProEdge: for Symbol " + symbolAnaltytics.symbol+" Triggered Rule :" + symbolAnaltytics.rules +"on Date "+symbolAnaltytics.proEdgeTriggerDate); 
+                
             }
             catch (Exception)
             {
-                
+
                 throw;
             }
             return symbolAnaltytics;
@@ -211,7 +268,7 @@ namespace ChartLabFinCalculation.BL
         {
             try
             {
-                int proEdgeId = 0;
+                String proEdgeId = "";
                 double curDayRating = symbolRatings[0].ratingValue;
                 double preDayRating = symbolRatings[1].ratingValue;
                 StringBuilder sb = new StringBuilder();
@@ -222,8 +279,8 @@ namespace ChartLabFinCalculation.BL
                 {
                     if (BuyCheckRatingIncreasePctFromPreDay(symbolRatings, 600.0))
                     {
-                        proEdgeId = 2;
-                        sb.Append("Buy: If there is a 130% increase in rating that with a minimum rating of .14 rating ,");
+                        proEdgeId = "B4";
+                        sb.Append("If there is a 600% increase in rating that with a minimum rating of .11 rating ,");
                     }
                 }
                 //If there is a 130% increase in rating that with a minimum rating of .14 rating
@@ -231,16 +288,19 @@ namespace ChartLabFinCalculation.BL
                 {
                     if (BuyCheckRatingIncreasePctFromPreDay(symbolRatings, 130.0))
                     {
-                        proEdgeId = 2;
+                        proEdgeId = "B5";
                         sb.Append("If there is a 130% increase in rating that with a minimum rating of .36 rating ,");
                     }
                 }
                 symbolAnaltytics.proEdgeId = proEdgeId;
+                symbolAnaltytics.alertType = 1;
                 symbolAnaltytics.rules = sb.ToString();
+                if (proEdgeId != "")
+                    log.Info("ProEdge: for Symbol " + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate); 
             }
             catch (Exception)
             {
-                
+
                 throw;
             }
             return symbolAnaltytics;
@@ -251,7 +311,7 @@ namespace ChartLabFinCalculation.BL
         {
             try
             {
-                int proEdgeId = 0;
+                String proEdgeId = "";
                 double curDayRating = symbolRatings[0].ratingValue;
                 double preDayRating = symbolRatings[1].ratingValue;
                 StringBuilder sb = new StringBuilder();
@@ -261,38 +321,41 @@ namespace ChartLabFinCalculation.BL
                 {
                     if (SellCheckForRatingDropsFromPreDay(symbolRatings, -13.0))
                     {
-                        proEdgeId = 3;
+                        proEdgeId = "S1";
                         sb.Append("Sell: if a rating above .92 drops by 13% or more the preceeding day ,");
                     }
                 }
 
-
+                //Sell: If a rating above .68 drops 22% the preceding day
+                if (curDayRating < .68 && preDayRating >= .68)
+                {
+                    if (SellCheckForRatingDropsFromPreDay(symbolRatings, -22.0))
+                    {
+                        proEdgeId = "S2";
+                        sb.Append("Sell: If a rating above .68 drops 22% the preceding day ,");
+                    }
+                }
                 //Sell: Any rating above .8599 that drops by 20% the prceeding day
 
                 if (curDayRating < .8599 && preDayRating >= .8599)
                 {
                     if (SellCheckForRatingDropsFromPreDay(symbolRatings, -20.00))
                     {
-                        proEdgeId = 3;
+                        proEdgeId = "S3";
                         sb.Append("Sell: Any rating above .8599 that drops by 20% the prceeding day ,");
                     }
 
                 }
-                //Sell: If a rating above .68 drops 22% the preceding day
-                if (curDayRating < .68 && preDayRating >= .68)
-                {
-                    if (SellCheckForRatingDropsFromPreDay(symbolRatings, -22.0))
-                    {
-                        proEdgeId = 3;
-                        sb.Append("Sell: If a rating above .68 drops 22% the preceding day ,");
-                    }
-                }
+
                 symbolAnaltytics.proEdgeId = proEdgeId;
+                symbolAnaltytics.alertType = 2;
                 symbolAnaltytics.rules = sb.ToString();
+                if (proEdgeId != "")
+                    log.Info("ProEdge: for Symbol " + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate); 
             }
             catch (Exception)
             {
-                
+
                 throw;
             }
             return symbolAnaltytics;
@@ -303,7 +366,7 @@ namespace ChartLabFinCalculation.BL
         {
             try
             {
-                int proEdgeId = 0;
+                String proEdgeId = "";
                 double curDayRating = symbolRatings[0].ratingValue;
                 double preDayRating = symbolRatings[1].ratingValue;
                 StringBuilder sb = new StringBuilder();
@@ -313,7 +376,7 @@ namespace ChartLabFinCalculation.BL
                 {
                     if (SellCheckForRatingDropsFromPreDay(symbolRatings, -50.0))
                     {
-                        proEdgeId = 4;
+                        proEdgeId = "S4";
                         sb.Append("Sell: If a rating above .60 drops 50% the preceding day ,");
                     }
 
@@ -323,18 +386,21 @@ namespace ChartLabFinCalculation.BL
                 {
                     if (SellCheckForRatingDropsFromPreDay(symbolRatings, -62.0))
                     {
-                        proEdgeId = 4;
+                        proEdgeId = "S5";
                         sb.Append("Sell: If a rating above .40 drops 62% the preceding day ,");
                     }
 
                 }
 
                 symbolAnaltytics.proEdgeId = proEdgeId;
+                symbolAnaltytics.alertType = 2;
                 symbolAnaltytics.rules = sb.ToString();
+                if (proEdgeId != "")
+                    log.Info("ProEdge: for Symbol " + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate); 
             }
             catch (Exception)
             {
-                
+
                 throw;
             }
             return symbolAnaltytics;
@@ -345,36 +411,41 @@ namespace ChartLabFinCalculation.BL
         {
             try
             {
-                int proEdgeId = 0;
+                String proEdgeId = "";
                 double curDayRating = symbolRatings[0].ratingValue;
                 double preDayRating = symbolRatings[1].ratingValue;
                 StringBuilder sb = new StringBuilder();
-                //  Any rating that is positive that drops to or below .00 by 200% sell
-                if (curDayRating < 0 && preDayRating >= 0)
-                {
-                    if (SellCheckForRatingDropsFromPreDay(symbolRatings, -200.0))
-                    {
-                        proEdgeId = 5;
-                        sb.Append("Any rathing that is positive that drops to or below .00 by 200% sell ,");
-                    }
 
-                }
                 //Sell if we fall below .00 for 5 consecutive days
                 if (curDayRating <= 0.0 && symbolRatings[6].ratingValue > 0)
                 {
                     if (SellCheckForSpecificRatingForDays(symbolRatings, 5, 0))
                     {
-                        proEdgeId = 5;
+                        proEdgeId = "S6";
                         sb.Append("Sell if we fall below .00 for 5 consecutive days ,");
                     }
 
                 }
+                //  Any rating that is positive that drops to or below .00 by 200% sell
+                if (curDayRating < 0 && preDayRating >= 0)
+                {
+                    if (SellCheckForRatingDropsFromPreDay(symbolRatings, -200.0))
+                    {
+                        proEdgeId = "S7";
+                        sb.Append("Any rathing that is positive that drops to or below .00 by 200% sell ,");
+                    }
+
+                }
+
                 symbolAnaltytics.proEdgeId = proEdgeId;
+                symbolAnaltytics.alertType = 2;
                 symbolAnaltytics.rules = sb.ToString();
+                if (proEdgeId != "")
+                    log.Info("ProEdge: for Symbol " + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate); 
             }
             catch (Exception)
             {
-                
+
                 throw;
             }
             return symbolAnaltytics;
@@ -385,7 +456,7 @@ namespace ChartLabFinCalculation.BL
         {
             try
             {
-                int proEdgeId = 0;
+                String proEdgeId = "";
                 double curDayRating = symbolRatings[0].ratingValue;
                 double preDayRating = symbolRatings[1].ratingValue;
                 StringBuilder sb = new StringBuilder();
@@ -394,7 +465,7 @@ namespace ChartLabFinCalculation.BL
                 {
                     if (SellCheckForRatingDecreasingForCount(symbolRatings, 12, -.38))
                     {
-                        proEdgeId = 7;
+                        proEdgeId = "SS1";
                         sb.Append("Sell Short when your have a 12 consecutive decline starting with at least a -.388 rating ,");
                     }
 
@@ -404,7 +475,7 @@ namespace ChartLabFinCalculation.BL
                 {
                     if (SellCheckForRatingDecreasingForCount(symbolRatings, 3, -.60))
                     {
-                        proEdgeId = 7;
+                        proEdgeId = "SS2";
                         sb.Append("Sell Short when you have a 3 consecutive decline starting with at least a -.52 rating ,");
                     }
 
@@ -414,144 +485,275 @@ namespace ChartLabFinCalculation.BL
                 {
                     if (SellCheckForRatingDropsFromPreDay(symbolRatings, -45.0))
                     {
-                        proEdgeId = 7;
+                        proEdgeId = "SS3";
                         sb.Append("Sell short when a rating decreases by 45% on any rating at or below -.40 ,");
                     }
 
                 }
                 symbolAnaltytics.proEdgeId = proEdgeId;
+                symbolAnaltytics.alertType = 2;
                 symbolAnaltytics.rules = sb.ToString();
+                if (proEdgeId != "")
+                    log.Info("ProEdge: for Symbol" + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate); 
             }
             catch (Exception)
             {
-                
+
                 throw;
             }
             return symbolAnaltytics;
 
         }
 
-        private static SnpAnalytics checkforRule6(List<Rating> symbolRatings, SnpAnalytics symbolAnaltytics)
+        private static SnpAnalytics checkforOverboughtRules(List<Rating> symbolRatings, SnpAnalytics symbolAnaltytics)
         {
             try
             {
-                int proEdgeId = 0;
+                String proEdgeId = "";
                 double curDayRating = symbolRatings[0].ratingValue;
                 double preDayRating = symbolRatings[1].ratingValue;
                 StringBuilder sb = new StringBuilder();
-                //Sell 50%: Approaching Overbought counter Trend -56. or over
+                //Sell 100%: Approaching Overbought counter Trend -69. or over
 
-
-                if (symbolRatings[0].ctRatingValue < -56)
+                if (symbolRatings[0].ctRatingValue < -69)
                 {
-                    proEdgeId = 6;
+                    proEdgeId = "O69";
+                    sb.Append("Sell 100%: Approaching Overbought counter Trend -69. or over ,");
+                }
+                //Sell 50%: Approaching Overbought counter Trend -56. or over
+                else if (symbolRatings[0].ctRatingValue < -56)
+                {
+                    proEdgeId = "O56";
                     sb.Append("Sell 50%: Approaching Overbought counter Trend -56. or over ,");
                 }
 
 
 
                 symbolAnaltytics.proEdgeId = proEdgeId;
+                symbolAnaltytics.alertType = 2;
                 symbolAnaltytics.rules = sb.ToString();
+                if (proEdgeId != "")
+                    log.Info("ProEdge: for Symbol" + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate); 
             }
             catch (Exception)
             {
-                
+
                 throw;
             }
             return symbolAnaltytics;
 
         }
 
-        private static SnpAnalytics checkforRule8to12(List<Rating> symbolRatings, SnpAnalytics symbolAnaltytics)
+        private static SnpAnalytics checkforNeutralRules(List<Rating> symbolRatings, SnpAnalytics symbolAnaltytics)
         {
             try
             {
-                int proEdgeId = 0;
+                String proEdgeId = "";
                 double curDayRating = symbolRatings[0].ratingValue;
                 double preDayRating = symbolRatings[1].ratingValue;
                 StringBuilder sb = new StringBuilder();
-                if (curDayRating >= .90)
+
+                // check for rating change
+                if (symbolRatings[0].rating == 5)
                 {
-                    proEdgeId = 8;
+                    proEdgeId = "R5";
+                    sb.Append("Rating is " + symbolRatings[0].rating);
                 }
-                else if (curDayRating >= .70)
+                else if (symbolRatings[0].rating == 4 && symbolRatings[1].rating == 3)
                 {
-                    proEdgeId = 9;
+                    proEdgeId = "R34";
+                    sb.Append("Rating change " + symbolRatings[0].rating + " to " + symbolRatings[1].rating);
                 }
-                else if (curDayRating >= .55)
+                else if (symbolRatings[0].rating == 4)
                 {
-                    proEdgeId = 10;
+                    proEdgeId = "R4";
+                    sb.Append("Rating is " + symbolRatings[0].rating);
                 }
-                else if (curDayRating >= .30)
+                else if (symbolRatings[0].rating == 3 && symbolRatings[1].rating == 2)
                 {
-                    proEdgeId = 11;
+                    proEdgeId = "R23";
+                    sb.Append("Rating change " + symbolRatings[0].rating + " to " + symbolRatings[1].rating);
                 }
-                else if (curDayRating >= .0)
+                else if (symbolRatings[0].rating == 2 && symbolRatings[1].rating == 1)
                 {
-                    proEdgeId = 12;
+                    proEdgeId = "R12";
+                    sb.Append("Rating change " + symbolRatings[0].rating + " to " + symbolRatings[1].rating);
                 }
-                else if (curDayRating >= -.20)
+                
+                // check for rating Value lies in range of 
+                if (proEdgeId != "")
                 {
-                    proEdgeId = 13;
+                    if (curDayRating >= .90)
+                    {
+                        proEdgeId = proEdgeId + "V90";
+                    }
+                    else if (curDayRating >= .70)
+                    {
+                        proEdgeId = proEdgeId + "V70";
+                    }
+                    else if (curDayRating >= .55)
+                    {
+                        proEdgeId = "R4R5V55";
+                    }
+                    else if (curDayRating >= .30)
+                    {
+                        proEdgeId = proEdgeId + "V30";
+                    }
+                    else if (curDayRating >= 0)
+                    {
+                        proEdgeId = proEdgeId + "V0";
+                    }
+                    else if (curDayRating >= -.20)
+                    {
+                        proEdgeId = proEdgeId + "VN20";
+                    }
+                    else if (curDayRating >= -.40)
+                    {
+                        proEdgeId = proEdgeId + "VN40";
+                    }
+                    else if (curDayRating >= -.65)
+                    {
+                        proEdgeId = proEdgeId + "VN65";
+                    }
+                    else if (curDayRating >= -1.0)
+                    {
+                        proEdgeId = proEdgeId + "VN100";
+                    }
+
+                    sb.Append(", rating value of " + curDayRating);
+
+                    // check for rating value increasing, decreasing, or same for specific days
+                    
                 }
-                else if (curDayRating >= -.40)
+                String increaseOrDecrease = "";
+                if (BuyCheckRatingIncreasingByCount(symbolRatings, 3))
                 {
-                    proEdgeId = 14;
+                    increaseOrDecrease = "I3";
+                    sb.Append(", conseutive increase for 3 days");
                 }
-                else if (curDayRating >= -.65)
+                else if (SellCheckForRatingDecreasingForCount(symbolRatings, 3, curDayRating))
                 {
-                    proEdgeId = 15;
+                    increaseOrDecrease = "D3";
+                    sb.Append(", conseutive decrease for 3 days");
                 }
-                else if (curDayRating >= -1.0)
+                else if (SellCheckForSpecificRatingForDays(symbolRatings, 3, curDayRating))
                 {
-                    proEdgeId = 16;
+                    increaseOrDecrease = "S3";
+                    sb.Append(", same for 3 days");
+                }
+                else if (checkRatingIncreasingOrEqualByCount(symbolRatings, 6, curDayRating))
+                {
+                    increaseOrDecrease = "IE6";
+                    sb.Append(", conseutive 6 equal or increase");
+                }
+                else
+                {
+                    increaseOrDecrease = "";
                 }
 
-                if (proEdgeId > 7)
+                if (increaseOrDecrease != "")
                 {
-                    if (BuyCheckRatingIncreasingByCount(symbolRatings, 3))
+                    if (proEdgeId != "")
                     {
-                        proEdgeId = proEdgeId * 10 + 1;
+                        proEdgeId = proEdgeId + increaseOrDecrease;
+
                     }
-                    else if (SellCheckForRatingDecreasingForCount(symbolRatings, 3, curDayRating))
+                    else if (symbolRatings[0].rating < 5 && (increaseOrDecrease.Equals("I3") || increaseOrDecrease.Equals("D3")))
                     {
-                        proEdgeId = proEdgeId * 10 + 2;
-                    }
-                    else if (SellCheckForSpecificRatingForDays(symbolRatings, 3, curDayRating))
-                    {
-                        proEdgeId = proEdgeId * 10 + 3;
+                        proEdgeId = increaseOrDecrease;
                     }
                 }
-                symbolAnaltytics.proEdgeId = proEdgeId;
-                symbolAnaltytics.rules = sb.ToString();
-            }
-            catch (Exception)
-            {
+                else {
+                    proEdgeId = "";
                 
-                throw;
+                }
+
+                symbolAnaltytics.proEdgeId = proEdgeId;
+                symbolAnaltytics.alertType = 3;
+                symbolAnaltytics.rules = sb.ToString();
+                if (proEdgeId != "")
+                    log.Info("ProEdge: for Symbol" + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate); 
+            }
+            catch (Exception ex)
+            {
+
+                log.Error(ex);
             }
             return symbolAnaltytics;
 
+        }
+
+        private static bool checkRatingIncreasingOrEqualByCount(List<Rating> symbolRatings, int increaseCount, double curDayRating)
+        {
+            int increaseRatingCount = 0;
+            try
+            {
+
+                for (int i = 0; i < symbolRatings.Count - 1; i++)
+                {
+                    if (increaseRatingCount < increaseCount)
+                    {
+                        double curRating = symbolRatings[i].ratingValue;
+                        double preDayRating = symbolRatings[i + 1].ratingValue;
+                        double diff = curRating - preDayRating;
+                        if (diff >= 0)
+                        {
+                            increaseRatingCount++;
+                        }
+                        else if (diff < 0)
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error(ex);
+            }
+            if (increaseRatingCount >= increaseCount)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         private static bool SellCheckForSpecificRatingForDays(List<Rating> symbolRatings, int days, double ratingValue)
         {
-            bool isbelowSpecificRating = false;
-            for (int i = 0; i < days; i++)
+            bool isSpecificRating = false;
+            try
             {
-                if (symbolRatings[i].ratingValue <= ratingValue)
+                if (symbolRatings.Count > days)
                 {
-                    isbelowSpecificRating = true;
-                }
-                else
-                {
+                    for (int i = 0; i < days; i++)
+                    {
+                        if (symbolRatings[i].ratingValue <= ratingValue)
+                        {
+                            isSpecificRating = true;
+                        }
+                        else
+                        {
 
-                    isbelowSpecificRating = false;
-                    break;
+                            isSpecificRating = false;
+                            break;
+                        }
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                log.Error(ex);
+            }
 
-            return isbelowSpecificRating;
+            return isSpecificRating;
 
         }
 
@@ -623,7 +825,7 @@ namespace ChartLabFinCalculation.BL
             }
         }
 
-        private static bool BuyCheckRatingIncreasingByCount(List<Rating> symbolRatings, int increaseCount)
+        private static bool BuyCheckRatingIncreasingByCount(List<Rating> symbolRatings, int increaseCountRequired)
         {
             int increaseRatingCount = 0;
             try
@@ -631,7 +833,7 @@ namespace ChartLabFinCalculation.BL
 
                 for (int i = 0; i < symbolRatings.Count - 1; i++)
                 {
-                    if (increaseRatingCount < increaseCount)
+                    if (increaseRatingCount < increaseCountRequired)
                     {
                         double curRating = symbolRatings[i].ratingValue;
                         double preDayRating = symbolRatings[i + 1].ratingValue;
@@ -656,7 +858,7 @@ namespace ChartLabFinCalculation.BL
             {
                 log.Error(ex);
             }
-            if (increaseRatingCount >= increaseCount)
+            if (increaseRatingCount >= increaseCountRequired)
             {
                 return true;
             }
@@ -685,6 +887,7 @@ namespace ChartLabFinCalculation.BL
                 return false;
             }
         }
+        #endregion
         #endregion
 
         #region import raings data from files sent by louise for 30 years of data.
@@ -797,5 +1000,24 @@ namespace ChartLabFinCalculation.BL
         #endregion
 
 
+        #region proEdge hist
+        internal static void calculateSNPProEdgeIDHIst(DateTime startDate)
+        {
+            try
+            {
+                List<DateTime> financialDates = SNPAnalyticsDAO.getFinancialDayDatesFromDB(startDate);
+                foreach (DateTime date in financialDates)
+                {
+                    calculateSNPProEdgeID(date);
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                log.Error("Error: When claculation hist Pro Edge rule Id  for snp symbols, " + ex);
+            }
+        }
+        #endregion
     }
 }

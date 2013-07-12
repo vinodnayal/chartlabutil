@@ -283,13 +283,13 @@ namespace ChartLabFinCalculation
                             switch (args[1])
                             {
                                 case "D":   //specific Date
-                                    
+
                                     toDate = DateTime.Now.Date;
                                     fromDate = DateTime.Now.Date;
                                     if (args.Length > 2)
                                     {
                                         DateTime date = DateTime.Parse(args[2]);
-                                        fromDate =toDate = date;
+                                        fromDate = toDate = date;
                                         logTime.Info("Process: Starting  Data Import for specific date " + date);
                                     }
                                     HistoricalDataImporter.HistoricalDataFilePath = HistoricalDataFilePath;
@@ -393,7 +393,7 @@ namespace ChartLabFinCalculation
                         }
                         catch (Exception ex)
                         {
-                            log.Error("Error:"+ex);
+                            log.Error("Error:" + ex);
                         }
                         logTime.Info("Process: Done! Calculate Market Internals Programme at: " + DateTime.Now);
                         #endregion
@@ -616,13 +616,13 @@ namespace ChartLabFinCalculation
 
                     case "TRH":
 
-                       
+
                         #region Top Rating symbols Hist
-                        
+
                         logTime.Info("Rating:  Top Rating symbols Hist: " + DateTime.Now);
                         BuySellRatingCalculation.SaveTopRatingSymbolsHist();
                         BuySellRatingCalculation.SaveTopRatingAddRemoveSymbolsHist();
-                       
+
                         break;
 
                         #endregion
@@ -640,8 +640,8 @@ namespace ChartLabFinCalculation
                     case "MailTest":
 
                         #region MailTest
-                         String From = ConfigurationManager.AppSettings["AdminEmail"];
-                         MailUtility.SendMail("testing", "testing", From, "om.omshiv@gmail.com");
+                        String From = ConfigurationManager.AppSettings["AdminEmail"];
+                        MailUtility.SendMail("testing", "testing", From, "om.omshiv@gmail.com");
 
                         break;
 
@@ -651,7 +651,7 @@ namespace ChartLabFinCalculation
                     case "MPA":
 
                         #region Model portfolio Signal Alert
-                        
+
                         break;
 
                         #endregion
@@ -668,7 +668,7 @@ namespace ChartLabFinCalculation
 
                     case "U":
 
-                        #region unsubscribe Free trial user with promocode 
+                        #region unsubscribe Free trial user with promocode
                         logTime.Info("Process:  update Free Trial Users Programme at: " + DateTime.Now);
                         UsersManager.ManageFreeTrialUsers();
 
@@ -676,18 +676,64 @@ namespace ChartLabFinCalculation
 
                         #endregion
 
-                        case "SNPAnalytics":
+                    case "Synopsis":
 
                         #region calculating synopsys id for chart page
-                        logTime.Info("Process:  calculating synopsys id for chart page Programme at: " + DateTime.Now);
-                        SnPSymbolsCalculations.snpDatafilesPath = SnPSpecificDatePricesPath;
-                        SnPSymbolsCalculations.calculateSNPSymbolAnalytics();
+                        logTime.Info("Process:  calculating synopsys id for chart page  Programme at: " + DateTime.Now);
+                        SNPSymbolsCalculations.snpDatafilesPath = SnPSpecificDatePricesPath;
+                        SNPSymbolsCalculations.calculateSNPSymbolsSynopsis();
 
                         break;
 
                         #endregion
 
-                        case "snpcache":
+                    case "ProEdge":
+
+                        #region calculating synopsys id for chart page
+                        SNPSymbolsCalculations.snpDatafilesPath = SnPSpecificDatePricesPath;
+                        if (args.Length > 1)
+                        {
+
+                            switch (args[1])
+                            {
+                                case "H":
+                                    logTime.Info("Process:  calculating Pro Edge Hist  Programme at: " + DateTime.Now);
+                                    DateTime startDate = DateTime.Now.AddDays(-40);
+                                    if (args.Length > 2)
+                                    {
+                                        int days = Convert.ToInt32(args[2]);
+                                        startDate = DateTime.Now.AddDays(-days);
+
+                                    }
+                                    SNPSymbolsCalculations.calculateSNPProEdgeIDHIst(startDate);
+                                    break;
+
+                                case "C":
+                                    
+                                    logTime.Info("Process:  calculating Pro Edge Current  Programme at: " + DateTime.Now);
+                                    SNPSymbolsCalculations.calculateSNPProEdgeID(DateTime.Now);
+                                    break;
+
+                                //case "D":
+                                //    DateTime onDate = DateTime.Now;
+                                //    if (args.Length > 2)
+                                //    {
+                                //        onDate = DateTime.Parse(args[2]);
+                                       
+                                //    }
+                                //    logTime.Info("Process:  calculating Pro Edge Current  Programme at: " + DateTime.Now);
+                                //    SNPSymbolsCalculations.calculateSNPProEdgeID(onDate);
+                                //    break;
+
+                            }
+
+                        }
+
+                        break;
+
+                        #endregion
+
+                    case "snpcache":
 
                         #region get current data for s&p 500 symbols in memcheche by calling php code
                         logTime.Info("Info:  get current data for s&p 500 symbols in memcheche by calling php code: " + DateTime.Now);
@@ -698,7 +744,7 @@ namespace ChartLabFinCalculation
                         #endregion
 
 
-                        case "ETFRating":
+                    case "ETFRating":
 
                         #region ETFRating calculations
                         logTime.Info("Starting calculate SNP Rating change hist Programme at: " + DateTime.Now);
@@ -708,16 +754,16 @@ namespace ChartLabFinCalculation
 
                         #endregion
 
-                        case "SNPRating":
-                        SnPSymbolsCalculations.snpDatafilesPath = SnPSpecificDatePricesPath;
-                        SnPSymbolsCalculations.CalculateSNPSymbolsRatingsData();
+                    case "SNPRating":
+                        SNPSymbolsCalculations.snpDatafilesPath = SnPSpecificDatePricesPath;
+                        SNPSymbolsCalculations.CalculateSNPSymbolsRatingsData();
                         break;
 
 
-                        case "SNPPrice":
-                         HistoricalDataImporter.HistoricalDataFilePath = HistoricalDataFilePath;
+                    case "SNPPrice":
+                        HistoricalDataImporter.HistoricalDataFilePath = HistoricalDataFilePath;
                         HistoricalDataImporter.ERRORSymbolsPath = ERRORSymbolsPath;
-                        SnPSymbolsCalculations.snpDatafilesPath = SnPSpecificDatePricesPath;
+                        SNPSymbolsCalculations.snpDatafilesPath = SnPSpecificDatePricesPath;
                         fromDate = DateTime.Now.AddDays(-400);
                         if (args.Length > 1)
                         {
@@ -728,9 +774,9 @@ namespace ChartLabFinCalculation
                         }
 
 
-                        SnPSymbolsCalculations.ImportSNPSymbolsPriceData(fromDate);
+                        SNPSymbolsCalculations.ImportSNPSymbolsPriceData(fromDate);
                         break;
-                        
+
 
                     //case "ETFRating":
 
