@@ -6,6 +6,7 @@ using FinLib;
 using FinLib.Model;
 using System.IO;
 using ChartLabFinCalculation.DAL;
+using System.Configuration;
 
 namespace ChartLabFinCalculation.BL
 {
@@ -275,7 +276,7 @@ namespace ChartLabFinCalculation.BL
 
 
                 //If there is a 600% increase in rating that with a minimum rating of .11 rating
-                if (curDayRating >= .11 && preDayRating < .11)
+                if (curDayRating >= .11)
                 {
                     if (BuyCheckRatingIncreasePctFromPreDay(symbolRatings, 600.0))
                     {
@@ -284,7 +285,7 @@ namespace ChartLabFinCalculation.BL
                     }
                 }
                 //If there is a 130% increase in rating that with a minimum rating of .14 rating
-                if (curDayRating >= .14 && preDayRating < .14)
+                if (curDayRating >= .14)
                 {
                     if (BuyCheckRatingIncreasePctFromPreDay(symbolRatings, 130.0))
                     {
@@ -1019,5 +1020,43 @@ namespace ChartLabFinCalculation.BL
             }
         }
         #endregion
+
+        internal static void SendProEdgeEmailAlerts()
+        {
+            try
+            {
+                log.Info("EmailAlert: Geting subscribed user list");
+                Dictionary<int, string> usersEmailDict = EmailAlertsDAO.GetProEdgeSubsUser();
+
+
+                String Subject = "ChartLab ProEdge Alerts";
+                String From = ConfigurationManager.AppSettings["AdminEmail"];
+                int emailCounter = 0;
+                foreach (KeyValuePair<int, String> user in usersEmailDict)
+                {
+                    emailCounter++;
+                    int userId = user.Key;
+                    String To = user.Value;
+                    log.Info("EmailAlert: Geting user's alert from DB");
+                    String AlertsString = getUserAlerts(userId);
+                    if (emailCounter % 10 == 0)
+                    {
+                        Thread.Sleep(30000);
+                    }
+                    if (AlertsString != "")
+                    {
+                        String Body = Constants.HtmlStartString + AlertsString + Constants.HtmlEndString;
+                        MailUtility.SendMail(Subject, Body, From, To);
+                        log.Info("EmailAlert: Alerts Mail sent to mail id :" + To);
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+                log.Error("Error: When claculation hist Pro Edge rule Id  for snp symbols, " + ex);
+            }
+        }
     }
 }
