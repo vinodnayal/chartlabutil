@@ -780,5 +780,10 @@ namespace ChartLabFinCalculation.DAL
         {
             throw new NotImplementedException();
         }
+
+        internal static Dictionary<int, string> GetProEdgeSubsUser()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

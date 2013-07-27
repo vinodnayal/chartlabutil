@@ -689,7 +689,7 @@ namespace ChartLabFinCalculation
 
                     case "ProEdge":
 
-                        #region calculating synopsys id for chart page
+                        #region calculating Proedge id for chart page
                         SNPSymbolsCalculations.snpDatafilesPath = SnPSpecificDatePricesPath;
                         if (args.Length > 1)
                         {
@@ -714,16 +714,10 @@ namespace ChartLabFinCalculation
                                     SNPSymbolsCalculations.calculateSNPProEdgeID(DateTime.Now);
                                     break;
 
-                                //case "D":
-                                //    DateTime onDate = DateTime.Now;
-                                //    if (args.Length > 2)
-                                //    {
-                                //        onDate = DateTime.Parse(args[2]);
-                                       
-                                //    }
-                                //    logTime.Info("Process:  calculating Pro Edge Current  Programme at: " + DateTime.Now);
-                                //    SNPSymbolsCalculations.calculateSNPProEdgeID(onDate);
-                                //    break;
+                                case "EA":
+                                   
+                                    SNPSymbolsCalculations.SendProEdgeEmailAlerts();
+                                    break;
 
                             }
 
