@@ -23,5 +23,7 @@ namespace FinLib.Model
         public int alertType { get; set; }
 
         public long proEdgeTriggerDateDiff { get; set; }
+
+        public string companyName { get; set; }
     }
 }
