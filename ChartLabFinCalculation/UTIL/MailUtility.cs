@@ -54,7 +54,53 @@ namespace ChartLabFinCalculation.UTIL
                 log.Error(ex);
             }
         }
+        internal static void SendMail(string Subject, string Body, string From, List<string> usersEmailsList)
+        {
 
+            bool retry = true;
+            MailMessage mail = new MailMessage();
+            SmtpClient SmtpServer = new SmtpClient(_SMTPServer);
+            SmtpServer.Port = _SmtpPort;
+            SmtpServer.Credentials = new System.Net.NetworkCredential(_adminEmail, _adminMailPassword);
+            SmtpServer.EnableSsl = true;
+            try
+            {
+                if (Body != "")
+                {
+                    mail.Subject = Subject;
+                    mail.From = new MailAddress(From);
+                    foreach (String mailId in usersEmailsList)
+                    {
+                        if (mailId != "")
+                        {
+                            mail.Bcc.Add(mailId);
+                        }
+                    }
+
+                    mail.Body = Body;
+                    mail.IsBodyHtml = true;
+                    SmtpServer.Send(mail);
+                }
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    if (retry)
+                    {
+                        SmtpServer.Send(mail);
+                        retry = false;
+                    }
+                }
+                catch (Exception ex1)
+                {
+                    log.Error(ex1);
+                }
+
+                log.Error("Error in Sending  email subject " + Subject);
+                log.Error(ex);
+            }
+        }
     }
 }
 

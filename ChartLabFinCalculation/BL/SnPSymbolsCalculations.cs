@@ -7,6 +7,7 @@ using FinLib.Model;
 using System.IO;
 using ChartLabFinCalculation.DAL;
 using System.Configuration;
+using ChartLabFinCalculation.UTIL;
 
 namespace ChartLabFinCalculation.BL
 {
@@ -76,10 +77,11 @@ namespace ChartLabFinCalculation.BL
                 int curRating = symbolRating.currating;
                 int preRating = symbolRating.prevrating;
                 int ctRating = symbolRating.ctrating;
-                if (preRating > 3)
+                if (preRating >= 3)
+                {
                     ruleId.Append("R" + preRating + curRating);
-                if (ctRating <= 3)
-                    ruleId.Append("C" + ctRating);
+                }
+                ruleId.Append("C" + ctRating);
                 if ((DateTime.Now - symbolRating.ratingChangeDate).TotalDays > 110 && curRating == 4)
                 {
 
@@ -120,11 +122,11 @@ namespace ChartLabFinCalculation.BL
                                 snpSymbolsProEdgeDetails.Add(tempAnalytics);
 
                                 //update snpsymbolAnalytics table with new alert
-                                if (snpSymbolsAnalytics.ContainsKey(symbolDetail.Key)  )
+                                if (snpSymbolsAnalytics.ContainsKey(symbolDetail.Key))
                                 {
                                     SnpAnalytics symbolAnalytics = snpSymbolsAnalytics[symbolDetail.Key];
 
-                                    if (tempAnalytics.alertType == 3 && symbolAnalytics.proEdgeTriggerDateDiff <= 10 && symbolAnalytics.proEdgeTriggerDateDiff >0 && (symbolAnalytics.alertType==1 || symbolAnalytics.alertType==2))
+                                    if (tempAnalytics.alertType == 3 && symbolAnalytics.proEdgeTriggerDateDiff <= 10 && symbolAnalytics.proEdgeTriggerDateDiff > 0 && (symbolAnalytics.alertType == 1 || symbolAnalytics.alertType == 2))
                                     {
                                     }
                                     else
@@ -148,7 +150,7 @@ namespace ChartLabFinCalculation.BL
 
 
 
-                CSVExporter.WriteToCSVProEdgeID(snpSymbolsProEdgeDetails, snpDatafilesPath + "/proEdgeFileHIst" + date.ToString("yyyyMMdd")+ ".csv");
+                CSVExporter.WriteToCSVProEdgeID(snpSymbolsProEdgeDetails, snpDatafilesPath + "/proEdgeFileHIst" + date.ToString("yyyyMMdd") + ".csv");
                 log.Info("Process :Write pro EdgeFile To CSV  for date  " + date);
 
                 SNPAnalyticsDAO.InsertProEdgeTriggerInDB(snpDatafilesPath, date);
@@ -252,9 +254,9 @@ namespace ChartLabFinCalculation.BL
                 symbolAnaltytics.proEdgeId = proEdgeId;
                 symbolAnaltytics.alertType = 1;
                 symbolAnaltytics.rules = sb.ToString();
-                if (proEdgeId != "") 
-                    log.Info("ProEdge: for Symbol " + symbolAnaltytics.symbol+" Triggered Rule :" + symbolAnaltytics.rules +"on Date "+symbolAnaltytics.proEdgeTriggerDate); 
-                
+                if (proEdgeId != "")
+                    log.Info("ProEdge: for Symbol " + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate);
+
             }
             catch (Exception)
             {
@@ -297,7 +299,7 @@ namespace ChartLabFinCalculation.BL
                 symbolAnaltytics.alertType = 1;
                 symbolAnaltytics.rules = sb.ToString();
                 if (proEdgeId != "")
-                    log.Info("ProEdge: for Symbol " + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate); 
+                    log.Info("ProEdge: for Symbol " + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate);
             }
             catch (Exception)
             {
@@ -352,7 +354,7 @@ namespace ChartLabFinCalculation.BL
                 symbolAnaltytics.alertType = 2;
                 symbolAnaltytics.rules = sb.ToString();
                 if (proEdgeId != "")
-                    log.Info("ProEdge: for Symbol " + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate); 
+                    log.Info("ProEdge: for Symbol " + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate);
             }
             catch (Exception)
             {
@@ -397,7 +399,7 @@ namespace ChartLabFinCalculation.BL
                 symbolAnaltytics.alertType = 2;
                 symbolAnaltytics.rules = sb.ToString();
                 if (proEdgeId != "")
-                    log.Info("ProEdge: for Symbol " + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate); 
+                    log.Info("ProEdge: for Symbol " + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate);
             }
             catch (Exception)
             {
@@ -442,7 +444,7 @@ namespace ChartLabFinCalculation.BL
                 symbolAnaltytics.alertType = 2;
                 symbolAnaltytics.rules = sb.ToString();
                 if (proEdgeId != "")
-                    log.Info("ProEdge: for Symbol " + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate); 
+                    log.Info("ProEdge: for Symbol " + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate);
             }
             catch (Exception)
             {
@@ -495,7 +497,7 @@ namespace ChartLabFinCalculation.BL
                 symbolAnaltytics.alertType = 2;
                 symbolAnaltytics.rules = sb.ToString();
                 if (proEdgeId != "")
-                    log.Info("ProEdge: for Symbol" + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate); 
+                    log.Info("ProEdge: for Symbol" + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate);
             }
             catch (Exception)
             {
@@ -534,7 +536,7 @@ namespace ChartLabFinCalculation.BL
                 symbolAnaltytics.alertType = 2;
                 symbolAnaltytics.rules = sb.ToString();
                 if (proEdgeId != "")
-                    log.Info("ProEdge: for Symbol" + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate); 
+                    log.Info("ProEdge: for Symbol" + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate);
             }
             catch (Exception)
             {
@@ -580,7 +582,7 @@ namespace ChartLabFinCalculation.BL
                     proEdgeId = "R12";
                     sb.Append("Rating change " + symbolRatings[0].rating + " to " + symbolRatings[1].rating);
                 }
-                
+
                 // check for rating Value lies in range of 
                 if (proEdgeId != "")
                 {
@@ -624,7 +626,7 @@ namespace ChartLabFinCalculation.BL
                     sb.Append(", rating value of " + curDayRating);
 
                     // check for rating value increasing, decreasing, or same for specific days
-                    
+
                 }
                 String increaseOrDecrease = "";
                 if (BuyCheckRatingIncreasingByCount(symbolRatings, 3))
@@ -664,16 +666,17 @@ namespace ChartLabFinCalculation.BL
                         proEdgeId = increaseOrDecrease;
                     }
                 }
-                else {
+                else
+                {
                     proEdgeId = "";
-                
+
                 }
 
                 symbolAnaltytics.proEdgeId = proEdgeId;
                 symbolAnaltytics.alertType = 3;
                 symbolAnaltytics.rules = sb.ToString();
                 if (proEdgeId != "")
-                    log.Info("ProEdge: for Symbol" + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate); 
+                    log.Info("ProEdge: for Symbol" + symbolAnaltytics.symbol + " Triggered Rule :" + symbolAnaltytics.rules + "on Date " + symbolAnaltytics.proEdgeTriggerDate);
             }
             catch (Exception ex)
             {
@@ -1026,36 +1029,44 @@ namespace ChartLabFinCalculation.BL
             try
             {
                 log.Info("EmailAlert: Geting subscribed user list");
-                Dictionary<int, string> usersEmailDict = EmailAlertsDAO.GetProEdgeSubsUser();
+                List<string> usersEmailsList = EmailAlertsDAO.GetProEdgeSubsUser();
+                log.Info("EmailAlert: Geting symbols alerts from DB");
+                List<SnpAnalytics> symbolAlerts = SNPAnalyticsDAO.getTodaysProEgeTriggers(); ;
 
-
-                String Subject = "ChartLab ProEdge Alerts";
+                String Subject = "ChartLab - PROPlus Alerts";
                 String From = ConfigurationManager.AppSettings["AdminEmail"];
-                int emailCounter = 0;
-                foreach (KeyValuePair<int, String> user in usersEmailDict)
-                {
-                    emailCounter++;
-                    int userId = user.Key;
-                    String To = user.Value;
-                    log.Info("EmailAlert: Geting user's alert from DB");
-                    String AlertsString = getUserAlerts(userId);
-                    if (emailCounter % 10 == 0)
-                    {
-                        Thread.Sleep(30000);
-                    }
-                    if (AlertsString != "")
-                    {
-                        String Body = Constants.HtmlStartString + AlertsString + Constants.HtmlEndString;
-                        MailUtility.SendMail(Subject, Body, From, To);
-                        log.Info("EmailAlert: Alerts Mail sent to mail id :" + To);
 
+                StringBuilder AlertsString = new StringBuilder();
+                log.Info("EmailAlert: Sending Proplus alerts");
+                foreach (SnpAnalytics symbol in symbolAlerts)
+                {
+                    if (symbol.alertType == 1)
+                    {
+                        AlertsString.Append("<div Style='color:green; font-weight:bold' ><img align='middle' src='http://www.chartlabpro.com/images/checkGreen.png' />" + symbol.symbol + " - " + symbol.companyName + " : Unusual Strong Strength.  </div><br>");
                     }
+                    else if (symbol.alertType == 2)
+                    {
+                        AlertsString.Append("<div Style='color:maroon;font-weight:bold' ><img align='middle' src='http://www.chartlabpro.com/images/crossRed.png' />" + symbol.symbol + " - " + symbol.companyName + " : Unusual Weakness.  </div><br>");
+                    }
+
+                }
+                if (AlertsString.ToString() != "")
+                {
+                    String finalAlertsString = "<b>PROPlus Alerts: </b><br>" + AlertsString.ToString();
+                    String Body = Constants.HtmlStartString + finalAlertsString + Constants.HtmlEndString;
+                    MailUtility.SendMail(Subject, Body, From, usersEmailsList);
+                    log.Info("EmailAlert: Alerts Mail sent.");
+
+                }
+                else
+                {
+                    log.Info("EmailAlert: Today there is no alert.");
                 }
             }
             catch (Exception ex)
             {
 
-                log.Error("Error: When claculation hist Pro Edge rule Id  for snp symbols, " + ex);
+                log.Error("Error: When Sending ProPlus alerts, " + ex);
             }
         }
     }

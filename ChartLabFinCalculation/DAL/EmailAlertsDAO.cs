@@ -781,9 +781,40 @@ namespace ChartLabFinCalculation.DAL
             throw new NotImplementedException();
         }
 
-        internal static Dictionary<int, string> GetProEdgeSubsUser()
+        internal static List<String> GetProEdgeSubsUser()
         {
-            throw new NotImplementedException();
+            List<String> users = new List<String>();
+
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
+            OdbcCommand com = new OdbcCommand(@"SELECT emailAddress FROM paidwatchlistusermapping p
+            JOIN users AS u ON u.userId=p.userid WHERE p.watchlistid =11 AND p.isuserpaid=1", con);
+
+            try
+            {
+                con.Open();
+                OdbcDataReader dr = com.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    if (dr.GetValue(0) != DBNull.Value)
+                    {
+                        users.Add(dr.GetString(0));
+                    }
+                }
+                dr.Close();
+
+            }
+            catch (OdbcException ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+
+            return users;
         }
     }
 }

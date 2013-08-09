@@ -327,6 +327,57 @@ LEFT JOIN signal_details sd ON sd.proedgeid = p.proedgeid  ";
 
             return snpSymbolsAnalytics;
         }
+
+        internal static List<SnpAnalytics> getTodaysProEgeTriggers()
+        {
+            List<SnpAnalytics> snpSymbolsAnalytics = new List<SnpAnalytics>();
+
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
+            OdbcCommand com;
+            String sqlString = @"SELECT s.symbol,e.companyName, sd.type FROM snpsymbols s
+                                LEFT JOIN snpsymbolsanalytics p ON p.symbol= s.symbol 
+                                LEFT JOIN equitiesfundamental e ON e.symbol= s.symbol 
+                                LEFT JOIN signal_details sd ON sd.proedgeid = p.proedgeid
+                                WHERE p.proedgedate= (SELECT MAX(proedgedate) FROM snpsymbolsanalytics) AND sd.type IN (1,2)";
+            com = new OdbcCommand(sqlString, con);
+
+            try
+            {
+                con.Open();
+
+                OdbcDataReader dr = com.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    SnpAnalytics symbolAnalytics = new SnpAnalytics();
+                    if (!Convert.IsDBNull(dr.GetValue(0)))
+                        symbolAnalytics.symbol = dr.GetString(0);
+
+                    if (!Convert.IsDBNull(dr.GetValue(1)))
+                        symbolAnalytics.companyName = dr.GetString(1);
+
+                    if (!Convert.IsDBNull(dr.GetValue(2)))
+                        symbolAnalytics.alertType = Convert.ToInt32(dr.GetValue(2));
+
+
+                   
+                        snpSymbolsAnalytics.Add(symbolAnalytics);
+
+                }
+
+            }
+            catch (OdbcException ex)
+            {
+                log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+
+            return snpSymbolsAnalytics;
+        }
     }
 }
 
