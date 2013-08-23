@@ -19,61 +19,7 @@ namespace ChartLabFinCalculation.BL
                 List<string> etfSymbolList = ETFSymbolsDAO.getETFSymbolsList();
                 foreach (string etfSymbol in etfSymbolList)
                 {
-                    try
-                    {
-                        List<Rating> RatingList = new List<Rating>();
-                        Dictionary<DateTime, CTRating> ctRatingList = new Dictionary<DateTime, CTRating>();
-                        String symbolDataPath = ETFDataFilesPath + "/" + etfSymbol;
-                        List<FileInfo> symbolCTRatingFiles = new List<FileInfo>();
-                        DirectoryInfo symbolDirectory = new DirectoryInfo(symbolDataPath);
-                        if (symbolDirectory.Exists)
-                        {
-                            FileInfo[] fileEntries = symbolDirectory.GetFiles();
-                            foreach (FileInfo file in fileEntries)
-                            {
-                                //symbolFilesDict.Add("price"
-                                String fileType = file.Extension;
-                                if (fileType.Equals(".NBY")) // import price data
-                                {
-                                    ImportPriceDataForSymbolsInDB(etfSymbol, file);
-                                }
-                                else if (fileType.Equals(".TR1")) //calculate buysell
-                                {
-                                    RatingList = CalculateBuySellRatings(etfSymbol, file);
-                                }
-                                else if (fileType.Equals(".CT2") || fileType.Equals(".CT3")) //calculate CT rating
-                                {
-                                    symbolCTRatingFiles.Add(file);
-                                }
-
-
-                            }
-                        }
-                        if (symbolCTRatingFiles.Count > 0)
-                        {
-
-                            ctRatingList = calculateCTRatings(etfSymbol, symbolCTRatingFiles);
-                        }
-                        foreach (Rating bsRating in RatingList)
-                        {
-                            if (ctRatingList.ContainsKey(bsRating.ratingDate))
-                            {
-                                CTRating ctRating = ctRatingList[bsRating.ratingDate];
-
-                                bsRating.ctRatingValue = ctRating.ctRatingValue;
-                                bsRating.ctRating = ctRating.ctRating;
-
-                            }
-
-                        }
-                        CSVExporter.WriteToCSVRating(RatingList, ETFDataFilesPath + "/RatingFile.csv");
-                        ETFSymbolsDAO.InsertRatingDataInDB(ETFDataFilesPath, "etfhistbsctrating", etfSymbol, true);
-                    }
-                    catch (Exception ex)
-                    {
-                        log.Error("Error in importing data for symbol " + etfSymbol);
-                        log.Error(ex);
-                    }
+                    importDataforSymbol(etfSymbol);
                 }
             }
             catch (Exception ex)
@@ -83,6 +29,75 @@ namespace ChartLabFinCalculation.BL
             }
 
 
+        }
+
+        public static void importDataforSymbol(string etfSymbol)
+        {
+            try
+            {
+                log.Info("Process:  ETF Rating Data importing for symbol "+ etfSymbol);
+                List<Rating> RatingList = new List<Rating>();
+                Dictionary<DateTime, CTRating> ctRatingList = new Dictionary<DateTime, CTRating>();
+                String symbolDataPath = ETFDataFilesPath + "/" + etfSymbol;
+                List<FileInfo> symbolCTRatingFiles = new List<FileInfo>();
+                DirectoryInfo symbolDirectory = new DirectoryInfo(symbolDataPath);
+                if (symbolDirectory.Exists)
+                {
+                    FileInfo[] fileEntries = symbolDirectory.GetFiles();
+                    foreach (FileInfo file in fileEntries)
+                    {
+                        //symbolFilesDict.Add("price"
+                        String fileType = file.Extension;
+                        if (fileType.Equals(".NBY")) // import price data
+                        {
+                            //log.Info("Process: calculating Prices ");
+                            // ImportPriceDataForSymbolsInDB(etfSymbol, file); // Price will be import from Yahooo
+                        }
+                        else if (fileType.Equals(".TR1")) //calculate buysell
+                        {
+                            log.Info("Process: calculating Ratings ");
+                            RatingList = CalculateBuySellRatings(etfSymbol, file);
+                        }
+                        else if (fileType.Equals(".CT2") || fileType.Equals(".CT3")) //calculate CT rating
+                        {
+                            log.Info("Process: calculating CT Ratings " + fileType);
+                            symbolCTRatingFiles.Add(file);
+                        }
+
+
+                    }
+                }
+                else
+                {
+                    log.Warn("Process: Data file directory does not exists.");
+                
+                }
+                if (symbolCTRatingFiles.Count > 0)
+                {
+
+                    ctRatingList = calculateCTRatings(etfSymbol, symbolCTRatingFiles);
+                }
+                foreach (Rating bsRating in RatingList)
+                {
+                    if (ctRatingList.ContainsKey(bsRating.ratingDate))
+                    {
+                        CTRating ctRating = ctRatingList[bsRating.ratingDate];
+
+                        bsRating.ctRatingValue = ctRating.ctRatingValue;
+                        bsRating.ctRating = ctRating.ctRating;
+
+                    }
+
+                }
+                log.Info("Process: Ratinngs Saving in DB of symbol " + etfSymbol);
+                CSVExporter.WriteToCSVRating(RatingList, ETFDataFilesPath + "/RatingFile.csv");
+                ETFSymbolsDAO.InsertRatingDataInDB(ETFDataFilesPath, "etfhistbsctrating", etfSymbol, true);
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error in importing data for symbol " + etfSymbol);
+                log.Error(ex);
+            }
         }
         //calculate datwise ctrating from historical data for symbol 
         internal static Dictionary<DateTime, CTRating> calculateCTRatings(string etfSymbol, List<FileInfo> symbolCTRatingFiles)
@@ -284,10 +299,48 @@ namespace ChartLabFinCalculation.BL
                 log.Error(ex);
             }
         }
-    
-    
-    
-    
-    
+
+
+
+
+
+
+        internal static void importPriceforSymbol(string Symbol)
+        {
+            try
+            {
+                DateTime toDate = DateTime.Now;
+                int customHistDataLength = 15;
+                int year = DateTime.Now.AddYears(-customHistDataLength).Date.Year;
+                DateTime fromDate = new DateTime(year, 1, 1);
+
+                log.Info("Process: Starting Historical Data Import for specific symbol " + Symbol);
+                                    SymbolHistoricalDAO.DeleteData(Symbol, "symbolshistorical");
+                                    HistoricalDataImporter.SaveHistDataSymbol(fromDate, toDate, Symbol, false, true, "symbolshistorical");
+                                    log.Info("Process: Done! Historical Data Import for specific symbol " + Symbol);
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error in importing price for ETF Symbol " + Symbol);
+                log.Error(ex);
+            }
+        }
+
+        internal static void importPriceforALLETFSymbol()
+        {
+            try
+            {
+                List<string> etfSymbolList = ETFSymbolsDAO.getETFSymbolsList();
+                foreach (string etfSymbol in etfSymbolList)
+                {
+                    importPriceforSymbol(etfSymbol);
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error in importing Prices data for etf symbols ");
+                log.Error(ex);
+            }
+        }
     }
 }

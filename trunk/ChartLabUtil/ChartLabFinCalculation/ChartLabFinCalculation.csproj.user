@@ -4,7 +4,7 @@
     <StartArguments>ProEdgeHist</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <StartArguments>ProEdge EA</StartArguments>
+    <StartArguments>ETF Prices AGG</StartArguments>
   </PropertyGroup>
   <PropertyGroup>
     <PublishUrlHistory>publish\</PublishUrlHistory>
