@@ -609,7 +609,43 @@ namespace ChartLabFinCalculation
                         #region ETF data import
                         logTime.Info("Process:  Starting calculate and import ETF market data in DB Programme at: " + DateTime.Now);
                         ETFSymbolsDataCalculation.ETFDataFilesPath = ETFSymbolsDataPath;
-                        ETFSymbolsDataCalculation.CalculateFTFSymbolsData();
+                        if (args.Length > 1)
+                        {
+                            switch (args[1])
+                            {
+                                case "All":
+                                    ETFSymbolsDataCalculation.CalculateFTFSymbolsData();
+                                    break;
+
+                                case "S":
+                                    if (args.Length > 2)
+                                    {
+                                        String Symbol = args[2];
+                                        ETFSymbolsDataCalculation.importDataforSymbol(Symbol);
+
+                                    }
+                                    break;
+
+                                case "Prices":
+
+                                    HistoricalDataImporter.HistoricalDataFilePath = HistoricalDataFilePath;
+                                    HistoricalDataImporter.ERRORSymbolsPath = ERRORSymbolsPath;
+                                    if (args.Length > 2)
+                                    {
+                                        String Symbol = args[2];
+                                        ETFSymbolsDataCalculation.importPriceforSymbol(Symbol);
+
+                                    }
+                                    else
+                                    {
+                                        ETFSymbolsDataCalculation.importPriceforALLETFSymbol();
+                                    }
+
+                                    break;
+
+                            }
+                        }
+
                         break;
 
                         #endregion
@@ -709,13 +745,13 @@ namespace ChartLabFinCalculation
                                     break;
 
                                 case "C":
-                                    
+
                                     logTime.Info("Process:  calculating Pro Edge Current  Programme at: " + DateTime.Now);
                                     SNPSymbolsCalculations.calculateSNPProEdgeID(DateTime.Now);
                                     break;
 
                                 case "EA":
-                                   
+
                                     SNPSymbolsCalculations.SendProEdgeEmailAlerts();
                                     break;
 
