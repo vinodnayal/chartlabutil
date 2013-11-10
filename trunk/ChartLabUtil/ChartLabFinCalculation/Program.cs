@@ -301,7 +301,7 @@ namespace ChartLabFinCalculation
                                     break;
 
                                 case "S":   //specific Symbol
-
+                                    HistoricalDataImporter.NewSymbolsPath = NewSymbolsPath;
                                     if (args.Length > 3)
                                     {
                                         int customHistDataLength = Convert.ToInt32(args[3]);
