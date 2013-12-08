@@ -4,7 +4,7 @@
     <StartArguments>ProEdgeHist</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <StartArguments>Hist S "C" 5</StartArguments>
+    <StartArguments>PM W 5358</StartArguments>
   </PropertyGroup>
   <PropertyGroup>
     <PublishUrlHistory>publish\</PublishUrlHistory>

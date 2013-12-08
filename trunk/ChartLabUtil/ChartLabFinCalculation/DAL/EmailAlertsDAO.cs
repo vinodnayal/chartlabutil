@@ -448,7 +448,7 @@ namespace ChartLabFinCalculation.DAL
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             OdbcCommand com = new OdbcCommand("SELECT DISTINCT usm.user_id,u.emailAddress FROM usersubscriptionmapping usm "
-                                                + "INNER JOIN users u ON u.userId=usm.user_id where u.isPaid=1", con);
+                                                + "INNER JOIN users u ON u.userId=usm.user_id where u.isPaid=1 OR u.isundertrial=1", con);
             try
             {
                 con.Open();
