@@ -6,6 +6,9 @@ using System.Data.Odbc;
 using FinLib;
 using FinLib.Model;
 using ChartLabFinCalculation.BL;
+using MongoDB.Driver;
+using MongoDB.Bson;
+using MongoDB.Driver.Builders;
 
 namespace ChartLabFinCalculation.DAL
 {
@@ -459,7 +462,7 @@ namespace ChartLabFinCalculation.DAL
                     users.Add(Convert.ToInt32(dr.GetString(0)), dr.GetString(1));
                 }
                 dr.Close();
-               
+
             }
             catch (OdbcException ex)
             {
@@ -492,7 +495,7 @@ namespace ChartLabFinCalculation.DAL
 
                 }
                 dr.Close();
-               
+
             }
             catch (OdbcException ex)
             {
@@ -534,7 +537,7 @@ namespace ChartLabFinCalculation.DAL
                     }
                 }
                 dr.Close();
-               
+
             }
             catch (OdbcException ex)
             {
@@ -565,7 +568,7 @@ namespace ChartLabFinCalculation.DAL
                     commonSubsList.Add(dr.GetInt32(0), dr.GetInt32(1));
                 }
                 dr.Close();
-               
+
             }
             catch (OdbcException ex)
             {
@@ -600,7 +603,7 @@ namespace ChartLabFinCalculation.DAL
                     }
                 }
                 dr.Close();
-                
+
             }
             catch (OdbcException ex)
             {
@@ -662,7 +665,7 @@ namespace ChartLabFinCalculation.DAL
                     userWatchlists.Add((dr.GetInt32(0)), dr.GetString(1));
                 }
                 dr.Close();
-              
+
             }
             catch (OdbcException ex)
             {
@@ -732,7 +735,7 @@ namespace ChartLabFinCalculation.DAL
 
                 }
                 dr.Close();
-              
+
             }
             catch (OdbcException ex)
             {
@@ -786,7 +789,7 @@ namespace ChartLabFinCalculation.DAL
             List<String> users = new List<String>();
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand com = new OdbcCommand(@"SELECT emailAddress FROM paidwatchlistusermapping p
+            OdbcCommand com = new OdbcCommand(@"SELECT DISTINCT emailAddress FROM paidwatchlistusermapping p
             JOIN users AS u ON u.userId=p.userid WHERE p.watchlistid =11 AND p.isuserpaid=1", con);
 
             try
@@ -796,7 +799,7 @@ namespace ChartLabFinCalculation.DAL
 
                 while (dr.Read())
                 {
-                    if (dr.GetValue(0) != DBNull.Value)
+                    if (dr.GetValue(0) != DBNull.Value && dr.GetString(0) != "")
                     {
                         users.Add(dr.GetString(0));
                     }
@@ -816,5 +819,51 @@ namespace ChartLabFinCalculation.DAL
 
             return users;
         }
+
+        /// <summary>
+        ///  Get snp alert from mongo
+        /// </summary>
+        /// <returns SnpAlert>snpAlert</returns>
+        internal static SnpAlert getSnpUpdateAlertMongo()
+        {
+
+            MongoServer mongo = MongoServer.Create(Constants.MongoConString);
+            SnpAlert snpAlert = new SnpAlert();
+            try
+            {
+                mongo.Connect();
+                var db = mongo.GetDatabase("chartlab");
+                var collection = db.GetCollection<BsonDocument>("ratingsynopsis");
+                var query = Query.EQ("symbol", "SPY");
+
+
+
+                log.Info("\n\n\n\n\n Getting Data from Mongo DB ");
+
+                foreach (BsonDocument item in collection.Find(query))
+                {
+
+                    snpAlert.status = item.GetElement("Status").Value.ToString();
+                    if (item.GetElement("CTRatingValue").Value.ToString() != null)
+                        snpAlert.ctRatingValue = double.Parse(item.GetElement("CTRatingValue").Value.ToString());
+
+                    snpAlert.synopsis = item.GetElement("synopsis").Value.ToString();
+                    snpAlert.ctRatingStatus = item.GetElement("CTRatingStatus").Value.ToString();
+
+
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+            return snpAlert;
+
+
+
+        }
+
     }
 }

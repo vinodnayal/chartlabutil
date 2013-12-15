@@ -67,6 +67,7 @@
     <Compile Include="Algo\TrendCalculation.cs" />
     <Compile Include="Bands.cs" />
     <Compile Include="CandleStick.cs" />
+    <Compile Include="Model\SnpAlert.cs" />
     <Compile Include="Model\SnpAnalytics.cs" />
     <Compile Include="Model\StatisticsPerf.cs" />
     <Compile Include="Model\SymbolAlerts.cs" />
