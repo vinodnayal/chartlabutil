@@ -1037,7 +1037,7 @@ namespace ChartLabFinCalculation.BL
                 String From = ConfigurationManager.AppSettings["AdminEmail"];
 
                 StringBuilder AlertsString = new StringBuilder();
-                log.Info("EmailAlert: Sending Proplus alerts");
+                log.Info("EmailAlert: Sending Proplus alerts for users count :" + usersEmailsList.Count);
                 foreach (SnpAnalytics symbol in symbolAlerts)
                 {
                     if (symbol.alertType == 1)
@@ -1050,13 +1050,29 @@ namespace ChartLabFinCalculation.BL
                     }
 
                 }
-                if (AlertsString.ToString() != "")
+                if (AlertsString.ToString() != "" )
                 {
                     String finalAlertsString = "<b>PROPlus Alerts: </b><br>" + AlertsString.ToString();
                     String Body = Constants.HtmlStartString + finalAlertsString + Constants.HtmlEndString;
-                    MailUtility.SendMail(Subject, Body, From, usersEmailsList);
-                    log.Info("EmailAlert: Alerts Mail sent.");
+                    int chunkSize = 40;
+                    double temp = (int)usersEmailsList.Count / chunkSize;
+                    int chunkCounts = (int) Math.Ceiling(temp);
+                    for (int i = 0; i <= chunkCounts; i++)
+                    {
+                        int index = 40 * i;
+                        if (i == chunkCounts)
+                        {
+                            MailUtility.SendMail(Subject, Body, From, usersEmailsList.GetRange(index, usersEmailsList.Count - index));
+                            log.Info("EmailAlert: Alerts Mail sent in range of " + index + " to " + (usersEmailsList.Count - index));
+                        }
+                        else
+                        {
+                            MailUtility.SendMail(Subject, Body, From, usersEmailsList.GetRange(index, chunkSize));
 
+                            log.Info("EmailAlert: Alerts Mail sent in range of " + index + " to " + (index + chunkSize - 1));
+                        }
+                    
+                    }
                 }
                 else
                 {
