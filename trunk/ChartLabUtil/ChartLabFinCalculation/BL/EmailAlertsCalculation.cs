@@ -163,6 +163,12 @@ namespace ChartLabFinCalculation.BL
             }
             return AlertString.ToString();
         }
+
+        /// <summary>
+        /// get all users list
+        /// get snp Alert
+        /// calculate alert for user based on subscritons and send on their mail id 
+        /// </summary>
         internal static void SendAlertsEmailtoUsers()
         {
             try
@@ -174,21 +180,33 @@ namespace ChartLabFinCalculation.BL
                 String Subject = "ChartLab Alerts";
                 String From = ConfigurationManager.AppSettings["AdminEmail"];
                 int emailCounter = 0;
+
+               String snpAlertHtmlView=  SnpUpdateAlerts.GetSNPUpdateAlert();
+                
                 foreach (KeyValuePair<int, String> user in usersEmailDict)
                 {
                     emailCounter++;
                     int userId = user.Key;
                     String To = user.Value;
                     log.Info("EmailAlert: Geting user's alert from DB");
-                    String AlertsString = getUserAlerts(userId);
+                    //snp alert from mongo
+                    String AlertsString = "<b>S&P 500 Alert: </b><br/>" + snpAlertHtmlView + "<br/><br/>";
+                 
+                    //get user alerts
+                    AlertsString += getUserAlerts(userId);
+                   
                     if (emailCounter % 10 == 0)
                     {
                         Thread.Sleep(30000);
                     }
                     if (AlertsString != "")
                     {
-                        String Body = Constants.HtmlStartString + AlertsString + Constants.HtmlEndString;
+                        //final HTML boly for mail
+                        String Body = Constants.HtmlStartString +  AlertsString + Constants.HtmlEndString;
+                      
+                        //sending alert by mail
                         MailUtility.SendMail(Subject, Body, From, To);
+
                         log.Info("EmailAlert: Alerts Mail sent to mail id :" + To);
                        
                     }
@@ -219,7 +237,7 @@ namespace ChartLabFinCalculation.BL
                         myPortAlerts = formateAlertText(userAlerts.portfolioAlerts);
                         if (myPortAlerts != "")
                         {
-                            alerts.Append("<b>My Portfolio Alerts: </b><br>");
+                            alerts.Append("<b>My Portfolio Alerts: </b><br/>");
                             alerts.Append(myPortAlerts);
 
                         }
@@ -237,7 +255,7 @@ namespace ChartLabFinCalculation.BL
 
                             String Alertsttext = formateAlertText(alert);
 
-                            alerts.Append("<b>'" + watchlistAlert.Key + "' Watchlist Alerts: </b><br>");
+                            alerts.Append("<b>'" + watchlistAlert.Key + "' Watchlist Alerts: </b><br/>");
                             alerts.Append(Alertsttext);
 
                         }

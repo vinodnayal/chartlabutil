@@ -88,6 +88,7 @@
     <Compile Include="BL\SentimentIndicator.cs" />
     <Compile Include="BL\SnPPriceCalculation.cs" />
     <Compile Include="BL\SNPSymbolsCalculations.cs" />
+    <Compile Include="BL\SnpUpdateAlerts.cs" />
     <Compile Include="BL\StatisticsCalculation.cs" />
     <Compile Include="BL\SymbolAnalyticsCalculation.cs" />
     <Compile Include="BL\SymbolPerformance.cs" />
