@@ -562,9 +562,9 @@ namespace ChartLabFinCalculation.BL
                     proEdgeId = "R5";
                     sb.Append("Rating is " + symbolRatings[0].rating);
                 }
-                else if (symbolRatings[0].rating == 4 && symbolRatings[1].rating == 3)
+                else if (symbolRatings[0].rating == 4 || symbolRatings[0].rating == 3)
                 {
-                    proEdgeId = "R34";
+                    proEdgeId = "R34V30";
                     sb.Append("Rating change " + symbolRatings[0].rating + " to " + symbolRatings[1].rating);
                 }
                 else if (symbolRatings[0].rating == 4)
@@ -572,19 +572,19 @@ namespace ChartLabFinCalculation.BL
                     proEdgeId = "R4";
                     sb.Append("Rating is " + symbolRatings[0].rating);
                 }
-                else if (symbolRatings[0].rating == 3 && symbolRatings[1].rating == 2)
+                else if (symbolRatings[0].rating == 3 || symbolRatings[0].rating == 2)
                 {
                     proEdgeId = "R23";
                     sb.Append("Rating change " + symbolRatings[0].rating + " to " + symbolRatings[1].rating);
                 }
-                else if (symbolRatings[0].rating == 2 && symbolRatings[1].rating == 1)
+                else if (symbolRatings[0].rating == 2 || symbolRatings[0].rating == 1)
                 {
-                    proEdgeId = "R12";
+                    proEdgeId = "R12VN65";
                     sb.Append("Rating change " + symbolRatings[0].rating + " to " + symbolRatings[1].rating);
                 }
 
                 // check for rating Value lies in range of 
-                if (proEdgeId != "")
+                if (proEdgeId != "" && ! (proEdgeId.Contains("R34") || proEdgeId.Contains("R12")))
                 {
                     if (curDayRating >= .90)
                     {
