@@ -289,7 +289,7 @@ namespace ChartLabFinCalculation.BL
         {
             try{
                 List<BuySellRating> historyBuySellRatingList = ETFSymbolsDAO.getETFBuySellRatingHistroyFromDB();
-            List<BuySellRatingChangeHist> ChangeBuySellRatingHist = BuySellRatingCalculation.getBuySellRatingChangelist(historyBuySellRatingList);
+            List<BuySellRatingChangeHist> ChangeBuySellRatingHist = Util.getBuySellRatingChangelist(historyBuySellRatingList);
             CSVExporter.WriteToCSVChangeRatingHistory(ChangeBuySellRatingHist, ETFDataFilesPath + "/ChangeRatingHistoryFile.csv");
             BuySellRatingDAO.InsertChangeRatingHistoryCSVToDB(ETFDataFilesPath,"etfbuysellratingchangehist");
             }

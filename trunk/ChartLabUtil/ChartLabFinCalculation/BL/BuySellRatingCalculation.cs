@@ -266,14 +266,14 @@ namespace ChartLabFinCalculation
 
             try
             {
-                log.Info("Rating: getting BuySell Rating Histroy From DB");
-                List<BuySellRating> historyBuySellRatingList = BuySellRatingDAO.getBuySellRatingHistroyFromDB();
-                log.Info("Rating: getting Change BuySell Rating Hist");
-                List<BuySellRatingChangeHist> ChangeBuySellRatingHist = getBuySellRatingChangelist(historyBuySellRatingList);
-                CSVExporter.WriteToCSVChangeRatingHistory(ChangeBuySellRatingHist, BuySellRatingChangeHistCsvFilePath + "/ChangeRatingHistoryFile.csv");
-                log.Info("Rating: Write To CSV Change Rating History");
-                BuySellRatingDAO.InsertChangeRatingHistoryCSVToDB(BuySellRatingChangeHistCsvFilePath, "buySellRatingChangeHistory");
-                log.Info("Rating: Inserted Change Rating History CSV To DB ");
+                //log.Info("Rating: getting BuySell Rating Histroy From DB");
+                //List<BuySellRating> historyBuySellRatingList = BuySellRatingDAO.getBuySellRatingHistroyFromDB();
+                //log.Info("Rating: getting Change BuySell Rating Hist");
+                //List<BuySellRatingChangeHist> ChangeBuySellRatingHist = getBuySellRatingChangelist(historyBuySellRatingList);
+                //CSVExporter.WriteToCSVChangeRatingHistory(ChangeBuySellRatingHist, BuySellRatingChangeHistCsvFilePath + "/ChangeRatingHistoryFile.csv");
+                //log.Info("Rating: Write To CSV Change Rating History");
+                //BuySellRatingDAO.InsertChangeRatingHistoryCSVToDB(BuySellRatingChangeHistCsvFilePath, "buySellRatingChangeHistory");
+                //log.Info("Rating: Inserted Change Rating History CSV To DB ");
             }
             catch (Exception ex)
             {
@@ -281,44 +281,7 @@ namespace ChartLabFinCalculation
                 log.Error("Error: Problem in Buy Sell ChangeHistory" + ex);
             }
         }
-        public static List<BuySellRatingChangeHist> getBuySellRatingChangelist(List<BuySellRating> historyBuySellRatingList)
-        {
-
-            List<BuySellRatingChangeHist> ChangeBuySellRatingHist = new List<BuySellRatingChangeHist>();
-            try
-            {
-                for (int i = 1; i < historyBuySellRatingList.Count; i++)
-                {
-                    int prevRating = historyBuySellRatingList[i - 1].rating;
-                    int currentRating = historyBuySellRatingList[i].rating;
-                    string prevSymbol = historyBuySellRatingList[i - 1].symbol;
-                    string currentSymbol = historyBuySellRatingList[i].symbol;
-                    if (currentSymbol.Equals(prevSymbol))
-                    {
-                        if ((prevRating - currentRating) != 0)
-                        {
-                            ChangeBuySellRatingHist.Add(
-                                new BuySellRatingChangeHist
-                                {
-                                    symbol = historyBuySellRatingList[i].symbol,
-                                    newRating = currentRating,
-                                    oldRating = prevRating,
-                                    ratingDate = historyBuySellRatingList[i].ratingDate
-
-
-                                });
-                        }
-                    }
-
-
-                }
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error: Problem in calculating Buy sell rating change hist" + ex);
-            }
-            return ChangeBuySellRatingHist;
-        }
+        
 
         internal static void updateETFRatings()
         {
