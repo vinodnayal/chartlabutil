@@ -12,7 +12,7 @@ namespace ChartLabFinCalculation
     {
 
         static log4net.ILog log = log4net.LogManager.GetLogger(typeof(BuySellRatingDAO));
-
+        
         public static void InsertRating(string foldername)
         {
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
@@ -33,6 +33,10 @@ namespace ChartLabFinCalculation
 
             OdbcCommand inserthistoryBuySellRatingCmd = new OdbcCommand("INSERT INTO historyBuySellRating (symbol,rating,ratingvalue,ratingdate,ctrating,ctratingvalue) " +
                                                    "SELECT symbol,rating,ratingvalue,DATE(NOW()),ctrating,ctratingvalue FROM temp_buySellRating", con);
+
+
+
+           
 
             OdbcCommand deleteTempRatingCmd = new OdbcCommand("DELETE from tempreviousrating", con);
             OdbcCommand insertTempPrevRatingCmd = con.CreateCommand();
@@ -91,6 +95,15 @@ namespace ChartLabFinCalculation
 
                 deleteBuySellRatingCmd.ExecuteNonQuery();
                 inserthistoryBuySellRatingCmd.ExecuteNonQuery();
+                log.Info("Rating: getting BuySell Rating Histroy From DB");
+                List<BuySellRating> historyBuySellRatingList = BuySellRatingDAO.getBuySellRatingHistroyFromDB();
+                log.Info("Rating: getting Change BuySell Rating Hist");
+                List<BuySellRatingChangeHist> ChangeBuySellRatingHist = Util.getBuySellRatingChangelist(historyBuySellRatingList);
+                CSVExporter.WriteToCSVChangeRatingHistory(ChangeBuySellRatingHist, BuySellRatingCalculation.BuySellRatingChangeHistCsvFilePath + "/ChangeRatingHistoryFile.csv");
+                log.Info("Rating: Write To CSV Change Rating History");
+                BuySellRatingDAO.InsertChangeRatingHistoryCSVToDB(BuySellRatingCalculation.BuySellRatingChangeHistCsvFilePath, "buySellRatingChangeHistory");
+                log.Info("Rating: Inserted Change Rating History CSV To DB ");
+
                 insertTempPrevRatingCmd.ExecuteReader();
                 deletetopRatingSymbols.ExecuteNonQuery();
                 insertTop20symbols.ExecuteReader();

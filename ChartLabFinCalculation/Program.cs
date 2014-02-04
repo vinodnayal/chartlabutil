@@ -352,7 +352,7 @@ namespace ChartLabFinCalculation
 
                         BuySellRatingCalculation.BuySellRatingFilePath = BuySellRatingFilePath;
                         BuySellRatingCalculation.BuySellRatingCsvFilePath = BuySellRatingCsvFilePath;
-
+                        BuySellRatingCalculation.BuySellRatingChangeHistCsvFilePath = BuySellRatingChangeHistCsvFilePath;
                         BuySellRatingCalculation.calculateBuySellRating();
                         logTime.Info("Rating: updating ETF Ratings from HistBuySellRating Tbl" + DateTime.Now);
                         BuySellRatingCalculation.updateETFRatings();
@@ -404,9 +404,9 @@ namespace ChartLabFinCalculation
                         #region Buy Sell Change History
 
                         logTime.Info("Rating: Starting Buy Sell Change History Programme at: " + DateTime.Now);
-                        BuySellRatingCalculation.BuySellRatingChangeHistCsvFilePath = BuySellRatingChangeHistCsvFilePath;
+                        //BuySellRatingCalculation.BuySellRatingChangeHistCsvFilePath = BuySellRatingChangeHistCsvFilePath;
 
-                        BuySellRatingCalculation.BuySellChangeHistory();
+                        //BuySellRatingCalculation.BuySellChangeHistory();
                         logTime.Info("Rating: Done! Buy Sell Change History Programme at: " + DateTime.Now);
                         #endregion
                         break;
