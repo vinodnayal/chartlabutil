@@ -102,6 +102,7 @@
     <Compile Include="BL\SymbolPerformance.cs" />
     <Compile Include="BL\UpdateHistoryDates.cs" />
     <Compile Include="BL\UsersManager.cs" />
+    <Compile Include="BL\Util.cs" />
     <Compile Include="BL\ValidationDataHelper.cs" />
     <Compile Include="BL\WebServices.cs" />
     <Compile Include="BL\WeeklyReturnCaculation.cs" />
