@@ -23,5 +23,23 @@ namespace FinLib.Model
         public int ctRatingAlertType { get; set; }
 
         public string watchlistName { get; set; }
+        public double price { get; set; }
+        public double change { get; set; }
+        public double changePct { get; set; }
+        public int longTermTrend { get; set; }
+        public DateTime longTermTrendDate { get; set; }
+
+
+        public double support { get; set; }
+
+        public double resistance { get; set; }
+
+        public string longTermTrendText { get; set; }
+        public string ratingAlertText { get; set; }
+        public string ctRatingAlertText { get; set; }
+
+        public string priceChangeText { get; set; }
+
+        public string wlHeaderCss { get; set; }
     }
 }
