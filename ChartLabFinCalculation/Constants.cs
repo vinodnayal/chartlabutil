@@ -104,5 +104,133 @@ namespace ChartLabFinCalculation
                  +"   <td><a href='https://twitter.com/ChartLabPro' target='_blank'><img src='http://www.chartlabpro.com/images/img3.png' width='86' height='32' alt='twitter'></a></td>"
                 +"</table> </div></div></body></html>";
         
+
+
+    public const String HtmlStartStringWithCss = @"
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
+<style>
+.alertTable{
+border:1px solid #f8f9fb;
+border-spacing:0px
+}
+
+.alertTable td{
+border-bottom:1px solid #f8f9fb;
+}
+
+.alertTable th{
+	text-transform:uppercase;
+	font-size:12px;
+	padding:14px 11px;
+	font-weight:bold;
+	background: #f8f9fb;
+	background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2Y4ZjlmYiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNlNWU4ZjAiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
+	background: -moz-linear-gradient(top,  #f8f9fb 0%, #e5e8f0 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f8f9fb), color-stop(100%,#e5e8f0));
+	background: -webkit-linear-gradient(top,  #f8f9fb 0%,#e5e8f0 100%);
+	background: -o-linear-gradient(top,  #f8f9fb 0%,#e5e8f0 100%);
+	background: -ms-linear-gradient(top,  #f8f9fb 0%,#e5e8f0 100%);
+	background: linear-gradient(to bottom,  #f8f9fb 0%,#e5e8f0 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f8f9fb', endColorstr='#e5e8f0',GradientType=0 );
+}
+.redInfo{
+	display:block;
+	border:1px solid #94443e;
+	width:93px;
+	padding:3px 5px;
+	color:#fff;
+	overflow:hidden;
+background:#d26c69;
+	background:#d26c69 url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2QyNmM2OSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjUlIiBzdG9wLWNvbG9yPSIjY2E1MjUwIiBzdG9wLW9wYWNpdHk9IjEiLz4KICAgIDxzdG9wIG9mZnNldD0iMTYlIiBzdG9wLWNvbG9yPSIjYzk1MjRmIiBzdG9wLW9wYWNpdHk9IjEiLz4KICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iI2FlNDAzYyIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgPC9saW5lYXJHcmFkaWVudD4KICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSJ1cmwoI2dyYWQtdWNnZy1nZW5lcmF0ZWQpIiAvPgo8L3N2Zz4=);
+	background: -moz-linear-gradient(top,  #d26c69 0%, #ca5250 5%, #c9524f 16%, #ae403c 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#d26c69), color-stop(5%,#ca5250), color-stop(16%,#c9524f), color-stop(100%,#ae403c));
+	background: -webkit-linear-gradient(top,  #d26c69 0%,#ca5250 5%,#c9524f 16%,#ae403c 100%);
+	background: -o-linear-gradient(top,  #d26c69 0%,#ca5250 5%,#c9524f 16%,#ae403c 100%);
+	background: -ms-linear-gradient(top,  #d26c69 0%,#ca5250 5%,#c9524f 16%,#ae403c 100%);
+	background: linear-gradient(to bottom,  #d26c69 0%,#ca5250 5%,#c9524f 16%,#ae403c 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d26c69', endColorstr='#ae403c',GradientType=0 );
+}
+
+.greenInfo{
+        display:block;
+	width:93px;
+	padding:3px 5px;
+	color:#fff;
+	overflow:hidden;
+	border:1px solid #709961;
+background:#94cf80;
+	background:#94cf80; url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzk0Y2Y4MCIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjUlIiBzdG9wLWNvbG9yPSIjODFjNjY5IiBzdG9wLW9wYWNpdHk9IjEiLz4KICAgIDxzdG9wIG9mZnNldD0iMjElIiBzdG9wLWNvbG9yPSIjN2ZjNTY3IiBzdG9wLW9wYWNpdHk9IjEiLz4KICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzY3YWU0YyIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgPC9saW5lYXJHcmFkaWVudD4KICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSJ1cmwoI2dyYWQtdWNnZy1nZW5lcmF0ZWQpIiAvPgo8L3N2Zz4=);
+	background: -moz-linear-gradient(top,  #94cf80 0%, #81c669 5%, #7fc567 21%, #67ae4c 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#94cf80), color-stop(5%,#81c669), color-stop(21%,#7fc567), color-stop(100%,#67ae4c));
+	background: -webkit-linear-gradient(top,  #94cf80 0%,#81c669 5%,#7fc567 21%,#67ae4c 100%);
+	background: -o-linear-gradient(top,  #94cf80 0%,#81c669 5%,#7fc567 21%,#67ae4c 100%);
+	background: -ms-linear-gradient(top,  #94cf80 0%,#81c669 5%,#7fc567 21%,#67ae4c 100%);
+	background: linear-gradient(to bottom,  #94cf80 0%,#81c669 5%,#7fc567 21%,#67ae4c 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#94cf80', endColorstr='#67ae4c',GradientType=0 );
+}
+
+.support
+{
+  vertical-align: middle ;  background-color:#EDF4EB;  padding:4px; color: green;   font-weight: bold;
+}
+
+.resistance
+{
+  vertical-align: middle ;background-color:#F1DFDF;  padding:4px; color: maroon; font-weight: bold;
+}
+.stock
+{
+width:200px;
+}
+
+.lastprice
+{
+width:60px;
+}
+.change
+{
+width:100px;
+}
+.supportTd
+{
+width:80px;
+}
+.resistanceTd
+{
+width:80px;
+}
+.alert
+{
+width:300px;
+}
+.lngterm
+{
+width:200px;
+text-align:center;
+}
+
+.wlHeader{
+font-weight:bold;
+color:white;
+background:#008040;
+}
+.portHeader{
+font-weight:bold;
+color:white;
+background:#112E55;
+}
+.commonWlHeader{
+font-weight:bold;
+color:white;
+background:#FF7F27;
+}
+</style>
+<body> <div style='border: 2px #EEEEEE solid; width: 1000px;'> 
+<table style='width: 100%;background-color: #F5F5F5;'>    <td><img height='45' src='http://www.chartlabpro.com/images/logoGray.png'/>
+</td>  <td><img src='http://www.chartlabpro.com/images/img111.png'/> <br><font color='Orange' size='3'>Alerts</font></td>  <td>
+<a style='float:right' href='http://www.chartlabpro.com/site/login'>Sign In</a></td></table><div style='padding: 20px'><div style='border: 4px #F5F5F5 solid; '>  
+<div style='background-color: #F5F5F5; height: 20px;'></div> <div  style='padding: 20px'>
+";
+
     }
 }

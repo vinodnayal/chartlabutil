@@ -51,27 +51,40 @@ namespace ChartLabFinCalculation.DAL
             // string mycon = System.Configuration.ConfigurationSettings.AppSettings.["sqlcon"].ConnectionString;
             return users;
         }
-        internal static Dictionary<String, SymbolAlerts> getMyPortAlerts(int userId)
+        internal static Dictionary<int, List<SymbolAlerts>> getMyPortAlerts(int userId)
         {
-            Dictionary<String, SymbolAlerts> symolAlertListDict = new Dictionary<String, SymbolAlerts>();
+            Dictionary<int, List<SymbolAlerts>> symolAlertList = new Dictionary<int,List<SymbolAlerts>>();
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand ratingChangeCom = new OdbcCommand("SELECT DISTINCT  up.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate FROM users u "
-                                                        + "LEFT JOIN userportfolio up ON up.userId=u.userid "
-                                                        + "INNER JOIN buysellratingchangehistory bs ON bs.symbol=up.symbol "
-                                                        + "LEFT JOIN equitiesfundamental ef ON ef.symbol=up.symbol "
-                                                         + "WHERE  u.userid=" + userId + " AND bs.ratingDate=(SELECT MAX(ratingDate) FROM buysellratingchangehistory)", con);
 
-            OdbcCommand ctRatingChangeCom = new OdbcCommand("SELECT DISTINCT up.symbol,ct.ctratingprev,ct.ctratingcurr , ef.companyName, ct.changeDate FROM users u "
-                                                            + "LEFT JOIN userportfolio up ON up.userId=u.userid "
-                                                            + "INNER JOIN ctratingchangehistory ct ON ct.symbol=up.symbol "
-                                                            + "LEFT JOIN equitiesfundamental ef ON ef.symbol=up.symbol "
-                                                           + "WHERE u.userid=" + userId + " AND ct.changeDate=(SELECT MAX(changedate) FROM ctratingchangehistory)", con);
+            OdbcCommand ratingChangeCom = new OdbcCommand(@" SELECT DISTINCT  up.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate,ct.ctratingprev,ct.ctratingcurr,ct.changedate,t1.close,t1.date,t2.close,t2.date,sa.r1,sa.s3,sa.longTerm,0 as watchlistid,'Portfolio' as watchlistname FROM users u 
+LEFT JOIN userportfolio up ON up.userId=u.userid 
+LEFT JOIN symbolanalytics sa ON sa.symbol=up.symbol 
+LEFT JOIN equitiesfundamental ef ON ef.symbol=up.symbol
+LEFT JOIN (SELECT * FROM buysellratingchangehistory WHERE ratingDate= (SELECT MAX(ratingDate) FROM buysellratingchangehistory)) AS bs ON bs.symbol=up.symbol
+LEFT JOIN (SELECT * FROM ctratingchangehistory WHERE changedate= (SELECT MAX(changedate) FROM ctratingchangehistory)) AS ct ON ct.symbol=up.symbol
+
+LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT MAX(DATE) FROM symbolshistorical)) AS t1 ON t1.symbol=up.symbol
+LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT DISTINCT DATE FROM symbolshistorical ORDER BY DATE DESC LIMIT 1,1)) AS t2 ON t2.symbol=up.symbol
+
+WHERE   u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT NULL)", con);
+
+            //OdbcCommand ratingChangeCom = new OdbcCommand("SELECT DISTINCT  up.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate FROM users u "
+            //                                            + "LEFT JOIN userportfolio up ON up.userId=u.userid "
+            //                                            + "INNER JOIN buysellratingchangehistory bs ON bs.symbol=up.symbol "
+            //                                            + "LEFT JOIN equitiesfundamental ef ON ef.symbol=up.symbol "
+            //                                             + "WHERE  u.userid=" + userId + " AND bs.ratingDate=(SELECT MAX(ratingDate) FROM buysellratingchangehistory)", con);
+
+            //OdbcCommand ctRatingChangeCom = new OdbcCommand("SELECT DISTINCT up.symbol,ct.ctratingprev,ct.ctratingcurr , ef.companyName, ct.changeDate FROM users u "
+            //                                                + "LEFT JOIN userportfolio up ON up.userId=u.userid "
+            //                                                + "INNER JOIN ctratingchangehistory ct ON ct.symbol=up.symbol "
+            //                                                + "LEFT JOIN equitiesfundamental ef ON ef.symbol=up.symbol "
+            //                                               + "WHERE u.userid=" + userId + " AND ct.changeDate=(SELECT MAX(changedate) FROM ctratingchangehistory)", con);
             try
             {
                 con.Open();
                 OdbcDataReader ratingChangeDr = ratingChangeCom.ExecuteReader();
-                symolAlertListDict = getSymbolBSRatingAlertObj(ratingChangeDr, symolAlertListDict, false);
+              symolAlertList = getSymbolBSRatingAlertObj(ratingChangeDr);
 
             }
             catch (OdbcException ex)
@@ -83,51 +96,51 @@ namespace ChartLabFinCalculation.DAL
                 if (con != null)
                     con.Close();
             }
-            try
-            {
-                con.Open();
-                OdbcDataReader ctRatingDr = ctRatingChangeCom.ExecuteReader();
-                symolAlertListDict = getSymbolCTRatingAlert(ctRatingDr, symolAlertListDict, false);
+            //try
+            //{
+            //    con.Open();
+            //    OdbcDataReader ctRatingDr = ctRatingChangeCom.ExecuteReader();
+            //    symolAlertListDict = getSymbolCTRatingAlert(ctRatingDr, symolAlertListDict, false);
 
-            }
-            catch (OdbcException ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                    con.Close();
-            }
+            //}
+            //catch (OdbcException ex)
+            //{
+            //    throw ex;
+            //}
+            //finally
+            //{
+            //    if (con != null)
+            //        con.Close();
+            //}
 
             // string mycon = System.Configuration.ConfigurationSettings.AppSettings.["sqlcon"].ConnectionString;
-            return symolAlertListDict;
+            return symolAlertList;
         }
-        internal static Dictionary<String, SymbolAlerts> getMyWatchlistAlerts(int userId)
+        internal static Dictionary<int, List<SymbolAlerts>> getMyWatchlistAlerts(int userId)
         {
-            Dictionary<String, SymbolAlerts> symolAlertListDict = new Dictionary<String, SymbolAlerts>();
+            Dictionary<int, List<SymbolAlerts>> symolAlertList = new Dictionary<int, List<SymbolAlerts>>();
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand ratingChangeCom = new OdbcCommand("SELECT DISTINCT wm.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate,wm.watchlistid,wl.watchlistname FROM users u "
-                                                            + "LEFT JOIN watchlist wl ON wl.userid=u.userId "
-                                                        + "LEFT JOIN watchlistsymbolmapping wm ON wm.watchlistid=wl.watchlistid "
-                                                        + "INNER JOIN buysellratingchangehistory bs ON bs.symbol=wm.symbol "
-                                                        + "LEFT JOIN equitiesfundamental ef ON ef.symbol=wm.symbol "
-                                                        + "WHERE  u.userid=" + userId + "  AND bs.ratingDate=(SELECT MAX(ratingDate) FROM buysellratingchangehistory)", con);
+            OdbcCommand ratingChangeCom = new OdbcCommand(@" SELECT DISTINCT  wm.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate,ct.ctratingprev,ct.ctratingcurr,ct.changedate,t1.close,t1.date,t2.close,t2.date,sa.r3,sa.s3,sa.longTerm,wm.watchlistid,wl.watchlistname FROM users u 
+LEFT JOIN watchlist wl ON wl.userid=u.userId 
+LEFT JOIN watchlistsymbolmapping wm ON wm.watchlistid=wl.watchlistid 
+LEFT JOIN symbolanalytics sa ON sa.symbol=wm.symbol 
+LEFT JOIN equitiesfundamental ef ON ef.symbol=wm.symbol
+LEFT JOIN (SELECT * FROM buysellratingchangehistory WHERE ratingDate= (SELECT MAX(ratingDate) FROM buysellratingchangehistory)) AS bs ON bs.symbol=wm.symbol
+LEFT JOIN (SELECT * FROM ctratingchangehistory WHERE changedate= (SELECT MAX(changedate) FROM ctratingchangehistory)) AS ct ON ct.symbol=wm.symbol
 
-            OdbcCommand ctRatingChangeCom = new OdbcCommand("SELECT DISTINCT wm.symbol,ct.ctratingprev,ct.ctratingcurr ,ef.companyName,ct.changeDate,wm.watchlistid,wl.watchlistname FROM users u "
-                                                            + "LEFT JOIN watchlist wl ON wl.userid=u.userId "
-                                                        + "LEFT JOIN watchlistsymbolmapping wm ON wm.watchlistid=wl.watchlistid "
-                                                        + "INNER JOIN ctratingchangehistory ct ON ct.symbol=wm.symbol "
-                                                        + "LEFT JOIN equitiesfundamental ef ON ef.symbol=wm.symbol "
-                                                        + "WHERE  u.userid=" + userId + "  AND ct.changeDate=(SELECT MAX(changedate) FROM ctratingchangehistory)", con);
+LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT MAX(DATE) FROM symbolshistorical)) AS t1 ON t1.symbol=wm.symbol
+LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT DISTINCT DATE FROM symbolshistorical ORDER BY DATE DESC LIMIT 1,1)) AS t2 ON t2.symbol=wm.symbol
 
+WHERE   u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT NULL)", con);
+
+           
             try
             {
 
                 con.Open();
                 OdbcDataReader ratingChangeDr = ratingChangeCom.ExecuteReader();
-                symolAlertListDict = getSymbolBSRatingAlertObj(ratingChangeDr, symolAlertListDict, true);
+                symolAlertList = getSymbolBSRatingAlertObj(ratingChangeDr);
             }
             catch (OdbcException ex)
             {
@@ -139,178 +152,337 @@ namespace ChartLabFinCalculation.DAL
                     con.Close();
             }
 
-            try
-            {
-                con.Open();
-                OdbcDataReader ctRatingDr = ctRatingChangeCom.ExecuteReader();
-                symolAlertListDict = getSymbolCTRatingAlert(ctRatingDr, symolAlertListDict, true);
-
-
-            }
-            catch (OdbcException ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                    con.Close();
-            }
-
-            // string mycon = System.Configuration.ConfigurationSettings.AppSettings.["sqlcon"].ConnectionString;
-            return symolAlertListDict;
+            
+            return symolAlertList;
         }
 
-        private static Dictionary<string, SymbolAlerts> getSymbolCTRatingAlert(OdbcDataReader ctRatingDr, Dictionary<string, SymbolAlerts> symolAlertListDict, bool isWatchlistAlert)
+        //private static Dictionary<string, SymbolAlerts> getSymbolCTRatingAlert(OdbcDataReader ctRatingDr, Dictionary<string, SymbolAlerts> symolAlertListDict, bool isWatchlistAlert)
+        //{
+        //    try
+        //    {
+               
+        //        while (ctRatingDr.Read())
+        //        {
+        //            int ctRatingAlertType = 0; //negative alert or positive
+        //            int prevCTRating = 0;
+        //            if (ctRatingDr.GetValue(1) != DBNull.Value)
+        //            {
+        //                prevCTRating = ctRatingDr.GetInt32(1);
+        //            }
+        //            int currCTRating = 0;
+        //            if (ctRatingDr.GetValue(2) != DBNull.Value)
+        //            {
+        //                currCTRating = ctRatingDr.GetInt32(2);
+        //            }
+
+        //            if (currCTRating > prevCTRating)
+        //            {
+        //                ctRatingAlertType = 1;
+        //            }
+        //            String watchlistName = "Portfolio";
+        //            if (isWatchlistAlert)
+        //            {
+        //                if (ctRatingDr.GetValue(6) != DBNull.Value)
+        //                {
+        //                    watchlistName = ctRatingDr.GetString(6);
+        //                }
+        //            }
+        //            String symbol = "";
+
+        //            if (ctRatingDr.GetValue(0) != DBNull.Value)
+        //            {
+        //                symbol = ctRatingDr.GetString(0);
+        //            }
+        //            String companyName = "";
+
+        //            if (ctRatingDr.GetValue(3) != DBNull.Value)
+        //            {
+        //                companyName = ctRatingDr.GetString(3);
+        //            }
+                   
+        //            if (!symolAlertListDict.ContainsKey(symbol))
+        //            {
+        //                symolAlertListDict.Add(symbol, new SymbolAlerts
+        //                {
+        //                    Symbol = symbol,
+        //                    preCTRating = prevCTRating,
+        //                    curCTRating = currCTRating,
+        //                    companyName = companyName,
+        //                    ctRatingAlertType = ctRatingAlertType,
+        //                    watchlistName = watchlistName
+        //                });
+        //            }
+        //            else
+        //            {
+        //                SymbolAlerts symAlert = symolAlertListDict[symbol];
+        //                symAlert.preCTRating = prevCTRating;
+        //                symAlert.curCTRating = currCTRating;
+        //                symAlert.companyName = companyName;
+        //                symAlert.ctRatingAlertType = ctRatingAlertType;
+        //            }
+        //        }
+        //        ctRatingDr.Close();
+        //    }
+        //    catch (OdbcException ex)
+        //    {
+        //        throw ex;
+        //    }
+
+        //    return symolAlertListDict;
+        //}
+
+        private static Dictionary<int, List<SymbolAlerts>> getSymbolBSRatingAlertObj(OdbcDataReader alertDr)
         {
+            Dictionary<int, List<SymbolAlerts>> wlAlertDict = new Dictionary<int, List<SymbolAlerts>>();
             try
             {
-                while (ctRatingDr.Read())
+
+               
+                while (alertDr.Read())
                 {
-                    int ctRatingAlertType = 0; //negative alert or positive
-                    int prevCTRating = 0;
-                    if (ctRatingDr.GetValue(1) != DBNull.Value)
+                    String symbol = "";
+
+                    if (alertDr.GetValue(0) != DBNull.Value)
                     {
-                        prevCTRating = ctRatingDr.GetInt32(1);
+                        symbol = alertDr.GetString(0);
+                    }
+                    int ratingAlertType = 0; //negative alert or positive
+                    int prevRating = 0;
+                    if (alertDr.GetValue(1) != DBNull.Value)
+                    {
+                        prevRating = alertDr.GetInt32(1);
+                    }
+                    int currRating = 0;
+                    if (alertDr.GetValue(2) != DBNull.Value)
+                    {
+                        currRating = alertDr.GetInt32(2);
+                    }
+                    if (currRating > prevRating)
+                    {
+                        ratingAlertType = 1;
+                    }
+                    String companyName = "";
+
+                    if (alertDr.GetValue(3) != DBNull.Value)
+                    {
+                        companyName = alertDr.GetString(3);
+                    }
+
+
+                    int ctRatingAlertType = 0; //negative alert or positive
+
+                    int prevCTRating = 0;
+                    if (alertDr.GetValue(5) != DBNull.Value)
+                    {
+                        prevCTRating = alertDr.GetInt32(5);
                     }
                     int currCTRating = 0;
-                    if (ctRatingDr.GetValue(2) != DBNull.Value)
+                    if (alertDr.GetValue(6) != DBNull.Value)
                     {
-                        currCTRating = ctRatingDr.GetInt32(2);
+                        currCTRating = alertDr.GetInt32(6);
                     }
 
                     if (currCTRating > prevCTRating)
                     {
                         ctRatingAlertType = 1;
                     }
-                    String watchlistName = "Portfolio";
-                    if (isWatchlistAlert)
-                    {
-                        if (ctRatingDr.GetValue(6) != DBNull.Value)
-                        {
-                            watchlistName = ctRatingDr.GetString(6);
-                        }
-                    }
-                    String symbol = "";
 
-                    if (ctRatingDr.GetValue(0) != DBNull.Value)
+                    double yesterdayPrice = 0;
+                    if (alertDr.GetValue(8) != DBNull.Value)
                     {
-                        symbol = ctRatingDr.GetString(0);
+                        yesterdayPrice = alertDr.GetFloat(8);
                     }
-                    String companyName = "";
 
-                    if (ctRatingDr.GetValue(3) != DBNull.Value)
+                    double todayPrice = 0;
+                    if (alertDr.GetValue(10) != DBNull.Value)
                     {
-                        companyName = ctRatingDr.GetString(3);
+                        todayPrice = alertDr.GetFloat(10);
                     }
-                    if (!symolAlertListDict.ContainsKey(symbol))
+
+                    double change = 0;
+                    double changePct = 0;
+                    if (todayPrice != 0 && yesterdayPrice != 0)
                     {
-                        symolAlertListDict.Add(symbol, new SymbolAlerts
-                        {
-                            Symbol = symbol,
-                            preCTRating = prevCTRating,
-                            curCTRating = currCTRating,
-                            companyName = companyName,
-                            ctRatingAlertType = ctRatingAlertType,
-                            watchlistName = watchlistName
-                        });
+                        change = todayPrice - yesterdayPrice;
+                        changePct = (todayPrice - yesterdayPrice) * 100 / yesterdayPrice;
+                    }
+
+
+
+
+
+
+                    double r3 = 0.0;
+                    if (alertDr.GetValue(12) != DBNull.Value)
+                    {
+                        r3 = Convert.ToDouble(alertDr.GetValue(12));
+                    }
+
+                    double s3 = 0.0;
+                    if (alertDr.GetValue(13) != DBNull.Value)
+                    {
+                        s3 = Convert.ToDouble(alertDr.GetValue(13));
+                    }
+
+                    int longTermAlertId = 0;
+
+                    if (alertDr.GetValue(14) != DBNull.Value)
+                    {
+                        longTermAlertId = alertDr.GetInt32(14);
+                    }
+
+
+                    String ratingAlertText = getRatingAlertText(currRating,prevRating);
+                    String ctRatingAlertText = getCtRatingAlertText(currCTRating,prevCTRating);
+                    String longTermAlertText = getLongTermText(longTermAlertId);
+                    string changeCssClass="greenInfo";
+                    if (change >= 0)
+                    {
+                        changeCssClass = "redInfo";
+                    }
+                    String priceChangeText = "<div class='"+changeCssClass+"'>"+change+"&nbsp;&nbsp;"+changePct+"%</div>";
+
+                    String watchlistName = "";
+                    if (alertDr.GetValue(16) != DBNull.Value)
+                    {
+                        watchlistName = alertDr.GetString(16);
+                    }
+
+                    int watchlistId = 0;
+                    if (alertDr.GetValue(15) != DBNull.Value)
+                    {
+                        watchlistId = Convert.ToInt32(alertDr.GetValue(15));
+                    }
+
+                    String wlHeaderCss = "portHeader";
+                    if (watchlistId <20)
+                    {
+                        wlHeaderCss = "commonWlHeader";
+                    }else
+                    {
+                        wlHeaderCss = "wlHeader";
+                    }
+
+
+
+                    //  wm.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate,ct.ctratingprev,ct.ctratingcurr,
+                    //ct.changedate,t1.close,t1.date,t2.close,t2.date,sa.r3,sa.s3,sa.longTerm,wm.watchlistid,wl.watchlistname 
+               SymbolAlerts symbolAlert= new SymbolAlerts
+                            {
+                                Symbol = symbol,
+                                preRating = prevRating,
+                                curRating = currRating,
+                                companyName = companyName,
+                                ratingAlertType = ratingAlertType,
+                                ctRatingAlertType = ctRatingAlertType,
+                                watchlistName = watchlistName,
+                                preCTRating = prevCTRating,
+                                curCTRating = currCTRating,
+                                change = change,
+                                changePct = changePct,
+                                resistance = Math.Round(r3,2),
+                                support = Math.Round(s3, 2),
+                                longTermTrendText = longTermAlertText,
+                                price = todayPrice,
+                                ratingAlertText = ratingAlertText,
+                                ctRatingAlertText = ctRatingAlertText,
+                                priceChangeText = priceChangeText,
+                                wlHeaderCss = wlHeaderCss
+
+                            };
+                    if (wlAlertDict.ContainsKey(watchlistId))
+                    {
+                        List<SymbolAlerts> symbolAlerts = wlAlertDict[watchlistId];
+                       symbolAlerts.Add(symbolAlert);
+                        
+                        wlAlertDict[watchlistId] = symbolAlerts;
                     }
                     else
                     {
-                        SymbolAlerts symAlert = symolAlertListDict[symbol];
-                        symAlert.preCTRating = prevCTRating;
-                        symAlert.curCTRating = currCTRating;
-                        symAlert.companyName = companyName;
-                        symAlert.ctRatingAlertType = ctRatingAlertType;
+                        List<SymbolAlerts> symbolAlerts = new List<SymbolAlerts>();
+                        symbolAlerts.Add(symbolAlert);
+                        wlAlertDict.Add(watchlistId, symbolAlerts);
                     }
                 }
-                ctRatingDr.Close();
+                alertDr.Close();
             }
             catch (OdbcException ex)
             {
                 throw ex;
             }
 
-            return symolAlertListDict;
+            return wlAlertDict;
         }
 
-        private static Dictionary<string, SymbolAlerts> getSymbolBSRatingAlertObj(OdbcDataReader ratingChangeDr, Dictionary<string, SymbolAlerts> symolAlertListDict, bool isWatchlistAlert)
+        private static string getCtRatingAlertText(int currCTRating, int prevCTRating)
         {
+            string text = string.Empty;
             try
             {
-
-
-                while (ratingChangeDr.Read())
+                if (currCTRating > prevCTRating)
                 {
-                    int ratingAlertType = 0; //negative alert or positive
-                    int prevRating = 0;
-                    if (ratingChangeDr.GetValue(1) != DBNull.Value)
-                    {
-                        prevRating = ratingChangeDr.GetInt32(1);
-                    }
-                    int currRating = 0;
-                    if (ratingChangeDr.GetValue(2) != DBNull.Value)
-                    {
-                        currRating = ratingChangeDr.GetInt32(2);
-                    }
-                    if (currRating > prevRating)
-                    {
-                        ratingAlertType = 1;
-                    }
-                    String watchlistName = "Portfolio";
-                    if (isWatchlistAlert)
-                    {
-                        if (isWatchlistAlert)
-                        {
-                            if (ratingChangeDr.GetValue(6) != DBNull.Value)
-                            {
-                                watchlistName = ratingChangeDr.GetString(6);
-                            }
-                        }
-                    }
-                    String symbol = "";
-
-                    if (ratingChangeDr.GetValue(0) != DBNull.Value)
-                    {
-                        symbol = ratingChangeDr.GetString(0);
-                    }
-                    String companyName = "";
-
-                    if (ratingChangeDr.GetValue(3) != DBNull.Value)
-                    {
-                        companyName = ratingChangeDr.GetString(3);
-                    }
-
-                    if (!symolAlertListDict.ContainsKey(symbol))
-                    {
-
-                        symolAlertListDict.Add(symbol, new SymbolAlerts
-                        {
-                            Symbol = symbol,
-                            preRating = prevRating,
-                            curRating = currRating,
-                            companyName = companyName,
-                            ratingAlertType = ratingAlertType,
-                            watchlistName = watchlistName
-                        });
-                    }
-                    else
-                    {
-                        SymbolAlerts symAlert = symolAlertListDict[symbol];
-                        symAlert.preRating = prevRating;
-                        symAlert.curRating = currRating;
-                        symAlert.companyName = companyName;
-                        symAlert.ratingAlertType = ratingAlertType;
-                    }
+                    text = "<div style='Color:green'><img align='middle' src='http://www.chartlabpro.com/images/checkGreen.png' /> " + Enum.GetName(typeof(CTRatingEnum), currCTRating) + "  from " + Enum.GetName(typeof(CTRatingEnum), prevCTRating) + "</div>";
                 }
-                ratingChangeDr.Close();
+                else if (currCTRating < prevCTRating)
+                {
+                    text = "<div style='Color:maroon'><img align='middle' src='http://www.chartlabpro.com/images/crossRed.png' />"+ Enum.GetName(typeof(CTRatingEnum), currCTRating) + "  from " + Enum.GetName(typeof(CTRatingEnum), prevCTRating) + "</div>";
+                }
             }
-            catch (OdbcException ex)
+            catch (Exception ex)
             {
+
                 throw ex;
             }
+            return text;
+        }
 
-            return symolAlertListDict;
+        private static string getRatingAlertText(int currRating, int prevRating)
+        {
+            string text = string.Empty;
+            try
+            {
+                if (currRating > prevRating)
+                {
+                    text = "<div style='Color:green'><img align='middle' src='http://www.chartlabpro.com/images/checkGreen.png' /> Upgraded "+currRating+"  from "+prevRating+"</div>";
+                }
+                else if(currRating < prevRating)
+                {
+                    text = "<div style='Color:maroon'><img align='middle' src='http://www.chartlabpro.com/images/crossRed.png' /> Downgraded " + currRating + "  from " + prevRating + "</div>";
+                }
+                
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+            return text;
+        }
+
+        private static string getLongTermText(int longTermAlertId)
+        {
+            string text = string.Empty;
+            try
+            {
+                if (longTermAlertId == 1)
+                {
+                    text = "<div style='Color:green'>Turned Bullish <img align='middle' src='http://www.chartlabpro.com/images/bull.png' /> </div>";
+                }
+                else if (longTermAlertId == 2)
+                {
+                    text = "<div style='Color:maroon' >Turned Bearish <img align='middle' src='http://www.chartlabpro.com/images/Bear.png' /></div>";
+                }
+                else
+                {
+                    text = "<div style='Color:gray' >Neutral </div>";
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw ex;
+            }
+            return text;
         }
 
         internal static List<int> getUserSubscriptions(int userId)
@@ -367,29 +539,40 @@ namespace ChartLabFinCalculation.DAL
 
         }
 
-        internal static Dictionary<String, SymbolAlerts> GetSpecificWLAlerts(int watchlistId)
+        internal static Dictionary<int, List<SymbolAlerts>> GetSpecificWLAlerts(int watchlistId)
         {
-            Dictionary<String, SymbolAlerts> symolAlertListDict = new Dictionary<String, SymbolAlerts>();
+            Dictionary<int, List<SymbolAlerts>> symolAlertList = new Dictionary<int, List<SymbolAlerts>>();
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand ratingChangeCom = new OdbcCommand("SELECT DISTINCT wm.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate,wm.watchlistid,wl.watchlistname FROM watchlist wl "
-                                                           + "LEFT JOIN watchlistsymbolmapping wm ON wm.watchlistid=wl.watchlistid "
-                                                           + "INNER JOIN buysellratingchangehistory bs ON bs.symbol=wm.symbol "
-                                                           + "LEFT JOIN equitiesfundamental ef ON ef.symbol=wm.symbol "
-                                                            + "WHERE  wl.watchlistid=" + watchlistId + " AND bs.ratingDate=(SELECT MAX(ratingDate) FROM buysellratingchangehistory)", con);
+            OdbcCommand ratingChangeCom = new OdbcCommand(@" SELECT DISTINCT  wm.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate,ct.ctratingprev,ct.ctratingcurr,ct.changedate,t1.close,t1.date,t2.close,t2.date,wm.watchlistid,wl.watchlistname FROM watchlist wl 
+LEFT JOIN watchlistsymbolmapping wm ON wm.watchlistid=wl.watchlistid 
+LEFT JOIN equitiesfundamental ef ON ef.symbol=wm.symbol
+LEFT JOIN (SELECT * FROM buysellratingchangehistory WHERE ratingDate= (SELECT MAX(ratingDate) FROM buysellratingchangehistory)) AS bs ON bs.symbol=wm.symbol
+LEFT JOIN (SELECT * FROM ctratingchangehistory WHERE changedate= (SELECT MAX(changedate) FROM ctratingchangehistory)) AS ct ON ct.symbol=wm.symbol
 
-            OdbcCommand ctRatingChangeCom = new OdbcCommand("SELECT DISTINCT wm.symbol,ct.ctratingprev,ct.ctratingcurr ,ef.companyName,ct.changeDate,wm.watchlistid,wl.watchlistname FROM watchlist wl "
-                                                           + "LEFT JOIN watchlistsymbolmapping wm ON wm.watchlistid=wl.watchlistid "
-                                                        + "INNER JOIN ctratingchangehistory ct ON ct.symbol=wm.symbol "
-                                                        + "LEFT JOIN equitiesfundamental ef ON ef.symbol=wm.symbol "
-                                                        + "WHERE  wl.watchlistid=" + watchlistId + "  AND ct.changeDate=(SELECT MAX(changedate) FROM ctratingchangehistory)", con);
+LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT MAX(DATE) FROM symbolshistorical)) AS t1 ON t1.symbol=wm.symbol
+LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT DISTINCT DATE FROM symbolshistorical ORDER BY DATE DESC LIMIT 1,1)) AS t2 ON t2.symbol=wm.symbol
+
+WHERE  wl.watchlistid=" + watchlistId + " AND (ratingDate IS NOT NULL OR changedate IS NOT NULL)", con);
+
+            //new OdbcCommand("SELECT DISTINCT wm.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate,wm.watchlistid,wl.watchlistname FROM watchlist wl "
+            //                                           + "LEFT JOIN watchlistsymbolmapping wm ON wm.watchlistid=wl.watchlistid "
+            //                                           + "INNER JOIN buysellratingchangehistory bs ON bs.symbol=wm.symbol "
+            //                                           + "LEFT JOIN equitiesfundamental ef ON ef.symbol=wm.symbol "
+            //                                            + "WHERE  wl.watchlistid=" + watchlistId + " AND bs.ratingDate=(SELECT MAX(ratingDate) FROM buysellratingchangehistory)", con);
+
+            //OdbcCommand ctRatingChangeCom = new OdbcCommand("SELECT DISTINCT wm.symbol,ct.ctratingprev,ct.ctratingcurr ,ef.companyName,ct.changeDate,wm.watchlistid,wl.watchlistname FROM watchlist wl "
+            //                                               + "LEFT JOIN watchlistsymbolmapping wm ON wm.watchlistid=wl.watchlistid "
+            //                                            + "INNER JOIN ctratingchangehistory ct ON ct.symbol=wm.symbol "
+            //                                            + "LEFT JOIN equitiesfundamental ef ON ef.symbol=wm.symbol "
+            //                                            + "WHERE  wl.watchlistid=" + watchlistId + "  AND ct.changeDate=(SELECT MAX(changedate) FROM ctratingchangehistory)", con);
             try
             {
 
 
                 con.Open();
                 OdbcDataReader ratingChangeDr = ratingChangeCom.ExecuteReader();
-                symolAlertListDict = getSymbolBSRatingAlertObj(ratingChangeDr, symolAlertListDict, true);
+                symolAlertList = getSymbolBSRatingAlertObj(ratingChangeDr);
             }
             catch (OdbcException ex)
             {
@@ -401,26 +584,26 @@ namespace ChartLabFinCalculation.DAL
                     con.Close();
             }
 
-            try
-            {
-                con.Open();
-                OdbcDataReader ctRatingDr = ctRatingChangeCom.ExecuteReader();
-                symolAlertListDict = getSymbolCTRatingAlert(ctRatingDr, symolAlertListDict, true);
+            //try
+            //{
+            //    con.Open();
+            //    OdbcDataReader ctRatingDr = ctRatingChangeCom.ExecuteReader();
+            //    symolAlertListDict = getSymbolCTRatingAlert(ctRatingDr, symolAlertListDict, true);
 
-            }
-            catch (OdbcException ex)
-            {
-                throw ex;
-            }
-            finally
-            {
-                if (con != null)
-                    con.Close();
-            }
+            //}
+            //catch (OdbcException ex)
+            //{
+            //    throw ex;
+            //}
+            //finally
+            //{
+            //    if (con != null)
+            //        con.Close();
+            //}
 
 
             // string mycon = System.Configuration.ConfigurationSettings.AppSettings.["sqlcon"].ConnectionString;
-            return symolAlertListDict;
+            return symolAlertList;
         }
 
         internal static void updateCommanAlertInDB(int subsId, string alertString)
@@ -533,7 +716,7 @@ namespace ChartLabFinCalculation.DAL
                         if (text != "" && text != null)
 
                             alertText.Append("<b>" + subsType + ":</b><br>");
-                        alertText.Append(EmailAlertsCalculation.formateAlertText(text));
+                       // alertText.Append(EmailAlertsCalculation.formateAlertText(text));
                     }
                 }
                 dr.Close();
@@ -565,7 +748,10 @@ namespace ChartLabFinCalculation.DAL
 
                 while (dr.Read())
                 {
-                    commonSubsList.Add(dr.GetInt32(0), dr.GetInt32(1));
+                    if (dr.GetValue(0) != DBNull.Value && dr.GetValue(1) != DBNull.Value)
+                    {
+                        commonSubsList.Add(dr.GetInt32(0), dr.GetInt32(1));
+                    }
                 }
                 dr.Close();
 

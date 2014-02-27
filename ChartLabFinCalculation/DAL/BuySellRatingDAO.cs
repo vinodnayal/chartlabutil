@@ -98,8 +98,8 @@ namespace ChartLabFinCalculation
                 log.Info("Rating: getting BuySell Rating Histroy From DB");
                 List<BuySellRating> historyBuySellRatingList = BuySellRatingDAO.getBuySellRatingHistroyFromDB();
                 log.Info("Rating: getting Change BuySell Rating Hist");
-                List<BuySellRatingChangeHist> ChangeBuySellRatingHist = Util.getBuySellRatingChangelist(historyBuySellRatingList);
-                CSVExporter.WriteToCSVChangeRatingHistory(ChangeBuySellRatingHist, BuySellRatingCalculation.BuySellRatingChangeHistCsvFilePath + "/ChangeRatingHistoryFile.csv");
+               // List<BuySellRatingChangeHist> ChangeBuySellRatingHist = Util.getBuySellRatingChangelist(historyBuySellRatingList);
+              //  CSVExporter.WriteToCSVChangeRatingHistory(ChangeBuySellRatingHist, BuySellRatingCalculation.BuySellRatingChangeHistCsvFilePath + "/ChangeRatingHistoryFile.csv");
                 log.Info("Rating: Write To CSV Change Rating History");
                 BuySellRatingDAO.InsertChangeRatingHistoryCSVToDB(BuySellRatingCalculation.BuySellRatingChangeHistCsvFilePath, "buySellRatingChangeHistory");
                 log.Info("Rating: Inserted Change Rating History CSV To DB ");
