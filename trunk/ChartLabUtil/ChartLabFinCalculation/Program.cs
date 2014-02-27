@@ -17,6 +17,7 @@ namespace ChartLabFinCalculation
 {
     class Program
     {
+        
         static log4net.ILog log = log4net.LogManager.GetLogger(typeof(Program));
         static log4net.ILog logTime = log4net.LogManager.GetLogger(typeof(Program));
         static string SymbolAnalyticsPath = ConfigurationManager.AppSettings["SymbolAnalyticsFolder"];

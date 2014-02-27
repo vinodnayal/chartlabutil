@@ -10,6 +10,7 @@ using FinLib;
 using ChartLabFinCalculation.UTIL;
 using System.Configuration;
 using System.Threading;
+using PreMailer.Net;
 
 
 namespace ChartLabFinCalculation.BL
@@ -201,7 +202,7 @@ namespace ChartLabFinCalculation.BL
                       //  string htmlSource = File.ReadAllText(@"C:\Workspace\testmail.html");
                       //  PreMailer
 
-
+                        
                        InlineResult result = PreMailer.Net.PreMailer.MoveCssInline(Body, true);
                        
                         //sending alert by mail
