@@ -21,11 +21,13 @@ namespace ChartLabFinCalculation.BL
             {
                 SnpAlert snpAlert = EmailAlertsDAO.getSnpUpdateAlertMongo();
 
+                string status = snpAlert.status.Replace(" ", "%20");
+                string ctDial = snpAlert.ctRatingStatus.Replace(" ", "%20");
 
                 snpHtmlAlertView = @"<table style=' border-bottom: 2px solid gray '><tr><td style='vertical-align: top; width: 70%'>
                                    <div style='height:178px'> " + snpAlert.synopsis + " <a href='www.chartlabpro.com/portManagement?id=1'>See More details...</a></div><div><img src='www.chartlabpro.com/images/alert" +
-                                   snpAlert.status + ".png'></img></div></td><td style='vertical-align: top; text-align:center'><img src='www.chartlabpro.com/images/ctDial" +
-                                   snpAlert.status + ".png'></img><div style='font-size:18px'>" +
+                                    status + ".png'></img></div></td><td style='vertical-align: top; text-align:center'><img src='www.chartlabpro.com/images/ctDial" +
+                                   ctDial + ".png'></img><div style='font-size:18px'>" +
                                    snpAlert.ctRatingStatus + " </div></td></tr></table>";
 
 

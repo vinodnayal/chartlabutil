@@ -145,7 +145,7 @@ namespace ChartLabFinCalculation.BL
                         {
                             AlertString.Append("<tr class='" + alert.wlHeaderCss + "'><td>" + alert.watchlistName.ToUpper() + "</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>");
                         }
-                        AlertString.Append("<tr><td class='stock'>" + alert.companyName + " - " + alert.Symbol + "</td><td class='lastprice'> $" + alert.price + " </td><td class='change'>  " +alert.priceChangeText+"</td><td class='supportTd'> <div class='support'>" + alert.support + "</div></td><td class='resistanceTd'><div class='resistance'>" + alert.resistance + "</div></td><td class='alert'>" + alert.ratingAlertText + alert.ctRatingAlertText + "</td><td class='lngterm'>" + alert.longTermTrendText + "</td></tr>");
+                        AlertString.Append("<tr><td class='stock'>" + alert.companyName + " - " + alert.Symbol + "</td><td class='lastprice'> $" + Math.Round(alert.price,2) + " </td><td class='change'>  " +alert.priceChangeText+"</td><td class='supportTd'> <div class='support'>" + alert.support + "</div></td><td class='resistanceTd'><div class='resistance'>" + alert.resistance + "</div></td><td class='alert'>" + alert.ratingAlertText + alert.ctRatingAlertText + "</td><td class='lngterm'>" + alert.longTermTrendText + "</td></tr>");
                         count++;     
                     }
                 }
@@ -169,10 +169,12 @@ namespace ChartLabFinCalculation.BL
             try
             {
                 log.Info("EmailAlert: Geting subscribed user list");
-                Dictionary<int, string> usersEmailDict = EmailAlertsDAO.GetUniqueSubsUser();
+              //todo uncomment it after testing-om
+             //   Dictionary<int, string> usersEmailDict = EmailAlertsDAO.GetUniqueSubsUser();
+                Dictionary<int, string> usersEmailDict = new Dictionary<int, string>();
+                usersEmailDict.Add(120, "brett@thechartlab.com");
 
-
-                String Subject = "ChartLab Alerts";
+                String Subject = "Testing: ChartLab Alerts";
                 String From = ConfigurationManager.AppSettings["AdminEmail"];
                 int emailCounter = 0;
 
@@ -206,7 +208,7 @@ namespace ChartLabFinCalculation.BL
                        InlineResult result = PreMailer.Net.PreMailer.MoveCssInline(Body, true);
                        
                         //sending alert by mail
-                        MailUtility.SendMail(Subject, Body, From, To);
+                       MailUtility.SendMail(Subject, result.Html, From, To);
                         log.Info("EmailAlert: Alerts Mail sent to mail id :" + To);
 
                     }

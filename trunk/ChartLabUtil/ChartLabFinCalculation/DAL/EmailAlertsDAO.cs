@@ -335,12 +335,16 @@ WHERE   u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT
                     String ratingAlertText = getRatingAlertText(currRating,prevRating);
                     String ctRatingAlertText = getCtRatingAlertText(currCTRating,prevCTRating);
                     String longTermAlertText = getLongTermText(longTermAlertId);
-                    string changeCssClass="greenInfo";
-                    if (change >= 0)
+                    string changeCssClass = "";
+                    if (change < 0)
                     {
                         changeCssClass = "redInfo";
                     }
-                    String priceChangeText = "<div class='"+changeCssClass+"'>"+change+"&nbsp;&nbsp;"+changePct+"%</div>";
+                    else
+                    {
+                        changeCssClass = "greenInfo";
+                    }
+                    String priceChangeText = "<div class='"+changeCssClass+"'>"+Math.Round(change,2)+"&nbsp;&nbsp;"+Math.Round(changePct,2)+"%</div>";
 
                     String watchlistName = "";
                     if (alertDr.GetValue(16) != DBNull.Value)
