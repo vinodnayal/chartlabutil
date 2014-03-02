@@ -68,19 +68,7 @@ LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT MAX(DATE) FROM sy
 LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT DISTINCT DATE FROM symbolshistorical ORDER BY DATE DESC LIMIT 1,1)) AS t2 ON t2.symbol=up.symbol
 
 WHERE   u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT NULL)", con);
-
-            //OdbcCommand ratingChangeCom = new OdbcCommand("SELECT DISTINCT  up.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate FROM users u "
-            //                                            + "LEFT JOIN userportfolio up ON up.userId=u.userid "
-            //                                            + "INNER JOIN buysellratingchangehistory bs ON bs.symbol=up.symbol "
-            //                                            + "LEFT JOIN equitiesfundamental ef ON ef.symbol=up.symbol "
-            //                                             + "WHERE  u.userid=" + userId + " AND bs.ratingDate=(SELECT MAX(ratingDate) FROM buysellratingchangehistory)", con);
-
-            //OdbcCommand ctRatingChangeCom = new OdbcCommand("SELECT DISTINCT up.symbol,ct.ctratingprev,ct.ctratingcurr , ef.companyName, ct.changeDate FROM users u "
-            //                                                + "LEFT JOIN userportfolio up ON up.userId=u.userid "
-            //                                                + "INNER JOIN ctratingchangehistory ct ON ct.symbol=up.symbol "
-            //                                                + "LEFT JOIN equitiesfundamental ef ON ef.symbol=up.symbol "
-            //                                               + "WHERE u.userid=" + userId + " AND ct.changeDate=(SELECT MAX(changedate) FROM ctratingchangehistory)", con);
-            try
+           try
             {
                 con.Open();
                 OdbcDataReader ratingChangeDr = ratingChangeCom.ExecuteReader();
@@ -96,24 +84,7 @@ WHERE   u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT
                 if (con != null)
                     con.Close();
             }
-            //try
-            //{
-            //    con.Open();
-            //    OdbcDataReader ctRatingDr = ctRatingChangeCom.ExecuteReader();
-            //    symolAlertListDict = getSymbolCTRatingAlert(ctRatingDr, symolAlertListDict, false);
-
-            //}
-            //catch (OdbcException ex)
-            //{
-            //    throw ex;
-            //}
-            //finally
-            //{
-            //    if (con != null)
-            //        con.Close();
-            //}
-
-            // string mycon = System.Configuration.ConfigurationSettings.AppSettings.["sqlcon"].ConnectionString;
+       
             return symolAlertList;
         }
         internal static Dictionary<int, List<SymbolAlerts>> getMyWatchlistAlerts(int userId)
@@ -156,80 +127,7 @@ WHERE   u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT
             return symolAlertList;
         }
 
-        //private static Dictionary<string, SymbolAlerts> getSymbolCTRatingAlert(OdbcDataReader ctRatingDr, Dictionary<string, SymbolAlerts> symolAlertListDict, bool isWatchlistAlert)
-        //{
-        //    try
-        //    {
-               
-        //        while (ctRatingDr.Read())
-        //        {
-        //            int ctRatingAlertType = 0; //negative alert or positive
-        //            int prevCTRating = 0;
-        //            if (ctRatingDr.GetValue(1) != DBNull.Value)
-        //            {
-        //                prevCTRating = ctRatingDr.GetInt32(1);
-        //            }
-        //            int currCTRating = 0;
-        //            if (ctRatingDr.GetValue(2) != DBNull.Value)
-        //            {
-        //                currCTRating = ctRatingDr.GetInt32(2);
-        //            }
-
-        //            if (currCTRating > prevCTRating)
-        //            {
-        //                ctRatingAlertType = 1;
-        //            }
-        //            String watchlistName = "Portfolio";
-        //            if (isWatchlistAlert)
-        //            {
-        //                if (ctRatingDr.GetValue(6) != DBNull.Value)
-        //                {
-        //                    watchlistName = ctRatingDr.GetString(6);
-        //                }
-        //            }
-        //            String symbol = "";
-
-        //            if (ctRatingDr.GetValue(0) != DBNull.Value)
-        //            {
-        //                symbol = ctRatingDr.GetString(0);
-        //            }
-        //            String companyName = "";
-
-        //            if (ctRatingDr.GetValue(3) != DBNull.Value)
-        //            {
-        //                companyName = ctRatingDr.GetString(3);
-        //            }
-                   
-        //            if (!symolAlertListDict.ContainsKey(symbol))
-        //            {
-        //                symolAlertListDict.Add(symbol, new SymbolAlerts
-        //                {
-        //                    Symbol = symbol,
-        //                    preCTRating = prevCTRating,
-        //                    curCTRating = currCTRating,
-        //                    companyName = companyName,
-        //                    ctRatingAlertType = ctRatingAlertType,
-        //                    watchlistName = watchlistName
-        //                });
-        //            }
-        //            else
-        //            {
-        //                SymbolAlerts symAlert = symolAlertListDict[symbol];
-        //                symAlert.preCTRating = prevCTRating;
-        //                symAlert.curCTRating = currCTRating;
-        //                symAlert.companyName = companyName;
-        //                symAlert.ctRatingAlertType = ctRatingAlertType;
-        //            }
-        //        }
-        //        ctRatingDr.Close();
-        //    }
-        //    catch (OdbcException ex)
-        //    {
-        //        throw ex;
-        //    }
-
-        //    return symolAlertListDict;
-        //}
+  
 
         private static Dictionary<int, List<SymbolAlerts>> getSymbolBSRatingAlertObj(OdbcDataReader alertDr)
         {
@@ -358,10 +256,14 @@ WHERE   u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT
                         watchlistId = Convert.ToInt32(alertDr.GetValue(15));
                     }
 
-                    String wlHeaderCss = "portHeader";
-                    if (watchlistId <20)
+                    String wlHeaderCss = "";
+                    if (watchlistId < 20 && watchlistId > 0)
                     {
                         wlHeaderCss = "commonWlHeader";
+                    }
+                    else if (watchlistId ==0)
+                    {
+                        wlHeaderCss = "portHeader";
                     }else
                     {
                         wlHeaderCss = "wlHeader";
@@ -548,8 +450,9 @@ WHERE   u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT
             Dictionary<int, List<SymbolAlerts>> symolAlertList = new Dictionary<int, List<SymbolAlerts>>();
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand ratingChangeCom = new OdbcCommand(@" SELECT DISTINCT  wm.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate,ct.ctratingprev,ct.ctratingcurr,ct.changedate,t1.close,t1.date,t2.close,t2.date,wm.watchlistid,wl.watchlistname FROM watchlist wl 
+            OdbcCommand ratingChangeCom = new OdbcCommand(@" SELECT DISTINCT wm.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate,ct.ctratingprev,ct.ctratingcurr,ct.changedate,t1.close,t1.date,t2.close,t2.date,sa.r3,sa.s3,sa.longTerm,wm.watchlistid,wl.watchlistname FROM watchlist wl 
 LEFT JOIN watchlistsymbolmapping wm ON wm.watchlistid=wl.watchlistid 
+LEFT JOIN symbolanalytics sa ON sa.symbol=wm.symbol 
 LEFT JOIN equitiesfundamental ef ON ef.symbol=wm.symbol
 LEFT JOIN (SELECT * FROM buysellratingchangehistory WHERE ratingDate= (SELECT MAX(ratingDate) FROM buysellratingchangehistory)) AS bs ON bs.symbol=wm.symbol
 LEFT JOIN (SELECT * FROM ctratingchangehistory WHERE changedate= (SELECT MAX(changedate) FROM ctratingchangehistory)) AS ct ON ct.symbol=wm.symbol
@@ -559,18 +462,7 @@ LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT DISTINCT DATE FRO
 
 WHERE  wl.watchlistid=" + watchlistId + " AND (ratingDate IS NOT NULL OR changedate IS NOT NULL)", con);
 
-            //new OdbcCommand("SELECT DISTINCT wm.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate,wm.watchlistid,wl.watchlistname FROM watchlist wl "
-            //                                           + "LEFT JOIN watchlistsymbolmapping wm ON wm.watchlistid=wl.watchlistid "
-            //                                           + "INNER JOIN buysellratingchangehistory bs ON bs.symbol=wm.symbol "
-            //                                           + "LEFT JOIN equitiesfundamental ef ON ef.symbol=wm.symbol "
-            //                                            + "WHERE  wl.watchlistid=" + watchlistId + " AND bs.ratingDate=(SELECT MAX(ratingDate) FROM buysellratingchangehistory)", con);
-
-            //OdbcCommand ctRatingChangeCom = new OdbcCommand("SELECT DISTINCT wm.symbol,ct.ctratingprev,ct.ctratingcurr ,ef.companyName,ct.changeDate,wm.watchlistid,wl.watchlistname FROM watchlist wl "
-            //                                               + "LEFT JOIN watchlistsymbolmapping wm ON wm.watchlistid=wl.watchlistid "
-            //                                            + "INNER JOIN ctratingchangehistory ct ON ct.symbol=wm.symbol "
-            //                                            + "LEFT JOIN equitiesfundamental ef ON ef.symbol=wm.symbol "
-            //                                            + "WHERE  wl.watchlistid=" + watchlistId + "  AND ct.changeDate=(SELECT MAX(changedate) FROM ctratingchangehistory)", con);
-            try
+           try
             {
 
 
@@ -588,25 +480,6 @@ WHERE  wl.watchlistid=" + watchlistId + " AND (ratingDate IS NOT NULL OR changed
                     con.Close();
             }
 
-            //try
-            //{
-            //    con.Open();
-            //    OdbcDataReader ctRatingDr = ctRatingChangeCom.ExecuteReader();
-            //    symolAlertListDict = getSymbolCTRatingAlert(ctRatingDr, symolAlertListDict, true);
-
-            //}
-            //catch (OdbcException ex)
-            //{
-            //    throw ex;
-            //}
-            //finally
-            //{
-            //    if (con != null)
-            //        con.Close();
-            //}
-
-
-            // string mycon = System.Configuration.ConfigurationSettings.AppSettings.["sqlcon"].ConnectionString;
             return symolAlertList;
         }
 
@@ -744,7 +617,7 @@ WHERE  wl.watchlistid=" + watchlistId + " AND (ratingDate IS NOT NULL OR changed
             Dictionary<int, int> commonSubsList = new Dictionary<int, int>();
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand com = new OdbcCommand("SELECT subcrptin_Id,WatchlistId  FROM emailsubscription WHERE iscommonSubs=1", con);
+            OdbcCommand com = new OdbcCommand("SELECT watchlistid,watchlistid  FROM watchlist WHERE (ispaid=0 OR ispaid IS NULL) AND userid=1", con);
             try
             {
                 con.Open();
