@@ -574,8 +574,8 @@ namespace ChartLabFinCalculation
 
                         #region Alerts calculation
                         logTime.Info("Process:  Starting Email Alerts calculation Programme at: " + DateTime.Now);
-                        EmailAlertsCalculation.CalculateMyAlerts();
-                        EmailAlertsCalculation.calculateCommonSubsAlerts();
+                       // EmailAlertsCalculation.CalculateMyAlerts();
+                       // EmailAlertsCalculation.calculateCommonSubsAlerts();
                         logTime.Info("EmailAlert:  done Email Alerts calculation Programme at: " + DateTime.Now);
 
                         break;

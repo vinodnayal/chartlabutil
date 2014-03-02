@@ -19,145 +19,6 @@ namespace ChartLabFinCalculation.BL
     {
         static log4net.ILog log = log4net.LogManager.GetLogger(typeof(EmailAlertsCalculation));
         static string AlertsPath = ConfigurationManager.AppSettings["AlertsPath"];
-        internal static void CalculateMyAlerts()
-        {
-            List<UserAlerts> portAlerts = new List<UserAlerts>();
-            List<UserAlerts> watchlistAlerts = new List<UserAlerts>();
-            try
-            {
-                log.Info("EmailAlert: getting subscribed user list");
-                List<int> UserList = EmailAlertsDAO.getAllUsers();
-                foreach (int userId in UserList)
-                {
-                    log.Info("EmailAlert: Calculating watchlist alerts for user id : " + userId);
-                    watchlistAlerts = calculateWatchlistAlerts(userId, watchlistAlerts);
-
-                    log.Info("EmailAlert: Calculating portfolio alerts for user id : " + userId);
-                    //  String portfolioAlerts = calculatePortAlerts(userId);
-
-                    portAlerts.Add(new UserAlerts
-                    {
-                        userId = userId,
-                        //   portfolioAlerts = portfolioAlerts,
-
-                    });
-                }
-                //CSVExporter.WriteToCSVMyAlertsData(portAlerts, AlertsPath + "/UserAlerts.csv");
-                //CSVExporter.WriteToCSVWatchlistAlertData(watchlistAlerts, AlertsPath + "/WatchlistAlerts.csv");
-                //EmailAlertsDAO.InsertUserAlertsCSVToDB(AlertsPath);
-                //EmailAlertsDAO.updateWatchlistAlertInDB(AlertsPath);
-
-
-
-
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error in calculating my alerts ");
-                log.Error(ex);
-            }
-        }
-        private static List<UserAlerts> calculateWatchlistAlerts(int userId, List<UserAlerts> watchlistAlerts)
-        {
-
-            try
-            {
-                //Dictionary<int, String> userWatchLists = EmailAlertsDAO.getUserWatchLists(userId);
-                //foreach (KeyValuePair<int, String> watchlist in userWatchLists)
-                //{
-                //    String alertString = "";
-                //    int watchlistId = watchlist.Key;
-
-                Dictionary<int, List<SymbolAlerts>> symbolAlertsList = EmailAlertsDAO.getMyWatchlistAlerts(userId);
-                //if (symbolAlertsList.Count > 0)
-                //{
-                //    alertString = getAlertString(symbolAlertsList);
-                //    watchlistAlerts.Add(new UserAlerts { userId = userId, watchlistId = watchlistId, watchlistAlerts = alertString });
-                //    //  EmailAlertsDAO.updateWatchlistAlertInDB(userId, watchlistId, alertString);
-                //}
-
-
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error in calculaing watchlist alerts ");
-                log.Error(ex);
-            }
-            return watchlistAlerts;
-        }
-        public static void calculateCommonSubsAlerts()
-        {
-            log.Info("EmailAlert: Calculating common model portfolio alerts");
-            try
-            {
-                Dictionary<int, int> commonSubs = EmailAlertsDAO.getCommonSubscriptions();
-                foreach (KeyValuePair<int, int> subscription in commonSubs)
-                {
-                    int subsId = subscription.Key;
-                    int watchlistId = subscription.Value;
-                    Dictionary<int, List<SymbolAlerts>> symbolAlertsList = EmailAlertsDAO.GetSpecificWLAlerts(watchlistId);
-                   
-
-
-                }
-
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error in calculaing Div portfolio alerts ");
-                log.Error(ex);
-            }
-        }
-        private static String calculatePortAlerts(int userId)
-        {
-            String alertString = "";
-            try
-            {
-
-                Dictionary<int, List<SymbolAlerts>> symbolAlertsList = EmailAlertsDAO.getMyPortAlerts(userId);
-                // alertString = getAlertString(symbolAlertsList);
-
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error in calculaing portfolio alerts for user ID " + userId);
-                log.Error(ex);
-            }
-            return alertString;
-        }
-        private static string getAlertString(Dictionary<int, List<SymbolAlerts>> wlAlerts)
-        {
-            StringBuilder AlertString = new StringBuilder();
-            try
-            {
-                AlertString.Append("<table class='alertTable'>");
-                AlertString.Append("<tr><th>Stock</th><th>Yesterday Price</th><th>Price Change</th><th>Support</th><th>Resistance</th><th>Alert</th><th>Long Term Trend</th></tr>");
-               
-                
-               
-                foreach (KeyValuePair<int, List<SymbolAlerts>> symbolAlertsItem in wlAlerts)
-                {
-                    int count = 0;
-                    List<SymbolAlerts> alerts = symbolAlertsItem.Value;
-                    foreach (SymbolAlerts alert in alerts)
-                    {
-                        if (count == 0)
-                        {
-                            AlertString.Append("<tr class='" + alert.wlHeaderCss + "'><td>" + alert.watchlistName.ToUpper() + "</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>");
-                        }
-                        AlertString.Append("<tr><td class='stock'>" + alert.companyName + " - " + alert.Symbol + "</td><td class='lastprice'> $" + Math.Round(alert.price,2) + " </td><td class='change'>  " +alert.priceChangeText+"</td><td class='supportTd'> <div class='support'>" + alert.support + "</div></td><td class='resistanceTd'><div class='resistance'>" + alert.resistance + "</div></td><td class='alert'>" + alert.ratingAlertText + alert.ctRatingAlertText + "</td><td class='lngterm'>" + alert.longTermTrendText + "</td></tr>");
-                        count++;     
-                    }
-                }
-                AlertString.Append("</table><br/>");
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error in calculating alert String ");
-                log.Error(ex);
-            }
-            return AlertString.ToString();
-        }
 
         /// <summary>
         /// get all users list
@@ -169,17 +30,19 @@ namespace ChartLabFinCalculation.BL
             try
             {
                 log.Info("EmailAlert: Geting subscribed user list");
-              //todo uncomment it after testing-om
-             //   Dictionary<int, string> usersEmailDict = EmailAlertsDAO.GetUniqueSubsUser();
-                Dictionary<int, string> usersEmailDict = new Dictionary<int, string>();
-                usersEmailDict.Add(120, "brett@thechartlab.com");
+                
+                  Dictionary<int, string> usersEmailDict = EmailAlertsDAO.GetUniqueSubsUser();
+                
+                //todo for testing-om
+                //Dictionary<int, string> usersEmailDict = new Dictionary<int, string>();
+                //usersEmailDict.Add(120, "om.omshiv@gmail.com");
 
-                String Subject = "Testing: ChartLab Alerts";
+                String Subject = "ChartLab Alerts";
                 String From = ConfigurationManager.AppSettings["AdminEmail"];
                 int emailCounter = 0;
 
                 String snpAlertHtmlView = SnpUpdateAlerts.GetSNPUpdateAlert();
-
+                Dictionary<int, String> commonWlAlerts = getCommonSubAlerts();
                 foreach (KeyValuePair<int, String> user in usersEmailDict)
                 {
                     emailCounter++;
@@ -187,28 +50,30 @@ namespace ChartLabFinCalculation.BL
                     String To = user.Value;
                     log.Info("EmailAlert: Geting user's alert from DB");
                     //snp alert from mongo
-                    String AlertsString = "<b>S&P 500 Alert: </b><br/>" + snpAlertHtmlView + "<br/><br/>";
+                    StringBuilder alertsSB = new StringBuilder();
+                    alertsSB.Append("<b>S&P 500 Alert: </b><br/>" + snpAlertHtmlView + "<br/><br/>");
+
 
                     //get user alerts
-                    AlertsString += getUserAlerts(userId);
+                    alertsSB.Append(getUserAlerts(userId, commonWlAlerts));
 
                     if (emailCounter % 10 == 0)
                     {
                         Thread.Sleep(30000);
                     }
-                    if (AlertsString != "")
+                    if (alertsSB.Length > 0)
                     {
                         //final HTML boly for mail
-                        String Body = Constants.HtmlStartStringWithCss + AlertsString + Constants.HtmlEndString;
+                        String Body = Constants.HtmlStartStringWithCss + alertsSB.ToString() + Constants.HtmlEndString;
 
-                      //  string htmlSource = File.ReadAllText(@"C:\Workspace\testmail.html");
-                      //  PreMailer
+                        //  string htmlSource = File.ReadAllText(@"C:\Workspace\testmail.html");
+                        //  PreMailer
 
-                        
-                       InlineResult result = PreMailer.Net.PreMailer.MoveCssInline(Body, true);
-                       
+
+                        InlineResult result = PreMailer.Net.PreMailer.MoveCssInline(Body, true);
+
                         //sending alert by mail
-                       MailUtility.SendMail(Subject, result.Html, From, To);
+                        MailUtility.SendMail(Subject, result.Html, From, To);
                         log.Info("EmailAlert: Alerts Mail sent to mail id :" + To);
 
                     }
@@ -223,7 +88,95 @@ namespace ChartLabFinCalculation.BL
             }
 
         }
-        private static String getUserAlerts(int userId)
+
+        /// <summary>
+        /// get formmated alert in HTMl
+        /// </summary>
+        /// <param name="wlAlerts"></param>
+        /// <returns></returns>
+        private static string getAlertString(Dictionary<int, List<SymbolAlerts>> wlAlerts)
+        {
+            StringBuilder AlertString = new StringBuilder();
+            try
+            {
+                AlertString.Append("<table class='alertTable'>");
+                AlertString.Append("<tr><th>Stock</th><th>Yesterday Price</th><th>Price Change</th><th>Support</th><th>Resistance</th><th>Alert</th><th>Long Term Trend</th></tr>");
+
+
+
+                foreach (KeyValuePair<int, List<SymbolAlerts>> symbolAlertsItem in wlAlerts)
+                {
+                    int count = 0;
+                    List<SymbolAlerts> alerts = symbolAlertsItem.Value;
+                    foreach (SymbolAlerts alert in alerts)
+                    {
+                        if (count == 0)
+                        {
+                            AlertString.Append("<tr class='" + alert.wlHeaderCss + "'><td>" + alert.watchlistName.ToUpper() + "</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>");
+                        }
+                        AlertString.Append("<tr><td class='stock'>" + alert.companyName + " - " + alert.Symbol + "</td><td class='lastprice'> $" + Math.Round(alert.price, 2) + " </td><td class='change'>  " + alert.priceChangeText + "</td><td class='supportTd'> <div class='support'>" + alert.support + "</div></td><td class='resistanceTd'><div class='resistance'>" + alert.resistance + "</div></td><td class='alert'>" + alert.ratingAlertText + alert.ctRatingAlertText + "</td><td class='lngterm'>" + alert.longTermTrendText + "</td></tr>");
+                        count++;
+                    }
+                }
+                AlertString.Append("</table><br/>");
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error in calculating alert String ");
+                log.Error(ex);
+            }
+            return AlertString.ToString();
+        }
+
+     
+        /// <summary>
+        /// get Common wl Alerts
+        /// </summary>
+        /// <returns></returns>
+        private static Dictionary<int, String> getCommonSubAlerts()
+        {
+            Dictionary<int, String> alerts = new Dictionary<int, String>();
+            try
+            {
+                Dictionary<int, int> commonSubs = EmailAlertsDAO.getCommonSubscriptions();
+
+                foreach (KeyValuePair<int, int> subscription in commonSubs)
+                {
+                    int subsId = subscription.Key;
+                    int watchlistId = subscription.Value;
+                    Dictionary<int, List<SymbolAlerts>> commonWlAlerts = EmailAlertsDAO.GetSpecificWLAlerts(watchlistId);
+                    String commonWlAlertsStr = "";
+                    if (commonWlAlerts.Count > 0)
+                    {
+                        commonWlAlertsStr = getAlertString(commonWlAlerts);
+                        if (commonWlAlertsStr != "")
+                        {
+                            if (!alerts.ContainsKey(subsId))
+                                alerts.Add(subsId, commonWlAlertsStr);
+
+                        }
+                    }
+
+
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error in getting watchlist alerts from DB ");
+                log.Error(ex);
+            }
+            return alerts;
+        }
+
+        /// <summary>
+        /// get users all alerts (port,wl,common)
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="commonWlAlertsDict"></param>
+        /// <returns></returns>
+        private static String getUserAlerts(int userId, Dictionary<int, String> commonWlAlertsDict)
         {
             StringBuilder alerts = new StringBuilder();
             try
@@ -232,36 +185,44 @@ namespace ChartLabFinCalculation.BL
 
                 if (subsIds.IndexOf(0) > -1)
                 {
-                    Dictionary<int, List<SymbolAlerts>> PortAlerts = EmailAlertsDAO.getMyPortAlerts(userId);
-                    String myPortAlerts = "";
-                    if (PortAlerts.Count > 0)
+                    try
                     {
-                        myPortAlerts = getAlertString(PortAlerts);
-                        if (myPortAlerts != "")
+                        Dictionary<int, List<SymbolAlerts>> PortAlerts = EmailAlertsDAO.getMyPortAlerts(userId);
+                        String myPortAlerts = "";
+                        if (PortAlerts.Count > 0)
                         {
-                            alerts.Append("<b>My Portfolio Alerts: </b><br/>");
-                            alerts.Append(myPortAlerts);
+                            myPortAlerts = getAlertString(PortAlerts);
+                            if (myPortAlerts != "")
+                            {
+                                alerts.Append("<b>My Portfolio Alerts: </b><br/><br/>");
+                                alerts.Append(myPortAlerts);
 
+                            }
                         }
+                    }
+
+                    catch (Exception ex)
+                    {
+                        log.Error("Error in getting porfolio alerts from DB ");
+                        log.Error(ex);
                     }
                 }
                 try
                 {
                     List<int> watchlistIds = subsIds;
-                    //Dictionary<string, string> myWatchlisttAlerts = EmailAlertsDAO.getSubscribedWlAlert(userId, watchlistIds);
-                   Dictionary<int, List<SymbolAlerts>> wlAlerts = EmailAlertsDAO.getMyWatchlistAlerts(userId);
-                   String myWlAlerts = "";
+                    Dictionary<int, List<SymbolAlerts>> wlAlerts = EmailAlertsDAO.getMyWatchlistAlerts(userId);
+                    String myWlAlerts = "";
                     if (wlAlerts.Count > 0)
-                   {
-                       myWlAlerts = getAlertString(wlAlerts);
-                       if (myWlAlerts != "")
-                       {
-                           alerts.Append("<b>My Watchlist Alerts: </b><br/>");
-                           alerts.Append(myWlAlerts);
+                    {
+                        myWlAlerts = getAlertString(wlAlerts);
+                        if (myWlAlerts != "")
+                        {
+                            alerts.Append("<b>My Watchlist Alerts: </b><br/><br/>");
+                            alerts.Append(myWlAlerts);
 
-                       }
-                   }
-                   
+                        }
+                    }
+
                 }
                 catch (Exception ex)
                 {
@@ -271,32 +232,26 @@ namespace ChartLabFinCalculation.BL
 
                 try
                 {
-                    Dictionary<int, int> commonSubs = EmailAlertsDAO.getCommonSubscriptions();
-                    foreach (KeyValuePair<int, int> subscription in commonSubs)
+                    bool isCommonAlertFound = false;
+                    alerts.Append("<b>Model Portfolio Alerts: </b><br/><br/>");
+                    foreach (int subsId in subsIds)
                     {
-                        int subsId = subscription.Key;
-                        int watchlistId = subscription.Value;
-                        Dictionary<int, List<SymbolAlerts>> commonWlAlerts = EmailAlertsDAO.GetSpecificWLAlerts(watchlistId);
-                        String commonWlAlertsStr = "";
-                        if (commonWlAlerts.Count > 0)
+                        if (commonWlAlertsDict.ContainsKey(subsId))
                         {
-                            commonWlAlertsStr = getAlertString(commonWlAlerts);
-                            if (commonWlAlertsStr != "")
-                            {
-                                alerts.Append("<b>My Watchlist Alerts: </b><br/>");
-                                alerts.Append(commonWlAlertsStr);
-
-                            }
+                            alerts.Append(commonWlAlertsDict[subsId]);
+                            isCommonAlertFound = true;
                         }
-
-
                     }
-                   
+
+                    if (!isCommonAlertFound)
+                    {
+                        alerts.Append("</b><b>No Alerts! </b><br/>");
+                    }
 
                 }
                 catch (Exception ex)
                 {
-                    log.Error("Error in getting watchlist alerts from DB ");
+                    log.Error("Error in getting common wl alerts from commonAlerts Dic ");
                     log.Error(ex);
                 }
 
@@ -307,67 +262,8 @@ namespace ChartLabFinCalculation.BL
                 log.Error(ex);
             }
 
-
-            //String CommanAlerts = EmailAlertsDAO.getCommonAlertText(userId);
-
-            //if (CommanAlerts != "")
-            //{
-            //    alerts.Append(CommanAlerts);
-
-            //}
-
             return alerts.ToString();
         }
-        //public static string formateAlertText(Dictionary<int, List<SymbolAlerts>> wlAlerts)
-        //{
 
-        //    StringBuilder formattedText = new StringBuilder();
-        //    try
-        //    {
-
-        //        String[] stringAlertsArray = //alertText.Split(';');
-        //        foreach (String alertString in stringAlertsArray)
-        //        {
-        //            if (alertString != "")
-        //            {
-        //                String[] symbolAlert = alertString.Split(':');
-        //                if (symbolAlert.Length > 1)
-        //                {
-        //                    int alertType;
-        //                    bool isParsed = int.TryParse(symbolAlert[1], out alertType);
-        //                    if (alertType == 1)
-        //                    {
-        //                        formattedText.Append("<div Style='color:green; font-weight:bold' ><img align='middle' src='http://www.chartlabpro.com/images/checkGreen.png' />" + symbolAlert[0] + " </div><br>");
-        //                    }
-        //                    else
-        //                    {
-        //                        formattedText.Append("<div Style='color:maroon;font-weight:bold' ><img align='middle' src='http://www.chartlabpro.com/images/crossRed.png' />" + symbolAlert[0] + " </div><br>");
-        //                    }
-
-
-        //                }
-        //                else
-        //                {
-        //                    String[] CTAlerts = alertString.Split('!');
-        //                    if (CTAlerts.Length > 1)
-        //                    {
-        //                        formattedText.Append("<li><b>" + CTAlerts[0] + "</b></li><br>");
-        //                    }
-        //                    else
-        //                    {
-        //                        formattedText.Append("<li><b>" + alertString + "</b></li><br>");
-        //                    }
-        //                }
-        //            }
-        //        }
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        log.Error("Error in formatting email alerts ");
-        //        log.Error(ex);
-        //    }
-        //    return formattedText.ToString();
-        //}
     }
 }

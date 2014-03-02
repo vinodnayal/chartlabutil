@@ -180,7 +180,7 @@ width:200px;
 
 .lastprice
 {
-width:60px;
+width:90px;
 }
 .change
 {
@@ -207,7 +207,7 @@ text-align:center;
 .wlHeader{
 font-weight:bold;
 color:white;
-background:#008040;
+background:#ff7f27;
 }
 .portHeader{
 font-weight:bold;
@@ -217,7 +217,7 @@ background:#112E55;
 .commonWlHeader{
 font-weight:bold;
 color:white;
-background:#FF7F27;
+background:#008040;
 }
 </style>
 <body> <div style='border: 2px #EEEEEE solid; width: 1000px;'> 
