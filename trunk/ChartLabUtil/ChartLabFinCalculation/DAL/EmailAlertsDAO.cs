@@ -186,15 +186,15 @@ WHERE   u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT
                     }
 
                     double yesterdayPrice = 0;
-                    if (alertDr.GetValue(8) != DBNull.Value)
+                    if (alertDr.GetValue(10) != DBNull.Value)
                     {
-                        yesterdayPrice = alertDr.GetFloat(8);
+                        yesterdayPrice = alertDr.GetFloat(10);
                     }
 
                     double todayPrice = 0;
-                    if (alertDr.GetValue(10) != DBNull.Value)
+                    if (alertDr.GetValue(8) != DBNull.Value)
                     {
-                        todayPrice = alertDr.GetFloat(10);
+                        todayPrice = alertDr.GetFloat(8);
                     }
 
                     double change = 0;
