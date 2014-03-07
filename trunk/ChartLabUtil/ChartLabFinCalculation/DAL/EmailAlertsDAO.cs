@@ -370,13 +370,21 @@ WHERE   u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT
             string text = string.Empty;
             try
             {
-                if (longTermAlertId == 1)
+                if (longTermAlertId == 3)
                 {
-                    text = "<div style='Color:green'>Turned Bullish <img align='middle' src='http://www.chartlabpro.com/images/bull.png' /> </div>";
+                    text = "<div style='Color:green'>Bullish <img align='middle' src='http://www.chartlabpro.com/images/bull.png' /> </div>";
                 }
                 else if (longTermAlertId == 2)
                 {
-                    text = "<div style='Color:maroon' >Turned Bearish <img align='middle' src='http://www.chartlabpro.com/images/Bear.png' /></div>";
+                    text = "<div style='Color:maroon' >Bearish <img align='middle' src='http://www.chartlabpro.com/images/Bear.png' /></div>";
+                } 
+                else if (longTermAlertId == 4)
+                {
+                    text = "<div style='Color:green'>Very Bullish <img align='middle' src='http://www.chartlabpro.com/images/bull.png' /> </div>";
+                }
+                else if (longTermAlertId == 1)
+                {
+                    text = "<div style='Color:maroon' >Very Bearish <img align='middle' src='http://www.chartlabpro.com/images/Bear.png' /></div>";
                 }
                 else
                 {
