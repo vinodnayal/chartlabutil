@@ -196,11 +196,11 @@ width:80px;
 }
 .alert
 {
-width:300px;
+width:320px;
 }
 .lngterm
 {
-width:200px;
+width:160px;
 text-align:center;
 }
 
