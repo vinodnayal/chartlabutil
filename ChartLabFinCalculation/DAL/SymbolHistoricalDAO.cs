@@ -167,7 +167,7 @@ namespace ChartLabFinCalculation
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
 
             //Now we will create a command
-            OdbcCommand com = new OdbcCommand("SELECT distinct symbol FROM equitiesFundamental where (id BETWEEN " + from + " AND " + to + ") AND isnew=0", con);
+            OdbcCommand com = new OdbcCommand("SELECT distinct symbol FROM equitiesFundamental where (id BETWEEN " + from + " AND " + to + ") AND isnew=0 AND isactive =1 AND symbol NOT IN (SELECT symbol FROM invalid_symbols) order by symbol", con);
             try
             {
                 con.Open();
