@@ -30,9 +30,9 @@ namespace ChartLabFinCalculation.BL
             try
             {
                 log.Info("EmailAlert: Geting subscribed user list");
-                
-                  Dictionary<int, string> usersEmailDict = EmailAlertsDAO.GetUniqueSubsUser();
-                
+
+                Dictionary<int, string> usersEmailDict = EmailAlertsDAO.GetUniqueSubsUser();
+
                 //todo for testing-om
                 //Dictionary<int, string> usersEmailDict = new Dictionary<int, string>();
                 //usersEmailDict.Add(120, "om.omshiv@gmail.com");
@@ -48,7 +48,7 @@ namespace ChartLabFinCalculation.BL
                     emailCounter++;
                     int userId = user.Key;
                     String To = user.Value;
-                    log.Info("EmailAlert: Geting user's alert from DB");
+                    log.Info("EmailAlert: Geting user's alert from DB userId:" + userId);
                     //snp alert from mongo
                     StringBuilder alertsSB = new StringBuilder();
                     alertsSB.Append("<b>S&P 500 Alert: </b><br/>" + snpAlertHtmlView + "<br/><br/>");
@@ -73,9 +73,20 @@ namespace ChartLabFinCalculation.BL
                         InlineResult result = PreMailer.Net.PreMailer.MoveCssInline(Body, true);
 
                         //sending alert by mail
-                        MailUtility.SendMail(Subject, result.Html, From, To);
-                        log.Info("EmailAlert: Alerts Mail sent to mail id :" + To);
-
+                        if (!string.IsNullOrEmpty(To))
+                        {
+                            log.Info("EmailAlert: Alerts Mail sending to mail id :" + To);
+                            MailUtility.SendMail(Subject, result.Html, From, To);
+                            log.Info("EmailAlert: Alerts Mail sent to mail id :" + To);
+                        }
+                        else
+                        {
+                            log.Info("EmailAlert: user mail id is blank for userid :" + userId);
+                        }
+                    }
+                    else
+                    {
+                        log.Info("EmailAlert: No mail alerts found for userid :" + userId);
                     }
                 }
 
@@ -128,7 +139,7 @@ namespace ChartLabFinCalculation.BL
             return AlertString.ToString();
         }
 
-     
+
         /// <summary>
         /// get Common wl Alerts
         /// </summary>

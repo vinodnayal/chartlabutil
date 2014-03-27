@@ -1063,13 +1063,13 @@ namespace ChartLabFinCalculation.BL
                         if (i == chunkCounts)
                         {
                             MailUtility.SendMail(Subject, Body, From, usersEmailsList.GetRange(index, usersEmailsList.Count - index));
-                            log.Info("EmailAlert: Alerts Mail sent in range of " + index + " to " + (usersEmailsList.Count - index));
+                            log.Info("EmailAlert: PROPlus Alerts Mail sent in range of " + index + " to " + (usersEmailsList.Count - index));
                         }
                         else
                         {
                             MailUtility.SendMail(Subject, Body, From, usersEmailsList.GetRange(index, chunkSize));
 
-                            log.Info("EmailAlert: Alerts Mail sent in range of " + index + " to " + (index + chunkSize - 1));
+                            log.Info("EmailAlert: PROPlus Alerts Mail sent in range of " + index + " to " + (index + chunkSize - 1));
                         }
                     
                     }
