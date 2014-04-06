@@ -26,7 +26,7 @@ namespace ChartLabFinCalculation
 
             List<DateTime> dateList = new List<DateTime>();
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand com = new OdbcCommand("SELECT DISTINCT DATE FROM symbolshistorical WHERE symbol='GOOG' ORDER BY DATE desc", con);
+            OdbcCommand com = new OdbcCommand("SELECT DISTINCT DATE FROM symbolshistorical WHERE symbol='SPY' ORDER BY DATE desc", con);
             OdbcCommand getWeeklyDate = new OdbcCommand("SELECT DATE from historicaldates where DateType='" + Constants.W + "'", con);
             OdbcCommand getMonthlyDate = new OdbcCommand("SELECT DATE from historicaldates where DateType='" + Constants.M + "'", con);
             OdbcCommand getYearlyDate = new OdbcCommand("SELECT DATE from historicaldates where DateType='" + Constants.Y + "'", con);

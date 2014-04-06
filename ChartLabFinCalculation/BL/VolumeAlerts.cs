@@ -184,14 +184,15 @@ namespace ChartLabFinCalculation
         {
             try
             {
-                log.Info("Process: Getting symbol List From DB");
-                List<String> symbolList = SymbolHistoricalDAO.GetsymbolListFromDB(1, Constants.MAX_ID_DB);
-                log.Info("Process: Getting Daily Avg Volume for symbol list for symbol count " + symbolList.Count);
-                List<DailyAverageVolume> dailyAvgVolumeList = GetDailyAvgVolume(symbolList);
-                log.Info("Process: Write To CSV Daily Avg Volume");
-                CSVExporter.WriteToCSVDailyAvgVolume(dailyAvgVolumeList, DailyAvgVolumeFolderPath + "/DailyAvgVolume.csv");
-                log.Info("Process: Save Daily Avg Volume Data");
-                VolumeDAO.SaveDailyAvgVolumeData(DailyAvgVolumeFolderPath);
+                //log.Info("Process: Getting symbol List From DB");
+                //List<String> symbolList = SymbolHistoricalDAO.GetsymbolListFromDB(1, Constants.MAX_ID_DB);
+                //log.Info("Process: Getting Daily Avg Volume for symbol list for symbol count " + symbolList.Count);
+                //List<DailyAverageVolume> dailyAvgVolumeList = GetDailyAvgVolume(symbolList);
+                //log.Info("Process: Write To CSV Daily Avg Volume");
+                //CSVExporter.WriteToCSVDailyAvgVolume(dailyAvgVolumeList, DailyAvgVolumeFolderPath + "/DailyAvgVolume.csv");
+                //log.Info("Process: Save Daily Avg Volume Data");
+                //VolumeDAO.SaveDailyAvgVolumeData(DailyAvgVolumeFolderPath);
+                
                 log.Info("Process: Update Volume Table");
                 VolumeDAO.UpdateVolumeTable();
 

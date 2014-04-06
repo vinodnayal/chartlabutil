@@ -70,7 +70,10 @@ namespace FinLib
                     symbolAnalytics.OBOSWeekly = (int)CalculateOBOSforRSI(symbolAnalytics.weeklyRSI);
                     symbolAnalytics.OBOSCurrent = (int)CalculateOBOSforRSI(symbolAnalytics.currentRSI);
                 }
-                List<double> _52weekRange = Calulate52WeekRange(symbol);
+                //List<double> _52weekRange = Calulate52WeekRange(symbol);
+                List<double> _52weekRange = new List<double>();
+                _52weekRange.Add(0);
+                _52weekRange.Add(0);
                 if (_52weekRange != null & _52weekRange.Count != 0)
                 {
                     symbolAnalytics.high52WeekRange = _52weekRange[0];
@@ -122,7 +125,7 @@ namespace FinLib
                                     //if(
                                     _52weekRange.Add(high);
                                     _52weekRange.Add(low);
-                                }
+                                }   
 
                             }
 
@@ -349,9 +352,10 @@ namespace FinLib
                 m_nav.Recordset_ = m_Recordset;
                 MovingAverage mov = new MovingAverage();
                 Field ema = mov.ExponentialMovingAverage(m_nav, m_Close, period, "EMA").GetField("EMA");
-
-                var ematoay = ema.Value(ema.RecordCount - 1);
-                return (double)ematoay;
+                double ematoay = 0;
+                if(ema.RecordCount >0)
+                    ematoay = (double)ema.Value(ema.RecordCount - 1);
+                return ematoay;
             }
 
             catch (Exception ex)
@@ -407,73 +411,80 @@ namespace FinLib
 
         public void CalulatePriceToDate(List<BarData> barlist, List<HistoricalDates> listHistoricalDates, SymbolAnalytics symbolAnalytics)
         {
-            Double QTDPrice = 0;
-            Double YTDPrice = 0;
-            Double MTDPrice = 0;
-            Double WTDPrice = 0;
-
-            //List<HistoricalDates> weeklyDate = listHistoricalDates.Where(x => x.dateType.Equals("weekly", StringComparison.OrdinalIgnoreCase)).ToList();
-            //List<BarData> barRecord = barlist.Where(x => x.Timestamp.Equals(weeklyDate[0].date)).ToList();
-            //if (barRecord.Count > 0)
-            //    WTDPrice = barRecord[0].Close;
-
-
-
-            foreach (HistoricalDates histDate in listHistoricalDates)
+            try
             {
-                List<BarData> barRecord = barlist.Where(x => x.date > (histDate.date.AddDays(-5)) && x.date <= (histDate.date)).ToList();
-                if (histDate.dateType.Equals("Weekly", StringComparison.OrdinalIgnoreCase))
+                Double QTDPrice = 0;
+                Double YTDPrice = 0;
+                Double MTDPrice = 0;
+                Double WTDPrice = 0;
+
+                //List<HistoricalDates> weeklyDate = listHistoricalDates.Where(x => x.dateType.Equals("weekly", StringComparison.OrdinalIgnoreCase)).ToList();
+                //List<BarData> barRecord = barlist.Where(x => x.Timestamp.Equals(weeklyDate[0].date)).ToList();
+                //if (barRecord.Count > 0)
+                //    WTDPrice = barRecord[0].Close;
+
+
+
+                foreach (HistoricalDates histDate in listHistoricalDates)
                 {
-                    if (barRecord.Count > 0)
+                    List<BarData> barRecord = barlist.Where(x => x.date > (histDate.date.AddDays(-5)) && x.date <= (histDate.date)).ToList();
+                    if (histDate.dateType.Equals("Weekly", StringComparison.OrdinalIgnoreCase))
                     {
-                        WTDPrice = barRecord[barRecord.Count - 1].close;
+                        if (barRecord.Count > 0)
+                        {
+                            WTDPrice = barRecord[barRecord.Count - 1].close;
+                        }
+                        else
+                            WTDPrice = barlist[0].close;
                     }
-                    else
-                        WTDPrice = barlist[0].close;
-                }
-                else if (histDate.dateType.Equals("Quaterly", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (barRecord.Count > 0)
-                        QTDPrice = barRecord[barRecord.Count - 1].close;
-                    else
-                        QTDPrice = barlist[0].close;
+                    else if (histDate.dateType.Equals("Quaterly", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (barRecord.Count > 0)
+                            QTDPrice = barRecord[barRecord.Count - 1].close;
+                        else
+                            QTDPrice = barlist[0].close;
 
-                }
-                else if (histDate.dateType.Equals("Yearly", StringComparison.OrdinalIgnoreCase))
-                {
+                    }
+                    else if (histDate.dateType.Equals("Yearly", StringComparison.OrdinalIgnoreCase))
+                    {
 
-                    if (barRecord.Count > 0)
-                        YTDPrice = barRecord[barRecord.Count - 1].close;
-                    else
-                        YTDPrice = barlist[0].close;
+                        if (barRecord.Count > 0)
+                            YTDPrice = barRecord[barRecord.Count - 1].close;
+                        else
+                            YTDPrice = barlist[0].close;
 
-                }
-                else if (histDate.dateType.Equals("Monthly", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (barRecord.Count > 0)
-                        MTDPrice = barRecord[barRecord.Count - 1].close;
-                    else
-                        MTDPrice = barlist[0].close;
+                    }
+                    else if (histDate.dateType.Equals("Monthly", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (barRecord.Count > 0)
+                            MTDPrice = barRecord[barRecord.Count - 1].close;
+                        else
+                            MTDPrice = barlist[0].close;
 
+                    }
                 }
+
+
+                symbolAnalytics.QTDPrice = QTDPrice;
+                symbolAnalytics.YTDPrice = YTDPrice;
+                symbolAnalytics.MTDPrice = MTDPrice;
+                symbolAnalytics.WTDPrice = WTDPrice;
+
+                ////List<string> mylist = new List<string> { "hello", "world", "foo", "bar" };
+                //List<string> listContainingLetterO = mylist.Where(x => x.Contains("o")).ToList();
+                //List<BarData> listContainingLetter1 = list.GetRange(2, 15);
+                // List<HistoricalDates> listDatePrice1 = listHistoricalDates.Where(x => x.dateType.Equals("weekly", StringComparison.OrdinalIgnoreCase)).ToList();
+                // DateTime date1 = listDatePrice1[0].date;
+                //BarData data1 = barlist.Where(y => y.Timestamp.Equals(date1)).ToList()[0];
+                // fincalc.CalulateRSI("MSFT", fromdate.Date, toDate.Date, barlist);
+
+
             }
+            catch (Exception ex)
+            {
 
-
-            symbolAnalytics.QTDPrice = QTDPrice;
-            symbolAnalytics.YTDPrice = YTDPrice;
-            symbolAnalytics.MTDPrice = MTDPrice;
-            symbolAnalytics.WTDPrice = WTDPrice;
-
-            ////List<string> mylist = new List<string> { "hello", "world", "foo", "bar" };
-            //List<string> listContainingLetterO = mylist.Where(x => x.Contains("o")).ToList();
-            //List<BarData> listContainingLetter1 = list.GetRange(2, 15);
-            // List<HistoricalDates> listDatePrice1 = listHistoricalDates.Where(x => x.dateType.Equals("weekly", StringComparison.OrdinalIgnoreCase)).ToList();
-            // DateTime date1 = listDatePrice1[0].date;
-            //BarData data1 = barlist.Where(y => y.Timestamp.Equals(date1)).ToList()[0];
-            // fincalc.CalulateRSI("MSFT", fromdate.Date, toDate.Date, barlist);
-
-
-
+                throw ex;
+            }
 
         }
 

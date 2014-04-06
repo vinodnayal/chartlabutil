@@ -49,6 +49,8 @@ namespace ChartLabFinCalculation
         {
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
+            String sql_update = "update volume , symbol_live_data set volume.avgvolume=symbol_live_data.volume where volume.symbol= symbol_live_data.symbol";
+            OdbcCommand updateCommand1 = new OdbcCommand(sql_update,con);
 
             OdbcCommand updateCommand = new OdbcCommand("UPDATE volume v, " +
                                                         "(SELECT FORMAT((T2.close-T1.close)*100/T1.close,2) AS PctPriceChg,T1.symbol,T2.volume FROM " +
@@ -65,7 +67,7 @@ namespace ChartLabFinCalculation
             try
             {
                 con.Open();
-
+                updateCommand1.ExecuteReader();
                 updateCommand.ExecuteReader();
                 log.Info("Volume Table Updated...");
 

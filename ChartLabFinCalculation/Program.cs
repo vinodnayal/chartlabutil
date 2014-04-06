@@ -417,15 +417,17 @@ namespace ChartLabFinCalculation
                         logTime.Info("Process: Starting Daily Average Volume Programme at: " + DateTime.Now);
                         VolumeAlerts.CalculateDailyAverageVolume(DailyAvgVolumeFolderPath);
                         logTime.Info("Process: Dane! Daily Average Volume Programme at: " + DateTime.Now);
+                        log.Info("Process: Insert Daily Volume Alert in historicalvolumealerts");
+                        VolumeDAO.InsertDailyVolumeAlert();
                         #endregion
                         break;
 
                     case "VDA":
                         #region  Daily Volume Alert
 
-                        logTime.Info("Process: Starting Daily Volume Alert Programme at: " + DateTime.Now);
-                        VolumeAlerts.InsertVolumeAlertDaily();
-                        logTime.Info("Process: Done! Daily Volume Alert Programme at: " + DateTime.Now);
+                        //logTime.Info("Process: Starting Daily Volume Alert Programme at: " + DateTime.Now);
+                        //VolumeAlerts.InsertVolumeAlertDaily();
+                        //logTime.Info("Process: Done! Daily Volume Alert Programme at: " + DateTime.Now);
                         #endregion
                         break;
 
