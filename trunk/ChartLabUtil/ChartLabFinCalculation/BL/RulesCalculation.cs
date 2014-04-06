@@ -22,6 +22,7 @@ namespace ChartLabFinCalculation
                 List<SymbolRule> symbolRuleList = new List<SymbolRule>();
                 log.Info("Process: Geting symbol List From DB");
                 List<string> symbolList = SymbolHistoricalDAO.GetsymbolListFromDB();
+                
                 log.Info("Process: Geting BuySell and CTRating from DB");
                 Dictionary<string, SymbolRatingAlert> ratingDict = RulesCalculationDAO.GetBuySellPlusCTRating();
                 log.Info("Process: Geting LongShortAlerts from DB");

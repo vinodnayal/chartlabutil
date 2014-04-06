@@ -10,7 +10,7 @@ namespace ChartLabFinCalculation
     {
         public static string MyConString = ConfigurationManager.AppSettings["ConnectionString"];
         public static string MongoConString = ConfigurationManager.AppSettings["MongoServer"];
-        public const int MAX_ID_DB = 10000;
+        public const int MAX_ID_DB = 100000;
         public const int Vol_ALERT_POSITIVE = 1;
         public const int Vol_ALERT_NEGATIVE = -1;
         public const int Vol_ALERT_NEUTRAL = 0;
