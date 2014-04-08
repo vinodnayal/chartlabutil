@@ -242,11 +242,11 @@ namespace ChartLabFinCalculation
                     rule.ratingChangeDate = longRatingAlertDict[symbol].ratingChangeDate;
                     rule.changeDatePrice = longRatingAlertDict[symbol].changeDatePrice;
 
-                    if ((prevrating == 3 & currating == 5) || (prevrating == 4 & currating == 5))
+                    if ((prevrating <= 4  & currating == 5))
                     {
                         rule.RuleId = Constants.LongAlert1;
                     }
-                    else if (prevrating == 3 & currating == 4)
+                    else if (prevrating <= 3 & currating == 4)
                     {
                         rule.RuleId = Constants.LongAlert2;
                     }
