@@ -125,15 +125,16 @@ namespace ChartLabFinCalculation.BL
                                 if (snpSymbolsAnalytics.ContainsKey(symbolDetail.Key))
                                 {
                                     SnpAnalytics symbolAnalytics = snpSymbolsAnalytics[symbolDetail.Key];
-
-                                    if (tempAnalytics.alertType == 3 && symbolAnalytics.proEdgeTriggerDateDiff <= 10 && symbolAnalytics.proEdgeTriggerDateDiff > 0 && (symbolAnalytics.alertType == 1 || symbolAnalytics.alertType == 2))
-                                    {
-                                    }
-                                    else
-                                    {
-                                        symbolAnalytics.proEdgeId = tempAnalytics.proEdgeId;
-                                        symbolAnalytics.proEdgeTriggerDate = tempAnalytics.proEdgeTriggerDate;
-                                    }
+                                    symbolAnalytics.proEdgeId = tempAnalytics.proEdgeId;
+                                    symbolAnalytics.proEdgeTriggerDate = tempAnalytics.proEdgeTriggerDate;
+                                    //if (tempAnalytics.alertType == 3 && symbolAnalytics.proEdgeTriggerDateDiff <= 10 && symbolAnalytics.proEdgeTriggerDateDiff > 0 && (symbolAnalytics.alertType == 1 || symbolAnalytics.alertType == 2))
+                                    //{
+                                    //}
+                                    //else
+                                    //{
+                                    //    symbolAnalytics.proEdgeId = tempAnalytics.proEdgeId;
+                                    //    symbolAnalytics.proEdgeTriggerDate = tempAnalytics.proEdgeTriggerDate;
+                                    //}
 
                                 }
                             }
