@@ -97,13 +97,14 @@ LEFT JOIN watchlist wl ON wl.userid=u.userId
 LEFT JOIN watchlistsymbolmapping wm ON wm.watchlistid=wl.watchlistid 
 LEFT JOIN symbolanalytics sa ON sa.symbol=wm.symbol 
 LEFT JOIN equitiesfundamental ef ON ef.symbol=wm.symbol
+LEFT JOIN paidwatchlistusermapping pwm ON pwm.user_wl_id = wl.watchlistid
 LEFT JOIN (SELECT * FROM buysellratingchangehistory WHERE ratingDate= (SELECT MAX(ratingDate) FROM buysellratingchangehistory)) AS bs ON bs.symbol=wm.symbol
 LEFT JOIN (SELECT * FROM ctratingchangehistory WHERE changedate= (SELECT MAX(changedate) FROM ctratingchangehistory)) AS ct ON ct.symbol=wm.symbol
 
 LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT MAX(DATE) FROM symbolshistorical)) AS t1 ON t1.symbol=wm.symbol
 LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT DISTINCT DATE FROM symbolshistorical ORDER BY DATE DESC LIMIT 1,1)) AS t2 ON t2.symbol=wm.symbol
 
-WHERE   u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT NULL)", con);
+WHERE   u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT NULL) AND pwm.user_wl_id IS null", con);
 
            
             try
@@ -936,5 +937,193 @@ WHERE  wl.watchlistid=" + watchlistId + " AND (ratingDate IS NOT NULL OR changed
 
         }
 
+
+        internal static Dictionary<int, List<SymbolAlerts>> getPaidWatchlistAlerts(int userId, int paidWatchlistId)
+        {
+            Dictionary<int, List<SymbolAlerts>> symolAlertList = new Dictionary<int, List<SymbolAlerts>>();
+
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
+            OdbcCommand ratingChangeCom = new OdbcCommand(@"SELECT mt.symbol,ef.companyName,t1.close,t1.date,t2.close,t2.date,sa.r3,sa.s3,
+CASE WHEN ACTION='Sell'  THEN  'Removing' ELSE 'Adding' END AS alert,
+pwm.user_wl_id, watchlistname
+FROM paidwatchlistusermapping pwm 
+LEFT JOIN model_trades_data mt ON mt.watchlistId = pwm.user_wl_id 
+LEFT JOIN watchlist wl ON wl.watchlistId = pwm.user_wl_id
+LEFT JOIN symbolanalytics sa ON sa.symbol=mt.symbol 
+LEFT JOIN equitiesfundamental ef ON ef.symbol=mt.symbol
+LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT MAX(DATE) FROM symbolshistorical)) AS t1 ON t1.symbol=mt.symbol
+LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= 
+(SELECT DISTINCT DATE FROM symbolshistorical ORDER BY DATE DESC LIMIT 1,1)) AS t2 ON t2.symbol=mt.symbol
+WHERE  mt.DATE >=DATE_ADD(NOW(),INTERVAL -1 DAY) and pwm.userid=" + userId + " AND  pwm.watchlistId= " + paidWatchlistId, con);
+
+
+            try
+            {
+
+                con.Open();
+                OdbcDataReader ratingChangeDr = ratingChangeCom.ExecuteReader();
+                symolAlertList = getPaidWlBuySellAlerts(ratingChangeDr);
+            }
+            catch (OdbcException ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+
+
+            return symolAlertList;
+
+        }
+
+        private static Dictionary<int, List<SymbolAlerts>> getPaidWlBuySellAlerts(OdbcDataReader alertDr)
+        {
+            Dictionary<int, List<SymbolAlerts>> wlAlertDict = new Dictionary<int, List<SymbolAlerts>>();
+            try
+            {
+                while (alertDr.Read())
+                {
+                    String symbol = "";
+
+                    if (alertDr.GetValue(0) != DBNull.Value)
+                    {
+                        symbol = alertDr.GetString(0);
+                    }
+                    
+                    String companyName = "";
+
+                    if (alertDr.GetValue(1) != DBNull.Value)
+                    {
+                        companyName = alertDr.GetString(1);
+                    }
+
+                    double yesterdayPrice = 0;
+                    if (alertDr.GetValue(4) != DBNull.Value)
+                    {
+                        yesterdayPrice = alertDr.GetFloat(4);
+                    }
+
+                    double todayPrice = 0;
+                    if (alertDr.GetValue(2) != DBNull.Value)
+                    {
+                        todayPrice = alertDr.GetFloat(2);
+                    }
+
+                    double change = 0;
+                    double changePct = 0;
+                    if (todayPrice != 0 && yesterdayPrice != 0)
+                    {
+                        change = todayPrice - yesterdayPrice;
+                        changePct = (todayPrice - yesterdayPrice) * 100 / yesterdayPrice;
+                    }
+
+                    double r3 = 0.0;
+                    if (alertDr.GetValue(6) != DBNull.Value)
+                    {
+                        r3 = Convert.ToDouble(alertDr.GetValue(6));
+                    }
+
+                    double s3 = 0.0;
+                    if (alertDr.GetValue(7) != DBNull.Value)
+                    {
+                        s3 = Convert.ToDouble(alertDr.GetValue(7));
+                    }
+
+                    String buySellAlertText = "";
+
+                    if (alertDr.GetValue(8) != DBNull.Value)
+                    {
+                        if (alertDr.GetString(8).Equals("Adding"))
+                        {
+                            buySellAlertText = "<div style='text-align:center; font-weight:bold; color:green'>" + alertDr.GetString(8) + "</div>";
+                        }
+                        else
+                        {
+                            buySellAlertText = "<div style='text-align:center; font-weight:bold;color:red'>" + alertDr.GetString(8) + "</div>";
+                        }
+                    }
+
+                    String longTermAlertText = "";
+                    string changeCssClass = "";
+                    if (change < 0)
+                    {
+                        changeCssClass = "redInfo";
+                    }
+                    else
+                    {
+                        changeCssClass = "greenInfo";
+                    }
+                    String priceChangeText = "<div class='" + changeCssClass + "'>" + Math.Round(change, 2) + "&nbsp;&nbsp;" + Math.Round(changePct, 2) + "%</div>";
+
+                    String watchlistName = "";
+                    if (alertDr.GetValue(10) != DBNull.Value)
+                    {
+                        watchlistName = alertDr.GetString(10);
+                    }
+
+                    int watchlistId = 0;
+                    if (alertDr.GetValue(9) != DBNull.Value)
+                    {
+                        watchlistId = Convert.ToInt32(alertDr.GetValue(9));
+                    }
+
+                    String wlHeaderCss = "";
+                    if (watchlistId < 20 && watchlistId > 0)
+                    {
+                        wlHeaderCss = "commonWlHeader";
+                    }
+                    else if (watchlistId == 0)
+                    {
+                        wlHeaderCss = "portHeader";
+                    }
+                    else
+                    {
+                        wlHeaderCss = "wlHeader";
+                    }
+                    SymbolAlerts symbolAlert = new SymbolAlerts
+                    {
+                        Symbol = symbol,
+                      
+                        companyName = companyName,
+                      
+                        watchlistName = watchlistName,
+                      
+                        change = change,
+                        changePct = changePct,
+                        resistance = Math.Round(r3, 2),
+                        support = Math.Round(s3, 2),
+                        longTermTrendText = longTermAlertText,
+                        price = todayPrice,
+                        ratingAlertText = buySellAlertText, //alert for buy sell (adding / removing)
+                        priceChangeText = priceChangeText,
+                        wlHeaderCss = wlHeaderCss
+
+                    };
+                    if (wlAlertDict.ContainsKey(watchlistId))
+                    {
+                        List<SymbolAlerts> symbolAlerts = wlAlertDict[watchlistId];
+                        symbolAlerts.Add(symbolAlert);
+
+                        wlAlertDict[watchlistId] = symbolAlerts;
+                    }
+                    else
+                    {
+                        List<SymbolAlerts> symbolAlerts = new List<SymbolAlerts>();
+                        symbolAlerts.Add(symbolAlert);
+                        wlAlertDict.Add(watchlistId, symbolAlerts);
+                    }
+                }
+                alertDr.Close();
+            }
+            catch (OdbcException ex)
+            {
+                throw ex;
+            }
+
+            return wlAlertDict;
+        }
     }
 }

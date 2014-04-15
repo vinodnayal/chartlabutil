@@ -34,8 +34,9 @@ namespace ChartLabFinCalculation.BL
                 Dictionary<int, string> usersEmailDict = EmailAlertsDAO.GetUniqueSubsUser();
 
                 //todo for testing-om
-                //Dictionary<int, string> usersEmailDict = new Dictionary<int, string>();
-                //usersEmailDict.Add(120, "om.omshiv@gmail.com");
+                //  Dictionary<int, string> usersEmailDict = new Dictionary<int, string>();
+                //  usersEmailDict.Add(120, "om.omshiv@gmail.com");
+                //usersEmailDict.Add(120, "brett@thechartlab.com");
 
                 String Subject = "ChartLab Alerts";
                 String From = ConfigurationManager.AppSettings["AdminEmail"];
@@ -182,7 +183,7 @@ namespace ChartLabFinCalculation.BL
         }
 
         /// <summary>
-        /// get users all alerts (port,wl,common)
+        /// get users all alerts (port,wl,common, paid watchlists)
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="commonWlAlertsDict"></param>
@@ -229,6 +230,30 @@ namespace ChartLabFinCalculation.BL
                         if (myWlAlerts != "")
                         {
                             alerts.Append("<b>My Watchlist Alerts: </b><br/><br/>");
+                            alerts.Append(myWlAlerts);
+
+                        }
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    log.Error("Error in getting watchlist alerts from DB ");
+                    log.Error(ex);
+                }
+
+                try
+                {
+                    //TODO - get users all paid watchlists and then get alerts for all wl. currenlty there is only one paid wl - 10
+                    int paidWatchlistId = 10;
+                    Dictionary<int, List<SymbolAlerts>> wlAlerts = EmailAlertsDAO.getPaidWatchlistAlerts(userId, paidWatchlistId);
+                    String myWlAlerts = "";
+                    if (wlAlerts.Count > 0)
+                    {
+                        myWlAlerts = getAlertString(wlAlerts);
+                        if (myWlAlerts != "")
+                        {
+                            alerts.Append("<b>Tectical Model Alerts: </b><br/><br/>");
                             alerts.Append(myWlAlerts);
 
                         }
