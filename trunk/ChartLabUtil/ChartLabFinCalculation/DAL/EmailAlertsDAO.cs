@@ -954,7 +954,7 @@ LEFT JOIN equitiesfundamental ef ON ef.symbol=mt.symbol
 LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT MAX(DATE) FROM symbolshistorical)) AS t1 ON t1.symbol=mt.symbol
 LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= 
 (SELECT DISTINCT DATE FROM symbolshistorical ORDER BY DATE DESC LIMIT 1,1)) AS t2 ON t2.symbol=mt.symbol
-WHERE  mt.DATE >=DATE_ADD(NOW(),INTERVAL -1 DAY) and pwm.userid=" + userId + " AND  pwm.watchlistId= " + paidWatchlistId, con);
+WHERE  mt.DATE >=DATE_ADD(CURDATE(),INTERVAL -1 DAY) and pwm.userid=" + userId + " AND  pwm.watchlistId= " + paidWatchlistId, con);
 
 
             try
