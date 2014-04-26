@@ -57,17 +57,15 @@ namespace ChartLabFinCalculation.DAL
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
 
-            OdbcCommand ratingChangeCom = new OdbcCommand(@" SELECT DISTINCT  up.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate,ct.ctratingprev,ct.ctratingcurr,ct.changedate,t1.close,t1.date,t2.close,t2.date,sa.r1,sa.s3,sa.longTerm,0 as watchlistid,'Portfolio' as watchlistname FROM users u 
+            OdbcCommand ratingChangeCom = new OdbcCommand(@" SELECT DISTINCT  up.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate,ct.ctratingprev,ct.ctratingcurr,ct.changedate,sl.last,''AS date1,sl.prev_close,'' AS preDate,sa.r1,sa.s3,sa.longTerm,0 AS watchlistid,'Portfolio' AS watchlistname FROM users u 
 LEFT JOIN userportfolio up ON up.userId=u.userid 
 LEFT JOIN symbolanalytics sa ON sa.symbol=up.symbol 
 LEFT JOIN equitiesfundamental ef ON ef.symbol=up.symbol
 LEFT JOIN (SELECT * FROM buysellratingchangehistory WHERE ratingDate= (SELECT MAX(ratingDate) FROM buysellratingchangehistory)) AS bs ON bs.symbol=up.symbol
 LEFT JOIN (SELECT * FROM ctratingchangehistory WHERE changedate= (SELECT MAX(changedate) FROM ctratingchangehistory)) AS ct ON ct.symbol=up.symbol
+LEFT JOIN symbol_live_data sl ON sl.symbol=up.symbol
 
-LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT MAX(DATE) FROM symbolshistorical)) AS t1 ON t1.symbol=up.symbol
-LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT DISTINCT DATE FROM symbolshistorical ORDER BY DATE DESC LIMIT 1,1)) AS t2 ON t2.symbol=up.symbol
-
-WHERE   u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT NULL)", con);
+WHERE  u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT NULL)", con);
            try
             {
                 con.Open();
@@ -92,19 +90,16 @@ WHERE   u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT
             Dictionary<int, List<SymbolAlerts>> symolAlertList = new Dictionary<int, List<SymbolAlerts>>();
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand ratingChangeCom = new OdbcCommand(@" SELECT DISTINCT  wm.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate,ct.ctratingprev,ct.ctratingcurr,ct.changedate,t1.close,t1.date,t2.close,t2.date,sa.r3,sa.s3,sa.longTerm,wm.watchlistid,wl.watchlistname FROM users u 
-LEFT JOIN watchlist wl ON wl.userid=u.userId 
-LEFT JOIN watchlistsymbolmapping wm ON wm.watchlistid=wl.watchlistid 
+            OdbcCommand ratingChangeCom = new OdbcCommand(@"  SELECT DISTINCT  wm.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate,ct.ctratingprev,ct.ctratingcurr,ct.changedate,sl.last,''AS date1,sl.prev_close,'' AS preDate,sa.r3,sa.s3,sa.longTerm,wm.watchlistid,wl.watchlistname FROM users u 
+INNER JOIN watchlist wl ON wl.userid=u.userId 
+INNER JOIN watchlistsymbolmapping wm ON wm.watchlistid=wl.watchlistid 
 LEFT JOIN symbolanalytics sa ON sa.symbol=wm.symbol 
 LEFT JOIN equitiesfundamental ef ON ef.symbol=wm.symbol
 LEFT JOIN paidwatchlistusermapping pwm ON pwm.user_wl_id = wl.watchlistid
 LEFT JOIN (SELECT * FROM buysellratingchangehistory WHERE ratingDate= (SELECT MAX(ratingDate) FROM buysellratingchangehistory)) AS bs ON bs.symbol=wm.symbol
 LEFT JOIN (SELECT * FROM ctratingchangehistory WHERE changedate= (SELECT MAX(changedate) FROM ctratingchangehistory)) AS ct ON ct.symbol=wm.symbol
-
-LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT MAX(DATE) FROM symbolshistorical)) AS t1 ON t1.symbol=wm.symbol
-LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT DISTINCT DATE FROM symbolshistorical ORDER BY DATE DESC LIMIT 1,1)) AS t2 ON t2.symbol=wm.symbol
-
-WHERE   u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT NULL) AND pwm.user_wl_id IS null", con);
+LEFT JOIN symbol_live_data sl ON sl.symbol=wm.symbol
+WHERE u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT NULL) AND pwm.user_wl_id IS null", con);
 
            
             try
@@ -459,16 +454,13 @@ WHERE   u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT
             Dictionary<int, List<SymbolAlerts>> symolAlertList = new Dictionary<int, List<SymbolAlerts>>();
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand ratingChangeCom = new OdbcCommand(@" SELECT DISTINCT wm.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate,ct.ctratingprev,ct.ctratingcurr,ct.changedate,t1.close,t1.date,t2.close,t2.date,sa.r3,sa.s3,sa.longTerm,wm.watchlistid,wl.watchlistname FROM watchlist wl 
+            OdbcCommand ratingChangeCom = new OdbcCommand(@" SELECT DISTINCT wm.symbol,bs.oldRating,bs.newRating,ef.companyName,bs.ratingDate,ct.ctratingprev,ct.ctratingcurr,ct.changedate,sl.last,''AS date1,sl.prev_close,'' AS preDate,sa.r3,sa.s3,sa.longTerm,wm.watchlistid,wl.watchlistname FROM watchlist wl 
 LEFT JOIN watchlistsymbolmapping wm ON wm.watchlistid=wl.watchlistid 
 LEFT JOIN symbolanalytics sa ON sa.symbol=wm.symbol 
 LEFT JOIN equitiesfundamental ef ON ef.symbol=wm.symbol
 LEFT JOIN (SELECT * FROM buysellratingchangehistory WHERE ratingDate= (SELECT MAX(ratingDate) FROM buysellratingchangehistory)) AS bs ON bs.symbol=wm.symbol
 LEFT JOIN (SELECT * FROM ctratingchangehistory WHERE changedate= (SELECT MAX(changedate) FROM ctratingchangehistory)) AS ct ON ct.symbol=wm.symbol
-
-LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT MAX(DATE) FROM symbolshistorical)) AS t1 ON t1.symbol=wm.symbol
-LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT DISTINCT DATE FROM symbolshistorical ORDER BY DATE DESC LIMIT 1,1)) AS t2 ON t2.symbol=wm.symbol
-
+LEFT JOIN symbol_live_data sl ON sl.symbol=wm.symbol
 WHERE  wl.watchlistid=" + watchlistId + " AND (ratingDate IS NOT NULL OR changedate IS NOT NULL)", con);
 
            try
@@ -943,7 +935,7 @@ WHERE  wl.watchlistid=" + watchlistId + " AND (ratingDate IS NOT NULL OR changed
             Dictionary<int, List<SymbolAlerts>> symolAlertList = new Dictionary<int, List<SymbolAlerts>>();
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand ratingChangeCom = new OdbcCommand(@"SELECT mt.symbol,ef.companyName,t1.close,t1.date,t2.close,t2.date,sa.r3,sa.s3,
+            OdbcCommand ratingChangeCom = new OdbcCommand(@"SELECT mt.symbol,ef.companyName,sl.last,''AS date1,sl.prev_close,'' AS preDate,sa.r3,sa.s3,
 CASE WHEN ACTION='Sell'  THEN  'Removing' ELSE 'Adding' END AS alert,
 pwm.user_wl_id, watchlistname
 FROM paidwatchlistusermapping pwm 
@@ -951,10 +943,8 @@ LEFT JOIN model_trades_data mt ON mt.watchlistId = pwm.user_wl_id
 LEFT JOIN watchlist wl ON wl.watchlistId = pwm.user_wl_id
 LEFT JOIN symbolanalytics sa ON sa.symbol=mt.symbol 
 LEFT JOIN equitiesfundamental ef ON ef.symbol=mt.symbol
-LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= (SELECT MAX(DATE) FROM symbolshistorical)) AS t1 ON t1.symbol=mt.symbol
-LEFT JOIN (SELECT * FROM symbolshistorical WHERE DATE= 
-(SELECT DISTINCT DATE FROM symbolshistorical ORDER BY DATE DESC LIMIT 1,1)) AS t2 ON t2.symbol=mt.symbol
-WHERE  mt.DATE >=DATE_ADD(CURDATE(),INTERVAL -1 DAY) and pwm.userid=" + userId + " AND  pwm.watchlistId= " + paidWatchlistId, con);
+LEFT JOIN symbol_live_data sl ON sl.symbol=mt.symbol
+WHERE  mt.DATE >=DATE_ADD(CURDATE(),INTERVAL -1 DAY) AND pwm.userid=" + userId + " AND  pwm.watchlistId= " + paidWatchlistId, con);
 
 
             try
