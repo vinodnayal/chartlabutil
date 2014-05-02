@@ -14,7 +14,7 @@ namespace ChartLabFinCalculation
             List<DateTime> dateList = new List<DateTime>();
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand com = new OdbcCommand("SELECT DISTINCT createddate FROM watchlist", con);
+            OdbcCommand com = new OdbcCommand("SELECT DISTINCT createddate FROM watchlist where createddate is not null", con);
            
            
 
