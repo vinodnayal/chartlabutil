@@ -190,7 +190,7 @@ WHERE u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT N
                     double todayPrice = 0;
                     if (alertDr.GetValue(8) != DBNull.Value)
                     {
-                        todayPrice = alertDr.GetFloat(8);
+                        todayPrice =float.Parse( alertDr.GetString(8));
                     }
 
                     double change = 0;
