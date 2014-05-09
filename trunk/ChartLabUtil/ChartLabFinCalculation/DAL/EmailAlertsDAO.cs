@@ -999,7 +999,7 @@ WHERE  mt.DATE >=DATE_ADD(CURDATE(),INTERVAL -1 DAY) AND pwm.userid=" + userId +
                     double todayPrice = 0;
                     if (alertDr.GetValue(2) != DBNull.Value)
                     {
-                        todayPrice = alertDr.GetFloat(2);
+                        todayPrice =float.Parse( alertDr.GetValue(2).ToString());
                     }
 
                     double change = 0;
