@@ -276,7 +276,7 @@ namespace ChartLabFinCalculation
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
             OdbcCommand com;
-            String sqlString = @"SELECT s.symbol, p.proedgeid,p.proedgedate,sd.type,DATEDIFF(NOW(),proedgedate),p.synopsisid FROM snpsymbols s
+            String sqlString = @"SELECT s.symbol, p.proedgeid,p.proedgedate,sd.type,DATEDIFF(NOW(),proedgedate),p.synopsisid FROM temp_buysellrating s
 LEFT JOIN snpsymbolsanalytics p ON p.symbol= s.symbol 
 LEFT JOIN signal_details sd ON sd.proedgeid = p.proedgeid  ";
             com = new OdbcCommand(sqlString, con);
