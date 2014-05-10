@@ -669,7 +669,7 @@ namespace ChartLabFinCalculation.BL
                 }
                 else
                 {
-                    proEdgeId = "";
+                   // proEdgeId = "";
 
                 }
 

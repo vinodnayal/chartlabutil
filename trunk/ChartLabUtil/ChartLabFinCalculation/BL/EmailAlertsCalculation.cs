@@ -58,9 +58,9 @@ namespace ChartLabFinCalculation.BL
                     //get user alerts
                     alertsSB.Append(getUserAlerts(userId, commonWlAlerts));
 
-                    if (emailCounter % 100 == 0)
+                    if (emailCounter % 20 == 0)
                     {
-                        Thread.Sleep(3000);
+                        Thread.Sleep(2000);
                     }
                     if (alertsSB.Length > 0)
                     {
