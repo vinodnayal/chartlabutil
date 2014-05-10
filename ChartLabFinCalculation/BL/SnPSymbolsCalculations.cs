@@ -652,7 +652,8 @@ namespace ChartLabFinCalculation.BL
                 }
                 else
                 {
-                    increaseOrDecrease = "";
+                    increaseOrDecrease = "S3";
+                    //increaseOrDecrease = "";
                 }
 
                 if (increaseOrDecrease != "")
