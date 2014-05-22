@@ -66,18 +66,19 @@ namespace ChartLabFinCalculation
             Dictionary<int, int> topfiveDaysRatingSymbolList = new Dictionary<int, int>();
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand com = new OdbcCommand("SELECT temp1.sectorId,COUNT(*) AS stocks FROM " +
+            String sql1="SELECT temp1.sectorId,COUNT(*) AS stocks FROM " +
                                             "(SELECT h.symbol,h.ratingValue,e.sectorId  FROM historybuysellrating AS h JOIN equitiesfundamental AS e " +
                                             "ON h.symbol=e.symbol LEFT JOIN symbolanalytics sa ON sa.symbol= h.symbol " +
-                                            "WHERE h.ratingdate=(SELECT DATE FROM historicaldates WHERE Datetype='" + Constants.D_5 + "')  " +
+                                            "WHERE h.ratingdate=(SELECT DATE FROM historicaldates WHERE Datetype='" + Constants.D_5 + "' and  e.sectorid is not null)  " +
                                             "ORDER BY h.ratingvalue DESC,DATEDIFF(CURDATE(),sa.preSBRatingDate) DESC,ctratingvalue,symbol LIMIT 20) temp1 " +
-                                            "GROUP BY temp1.sectorId", con);
+                                            "GROUP BY temp1.sectorId";
+            OdbcCommand com = new OdbcCommand(sql1, con);
 
             OdbcCommand insert = new OdbcCommand("INSERT INTO sectorstocksymbols (sectorid,symbol,stockdayid) " +
                                                 "(SELECT e.sectorId,h.symbol,2 FROM historybuysellrating AS h JOIN equitiesfundamental AS e " +
                                                 "ON h.symbol=e.symbol LEFT JOIN symbolanalytics sa ON sa.symbol= h.symbol " +
-                                                "WHERE h.ratingdate=(SELECT DATE FROM historicaldates WHERE Datetype='5days')  " +
-                                                "ORDER BY h.ratingvalue DESC,DATEDIFF(CURDATE(),sa.preSBRatingDate) DESC,ctratingvalue,symbol LIMIT 20)", con);
+                                                "WHERE h.ratingdate=(SELECT DATE FROM historicaldates WHERE Datetype='5days') and e.sectorid is not null  " +
+                                                "ORDER BY h.ratingvalue DESC,DATEDIFF(CURDATE(),sa.preSBRatingDate ) DESC,ctratingvalue,symbol LIMIT 20)", con);
 
             try
             {
