@@ -584,12 +584,14 @@ namespace ChartLabFinCalculation
 
                         #endregion
                     case "EA":
-
+                        // 1- 500 , 501 -2500
                         #region Email Alerts sending
+                        int emailcount_start = Convert.ToInt32(args[1]);
+                        int emailcount_end = Convert.ToInt32(args[1]);
                         logTime.Info("EmailAlert:  Starting Email Alerts sending Programme at: " + DateTime.Now);
                         //DayOfWeek dayOfWeek = DateTime.Now.DayOfWeek;
 
-                        EmailAlertsCalculation.SendAlertsEmailtoUsers();
+                        EmailAlertsCalculation.SendAlertsEmailtoUsers(emailcount_start, emailcount_end);
                         logTime.Info("EmailAlert:  Done Email Alerts sending Programme at: " + DateTime.Now);
                         break;
 

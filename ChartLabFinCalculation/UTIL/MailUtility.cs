@@ -16,11 +16,11 @@ namespace ChartLabFinCalculation.UTIL
         static String _adminMailPassword = ConfigurationManager.AppSettings["AdminPassword"];
         static int _SmtpPort = Convert.ToInt32(ConfigurationManager.AppSettings["SMTPPort"]);
 
-        internal static void SendMail(string Subject, string Body, string From, string To)
+        internal static bool SendMail(string Subject, string Body, string From, string To)
         {
            
 
-            bool retry = true;
+            
             MailMessage mail = new MailMessage();
             SmtpClient SmtpServer = new SmtpClient(_SMTPServer);
             SmtpServer.Port = _SmtpPort;
@@ -34,24 +34,14 @@ namespace ChartLabFinCalculation.UTIL
                 mail.Body = Body;
                 mail.IsBodyHtml = true;
                 SmtpServer.Send(mail);
+                return true;
             }
             catch (Exception ex)
            {
-               try
-               {
-                   if (retry)
-                   {
-                       SmtpServer.Send(mail);
-                       retry = false;
-                   }
-               }
-               catch (Exception ex1)
-               {
-                   log.Error(ex1);
-               }
-                
+              
                 log.Error("Error in Sending  email to email id: " + To + " subject : " + Subject);
                 log.Error(ex);
+                return false;
             }
         }
         internal static void SendMail(string Subject, string Body, string From, List<string> usersEmailsList)
@@ -84,21 +74,22 @@ namespace ChartLabFinCalculation.UTIL
             }
             catch (Exception ex)
             {
-                try
-                {
-                    if (retry)
-                    {
-                        SmtpServer.Send(mail);
-                        retry = false;
-                    }
-                }
-                catch (Exception ex1)
-                {
-                    log.Error(ex1);
-                }
+                //try
+                //{
+                //    if (retry)
+                //    {
+                //        SmtpServer.Send(mail);
+                //        retry = false;
+                //    }
+                //}
+                //catch (Exception ex1)
+                //{
+                //    log.Error(ex1);
+                //}
 
                 log.Error("Error in Sending  email subject " + Subject);
                 log.Error(ex);
+                //throw ex;
             }
         }
     }

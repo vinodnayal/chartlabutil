@@ -426,6 +426,33 @@ WHERE u.userid=" + userId + " AND (ratingDate IS NOT NULL OR changedate IS NOT N
 
         }
 
+        internal static void insertfailedmessages(Dictionary<int, String> failedEmails)
+        {
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
+            
+
+            try
+            {
+                con.Open();
+                foreach (KeyValuePair<int, String> user in failedEmails)
+                {
+                    OdbcCommand imsert = new OdbcCommand("insert into failedemails(userid,email) values ("+user.Key+",'"+user.Value+"'", con);
+                    imsert.ExecuteNonQuery();
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+
+        }
+
         internal static void updateMyAlertsInDB(int userId, int subscriptionId, string alertString)
         {
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
@@ -506,13 +533,14 @@ WHERE  wl.watchlistid=" + watchlistId + " AND (ratingDate IS NOT NULL OR changed
             }
         }
 
-        internal static Dictionary<int, string> GetUniqueSubsUser()
+        internal static Dictionary<int, string> GetUniqueSubsUser(int start, int end)
         {
             Dictionary<int, string> users = new Dictionary<int, string>();
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand com = new OdbcCommand("SELECT DISTINCT usm.user_id,u.emailAddress FROM usersubscriptionmapping usm "
-                                                + "INNER JOIN users u ON u.userId=usm.user_id where u.isPaid=1 OR u.isundertrial=1", con);
+            String query = "SELECT DISTINCT usm.user_id,u.emailAddress FROM usersubscriptionmapping usm INNER JOIN users u ON u.userId=usm.user_id "+
+            " WHERE (u.isPaid=1 OR u.isundertrial=1) AND u.emailAddress IS NOT NULL AND  u.emailAddress <>''  AND u.emailAddress <>'0' ORDER BY usm.user_id LIMIT "+start +","+end;
+            OdbcCommand com = new OdbcCommand(query, con);
             try
             {
                 con.Open();

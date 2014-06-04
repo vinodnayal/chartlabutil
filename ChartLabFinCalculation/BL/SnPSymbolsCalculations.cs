@@ -1064,12 +1064,26 @@ namespace ChartLabFinCalculation.BL
                         int index = 40 * i;
                         if (i == chunkCounts)
                         {
-                            MailUtility.SendMail(Subject, Body, From, usersEmailsList.GetRange(index, usersEmailsList.Count - index));
-                            log.Info("EmailAlert: PROPlus Alerts Mail sent in range of " + index + " to " + (usersEmailsList.Count - index));
+                            try
+                            {
+                                MailUtility.SendMail(Subject, Body, From, usersEmailsList.GetRange(index, usersEmailsList.Count - index));
+                            }
+                            catch (Exception ex)
+                            {
+                                log.Info("EmailAlert: PROPlus Alerts Mail sent in range of " + index + " to " + (usersEmailsList.Count - index));
+                            }
                         }
                         else
                         {
-                            MailUtility.SendMail(Subject, Body, From, usersEmailsList.GetRange(index, chunkSize));
+                            try
+                            {
+                                MailUtility.SendMail(Subject, Body, From, usersEmailsList.GetRange(index, chunkSize));
+                            }
+                            catch (Exception ex)
+                            {
+
+
+                            }
 
                             log.Info("EmailAlert: PROPlus Alerts Mail sent in range of " + index + " to " + (index + chunkSize - 1));
                         }

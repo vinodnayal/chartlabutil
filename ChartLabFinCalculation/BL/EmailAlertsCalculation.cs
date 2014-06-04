@@ -25,13 +25,14 @@ namespace ChartLabFinCalculation.BL
         /// get snp Alert
         /// calculate alert for user based on subscritons and send on their mail id 
         /// </summary>
-        internal static void SendAlertsEmailtoUsers()
+        internal static void SendAlertsEmailtoUsers(int start,int end)
         {
+            Dictionary<int, String> failedEmails = new Dictionary<int, string>();
             try
             {
                 log.Info("EmailAlert: Geting subscribed user list");
 
-                Dictionary<int, string> usersEmailDict = EmailAlertsDAO.GetUniqueSubsUser();
+                Dictionary<int, string> usersEmailDict = EmailAlertsDAO.GetUniqueSubsUser(start,end);
 
                 //todo for testing-om
                 //  Dictionary<int, string> usersEmailDict = new Dictionary<int, string>();
@@ -44,9 +45,12 @@ namespace ChartLabFinCalculation.BL
 
                 String snpAlertHtmlView = SnpUpdateAlerts.GetSNPUpdateAlert();
                 Dictionary<int, String> commonWlAlerts = getCommonSubAlerts();
+                
+                log.Info("Sending email to users count " + usersEmailDict.Count);
+
                 foreach (KeyValuePair<int, String> user in usersEmailDict)
                 {
-                    emailCounter++;
+                    //emailCounter++;
                     int userId = user.Key;
                     String To = user.Value;
                     log.Info("EmailAlert: Geting user's alert from DB userId:" + userId);
@@ -58,10 +62,10 @@ namespace ChartLabFinCalculation.BL
                     //get user alerts
                     alertsSB.Append(getUserAlerts(userId, commonWlAlerts));
 
-                    if (emailCounter % 20 == 0)
-                    {
-                        Thread.Sleep(2000);
-                    }
+                    //if (emailCounter % 100 == 0)
+                    //{
+                    //    Thread.Sleep(60000);
+                    //}
                     if (alertsSB.Length > 0)
                     {
                         //final HTML boly for mail
@@ -76,9 +80,17 @@ namespace ChartLabFinCalculation.BL
                         //sending alert by mail
                         if (!string.IsNullOrEmpty(To))
                         {
-                            log.Info("EmailAlert: Alerts Mail sending to mail id :" + To);
-                            MailUtility.SendMail(Subject, result.Html, From, To);
-                            log.Info("EmailAlert: Alerts Mail sent to mail id :" + To);
+                            //log.Info("EmailAlert: Alerts Mail sending to mail id :" + To);
+                            if (MailUtility.SendMail(Subject, result.Html, From, To))
+                            {
+                                log.Info("EmailAlert: Alerts Mail sent to mail id :" + To);
+                            }
+                            else
+                            {
+
+                                failedEmails.Add(user.Key,user.Value);
+                            }
+                            
                         }
                         else
                         {
@@ -91,12 +103,15 @@ namespace ChartLabFinCalculation.BL
                     }
                 }
 
+                EmailAlertsDAO.insertfailedmessages(failedEmails);
+
 
             }
             catch (Exception ex)
             {
                 log.Error("Error:  in Sending  email alerts ");
                 log.Error(ex);
+                
             }
 
         }
