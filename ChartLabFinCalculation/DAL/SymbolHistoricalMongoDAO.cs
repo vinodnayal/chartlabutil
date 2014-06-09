@@ -61,6 +61,7 @@ namespace ChartLabFinCalculation
             return symbolDataList;
         }
 
+        
         public static double GetSymbolSpecificDatePrice(string symbol,DateTime date)
         {
             double price=0;
