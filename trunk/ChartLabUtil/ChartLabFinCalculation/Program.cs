@@ -587,7 +587,7 @@ namespace ChartLabFinCalculation
                         // 1- 500 , 501 -2500
                         #region Email Alerts sending
                         int emailcount_start = Convert.ToInt32(args[1]);
-                        int emailcount_end = Convert.ToInt32(args[1]);
+                        int emailcount_end = Convert.ToInt32(args[2]);
                         logTime.Info("EmailAlert:  Starting Email Alerts sending Programme at: " + DateTime.Now);
                         //DayOfWeek dayOfWeek = DateTime.Now.DayOfWeek;
 

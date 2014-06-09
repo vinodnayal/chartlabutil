@@ -1143,5 +1143,59 @@ WHERE  mt.DATE >=DATE_ADD(CURDATE(),INTERVAL -1 DAY) AND pwm.userid=" + userId +
 
             return wlAlertDict;
         }
+
+        public static void saveemailalert(int user, String email, String content)
+        {
+
+
+            try
+            {
+
+                MongoServer mongo = MongoServer.Create(Constants.MongoConString);
+                BsonDocument doc = new BsonDocument();
+                doc.Add(new BsonElement("userid", user));
+                doc.Add(new BsonElement("email", email));
+                doc.Add(new BsonElement("content", content));
+                mongo.Connect();
+                var db = mongo.GetDatabase("chartlab");
+                var collection = db.GetCollection<BsonDocument>("emailalerts");
+                collection.Save(doc);
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+
+        }
+
+        internal static void insertalertemails(int userid, string email, string content)
+        {
+            OdbcConnection con = new OdbcConnection(Constants.MyConString);
+
+
+            try
+            {
+                con.Open();
+                    String query=@"insert into emailalerts(userid,email,content) values (" + userid + ",'" + email + "','"+content+"'";
+                    OdbcCommand imsert = new OdbcCommand(query, con);
+                    imsert.ExecuteNonQuery();
+                
+
+            }
+            catch (Exception ex)
+            {
+                log.Error(ex);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Close();
+            }
+
+            
+        }
     }
 }

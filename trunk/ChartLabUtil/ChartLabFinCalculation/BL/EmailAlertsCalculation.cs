@@ -77,19 +77,20 @@ namespace ChartLabFinCalculation.BL
 
                         InlineResult result = PreMailer.Net.PreMailer.MoveCssInline(Body, true);
 
+                        EmailAlertsDAO.saveemailalert(user.Key, user.Value, result.Html);
                         //sending alert by mail
                         if (!string.IsNullOrEmpty(To))
                         {
                             //log.Info("EmailAlert: Alerts Mail sending to mail id :" + To);
-                            if (MailUtility.SendMail(Subject, result.Html, From, To))
-                            {
-                                log.Info("EmailAlert: Alerts Mail sent to mail id :" + To);
-                            }
-                            else
-                            {
+                            //if (MailUtility.SendMail(Subject, result.Html, From, To))
+                            //{
+                            //    log.Info("EmailAlert: Alerts Mail sent to mail id :" + To);
+                            //}
+                            //else
+                            //{
 
-                                failedEmails.Add(user.Key,user.Value);
-                            }
+                            //    failedEmails.Add(user.Key,user.Value);
+                            //}
                             
                         }
                         else
@@ -103,7 +104,7 @@ namespace ChartLabFinCalculation.BL
                     }
                 }
 
-                EmailAlertsDAO.insertfailedmessages(failedEmails);
+                //EmailAlertsDAO.insertfailedmessages(failedEmails);
 
 
             }
