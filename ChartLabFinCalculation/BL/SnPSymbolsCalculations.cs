@@ -563,25 +563,27 @@ namespace ChartLabFinCalculation.BL
                     proEdgeId = "R5";
                     sb.Append("Rating is " + symbolRatings[0].rating);
                 }
-                else if (symbolRatings[0].rating == 4 || symbolRatings[0].rating == 3)
+
+                else if (curDayRating == 3)
                 {
                     proEdgeId = "R34V30";
-                    sb.Append("Rating change " + symbolRatings[0].rating + " to " + symbolRatings[1].rating);
+                    sb.Append("Rating change " + preDayRating + " to " + curDayRating);
                 }
                 else if (symbolRatings[0].rating == 4)
                 {
                     proEdgeId = "R4";
                     sb.Append("Rating is " + symbolRatings[0].rating);
                 }
-                else if (symbolRatings[0].rating == 3 || symbolRatings[0].rating == 2)
+
+                else if (curDayRating == 2 )
                 {
                     proEdgeId = "R23";
-                    sb.Append("Rating change " + symbolRatings[0].rating + " to " + symbolRatings[1].rating);
+                    sb.Append("Rating change " + preDayRating + " to " + curDayRating);
                 }
-                else if (symbolRatings[0].rating == 2 || symbolRatings[0].rating == 1)
+                else if (curDayRating == 1 )
                 {
                     proEdgeId = "R12VN65";
-                    sb.Append("Rating change " + symbolRatings[0].rating + " to " + symbolRatings[1].rating);
+                    sb.Append("Rating change " + preDayRating + " to " + curDayRating);
                 }
 
                 // check for rating Value lies in range of 
