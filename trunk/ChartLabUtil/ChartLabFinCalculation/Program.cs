@@ -345,7 +345,7 @@ namespace ChartLabFinCalculation
 
                         #endregion
                         break;
-
+                    
                     case "B":
 
                         #region Buy Sell Rating
