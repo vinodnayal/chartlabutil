@@ -881,8 +881,7 @@ WHERE  wl.watchlistid=" + watchlistId + " AND (ratingDate IS NOT NULL OR changed
             List<String> users = new List<String>();
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand com = new OdbcCommand(@"SELECT DISTINCT emailAddress FROM paidwatchlistusermapping p
-            JOIN users AS u ON u.userId=p.userid WHERE p.watchlistid =11 AND p.isuserpaid=1", con);
+            OdbcCommand com = new OdbcCommand(@"SELECT DISTINCT emailAddress FROM users WHERE substypeid=3 AND ispaid=1 AND emailAddress!=''  ORDER BY emailAddress ", con);
 
             try
             {
