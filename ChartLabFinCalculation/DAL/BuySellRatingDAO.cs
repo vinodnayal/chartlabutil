@@ -23,6 +23,8 @@ namespace ChartLabFinCalculation
                                                 "LINES TERMINATED BY '\n' " +
                                                 "(symbol,rating,ratingvalue,ctrating,ctratingvalue);", con);
 
+
+            OdbcCommand insertCommandSPY = new OdbcCommand("INSERT INTO temp_buysellrating(symbol,rating,ratingvalue,ctrating,ctratingvalue) SELECT '^GSPC',rating,ratingvalue,ctrating,ctratingvalue FROM temp_buysellrating WHERE symbol ='SPY'", con);
             OdbcCommand insertCommandGOOG = new OdbcCommand("INSERT INTO temp_buysellrating(symbol,rating,ratingvalue,ctrating,ctratingvalue) SELECT 'GOOG',rating,ratingvalue,ctrating,ctratingvalue FROM temp_buysellrating WHERE symbol='GOOGL'", con);
 
 
@@ -96,6 +98,7 @@ namespace ChartLabFinCalculation
                 
                 insertCommand.ExecuteReader();
                 insertCommandGOOG.ExecuteReader();
+                insertCommandSPY.ExecuteReader();
                 updateCommand.ExecuteReader();
 
                 deleteBuySellRatingCmd.ExecuteNonQuery();
