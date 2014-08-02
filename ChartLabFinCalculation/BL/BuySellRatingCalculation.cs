@@ -96,9 +96,9 @@ namespace ChartLabFinCalculation
             try
             {
                 log.Info("Rating: Calculating Avg Rating For SnP");
-                Rating SnPAvgRating = CalculateAvgRatingForSnP(Constants.GSPCSymbol);
+                //Rating SnPAvgRating = CalculateAvgRatingForSnP(Constants.GSPCSymbol);
 
-                BuySellRatingDAO.InsertSnPAvgRating(SnPAvgRating);
+               // BuySellRatingDAO.InsertSnPAvgRating(SnPAvgRating);
                 log.Info("Rating: inserted in DB (historybuysellrating, symbolanalytics tables), Avg Rating For SnP");
             }
             catch (Exception ex)
