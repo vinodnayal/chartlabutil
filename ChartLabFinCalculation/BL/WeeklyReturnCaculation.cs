@@ -17,7 +17,7 @@ namespace ChartLabFinCalculation.BL
                 try
                 {
                     String tableName = "weekly_perf_global_market";
-                    WeeklyReturnDAO.updateWeeklyReturns(tableName);
+                    //WeeklyReturnDAO.updateWeeklyReturns(tableName);
                 }
                 catch (Exception ex)
                 {
@@ -28,7 +28,7 @@ namespace ChartLabFinCalculation.BL
                 try
                 {
                     String tableName = "weekly_perf_asset_class";
-                    WeeklyReturnDAO.updateWeeklyReturns(tableName);
+                   // WeeklyReturnDAO.updateWeeklyReturns(tableName);
                 }
                 catch (Exception ex)
                 {
