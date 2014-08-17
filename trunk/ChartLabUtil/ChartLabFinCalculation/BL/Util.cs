@@ -17,28 +17,35 @@ namespace ChartLabFinCalculation
             {
                 for (int i = 1; i < historyBuySellRatingList.Count; i++)
                 {
-                    int prevRating = historyBuySellRatingList[i - 1].rating;
-                    int currentRating = historyBuySellRatingList[i].rating;
-                    string prevSymbol = historyBuySellRatingList[i - 1].symbol;
-                    string currentSymbol = historyBuySellRatingList[i].symbol;
-                    if (currentSymbol.Equals(prevSymbol))
+                    try
                     {
-                        if ((prevRating - currentRating) != 0)
+                        int prevRating = historyBuySellRatingList[i - 1].rating;
+                        int currentRating = historyBuySellRatingList[i].rating;
+                        string prevSymbol = historyBuySellRatingList[i - 1].symbol;
+                        string currentSymbol = historyBuySellRatingList[i].symbol;
+                        if (currentSymbol.Equals(prevSymbol))
                         {
-                            ChangeBuySellRatingHist.Add(
-                                new BuySellRatingChangeHist
-                                {
-                                    symbol = historyBuySellRatingList[i].symbol,
-                                    newRating = currentRating,
-                                    oldRating = prevRating,
-                                    ratingDate = historyBuySellRatingList[i].ratingDate
+                            if ((prevRating - currentRating) != 0)
+                            {
+                                ChangeBuySellRatingHist.Add(
+                                    new BuySellRatingChangeHist
+                                    {
+                                        symbol = historyBuySellRatingList[i].symbol,
+                                        newRating = currentRating,
+                                        oldRating = prevRating,
+                                        ratingDate = historyBuySellRatingList[i].ratingDate
 
 
-                                });
+                                    });
+                            }
                         }
+
                     }
+                    catch (Exception ex)
+                    {
+                        log.Error("Error: Buy sell rating change hist" + ex);
 
-
+                    }
                 }
             }
             catch (Exception ex)

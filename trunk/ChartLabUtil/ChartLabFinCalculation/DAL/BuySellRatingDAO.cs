@@ -254,20 +254,41 @@ namespace ChartLabFinCalculation
 
                 while (dr.Read())
                 {
-                    buySellRatingHist.Add(new BuySellRating
+                    BuySellRating rt = new BuySellRating();
+                    try
                     {
-                        symbol = dr.GetString(0).ToString(),
-                        ratingDate = DateTime.Parse(dr.GetString(2)),
-                        rating = Convert.ToInt32(dr[1]),
+                        
+                        rt.symbol = dr.GetString(0).ToString();
+                            rt.ratingDate = DateTime.Parse(dr.GetString(2));
+                          rt.rating = Convert.ToInt32(dr[1]);
+                          
+                        
+                        buySellRatingHist.Add(rt);
+                    }
+                    catch (Exception ex)
+                    {
+                        try
+                        {
+                            log.Error("VINOD 1 ERROR in data " + ex.ToString());
+                            log.Error("Symbol : " + rt.symbol);
+                            log.Error("DATE:" + dr.GetString(2));
+                        }
+                        catch (Exception ex1)
+                        {
 
-                    });
+
+                        }
+                        
+                 
+
+                    }
                 }
                 dr.Close();
 
             }
             catch (Exception ex)
             {
-                log.Error("ERROR \n" + "============ \n" + ex.ToString());
+                log.Error("VINOD 2 ERROR \n" + "============ \n" + ex.ToString());
             }
             finally
             {
