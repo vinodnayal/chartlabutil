@@ -244,7 +244,7 @@ namespace ChartLabFinCalculation
 
             //Now we will create a command
 
-            OdbcCommand historyBuySellRating = new OdbcCommand("SELECT * FROM historyBuySellRating ORDER BY symbol,ratingdate", con);
+            OdbcCommand historyBuySellRating = new OdbcCommand("SELECT * FROM historyBuySellRating WHERE ratingdate >'2012-02-01'  ORDER BY symbol,ratingdate ", con);
 
 
             try
@@ -556,9 +556,9 @@ namespace ChartLabFinCalculation
                 if (fromDate == DateTime.MinValue)
                 {
                     if (backDateCount == 0)
-                        sqlQuery = " SELECT DISTINCT ratingDate FROM historybuysellrating where ratingDate >='2012-02-02'  order by ratingDate";
+                        sqlQuery = " SELECT DISTINCT ratingDate FROM historybuysellrating where ratingDate >='2012-02-01'  order by ratingDate";
                     else
-                        sqlQuery = @" SELECT ratingDate FROM (SELECT DISTINCT ratingDate FROM historybuysellrating ORDER BY ratingDate DESC LIMIT 2) temp
+                        sqlQuery = @" SELECT ratingDate FROM (SELECT DISTINCT ratingDate FROM historybuysellrating where ratingDate >='2012-02-01'  ORDER BY ratingDate DESC LIMIT 2) temp
                                       ORDER BY  ratingDate";
                 }
                 else
@@ -596,7 +596,7 @@ namespace ChartLabFinCalculation
             List<CTRatingHistory> ctRatingHist = new List<CTRatingHistory>();
 
             OdbcConnection con = new OdbcConnection(Constants.MyConString);
-            OdbcCommand historyBuySellRating = new OdbcCommand("SELECT symbol,ratingdate,ctrating FROM historyBuySellRating ORDER BY symbol,ratingdate", con);
+            OdbcCommand historyBuySellRating = new OdbcCommand("SELECT symbol,ratingdate,ctrating FROM historyBuySellRating WHERE ratingdate >'2012-02-01' ORDER BY symbol,ratingdate", con);
             try
             {
                 con.Open();
