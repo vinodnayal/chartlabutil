@@ -66,63 +66,64 @@ namespace ChartLabFinCalculation
                     {
 
                         barlist = SymbolHistoricalMongoDAO.GetHistoricalDataFromMongo(fromdate, toDate, symbol);
+                        if (barlist == null || barlist.Count == 0)
+                        {
+
+                            log.Warn("Warn: Empty List Returned From Provider" + symbol);
+                        }
+                        else
+                        {
+
+                            List<DateOBOS> listOBOS = fincalc.CalculateOBOSForRange(barlist);
+                            if (listOBOS.Count > 1)
+                            {
+                                if (!historical)
+                                {
+                                    listOBOS = listOBOS.GetRange(listOBOS.Count - 1, 1);
+
+                                    if (count == 0)
+                                    {
+                                        listOBOSCount = calculateOBSOfirstTime(listOBOS, symbolList);
+
+
+                                    }
+
+                                    else
+                                    {
+                                        calculateOBOSNext(listOBOSCount, listOBOS, symbolList);
+
+                                    }
+                                    count++;
+                                }
+
+                                else
+                                {
+                                    if (count == 0)
+                                    {
+                                        listOBOSCount = calculateOBSOfirstTime(listOBOS, symbolList);
+
+
+                                    }
+
+                                    else
+                                    {
+                                        calculateOBOSNext(listOBOSCount, listOBOS, symbolList);
+
+
+
+                                    }
+                                    count++;
+                                }
+
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {
 
                         log.Error("Error" + ex);
                     }
-                    if (barlist == null || barlist.Count == 0)
-                    {
-
-                        log.Warn("Warn: Empty List Returned From Provider" + symbol);
-                    }
-                    else
-                    {
-
-                        List<DateOBOS> listOBOS = fincalc.CalculateOBOSForRange(barlist);
-                        if (listOBOS.Count > 1)
-                        {
-                            if (!historical)
-                            {
-                                listOBOS = listOBOS.GetRange(listOBOS.Count - 1, 1);
-
-                                if (count == 0)
-                                {
-                                    listOBOSCount = calculateOBSOfirstTime(listOBOS, symbolList);
-
-
-                                }
-
-                                else
-                                {
-                                    calculateOBOSNext(listOBOSCount, listOBOS, symbolList);
-
-                                }
-                                count++;
-                            }
-
-                            else
-                            {
-                                if (count == 0)
-                                {
-                                    listOBOSCount = calculateOBSOfirstTime(listOBOS, symbolList);
-
-
-                                }
-
-                                else
-                                {
-                                    calculateOBOSNext(listOBOSCount, listOBOS, symbolList);
-
-
-
-                                }
-                                count++;
-                            }
-
-                        }
-                    }
+                    
                 }
             }
             catch (Exception ex)
