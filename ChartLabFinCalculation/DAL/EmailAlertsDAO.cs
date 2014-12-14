@@ -966,7 +966,7 @@ WHERE  wl.watchlistid=" + watchlistId + " AND (ratingDate IS NOT NULL OR changed
 CASE WHEN ACTION='Sell'  THEN  'Removing' ELSE 'Adding' END AS alert,
 pwm.user_wl_id, watchlistname
 FROM paidwatchlistusermapping pwm 
-LEFT JOIN model_trades_data mt ON mt.watchlistId = pwm.user_wl_id 
+LEFT JOIN model_trades_data_new mt ON mt.watchlistId = pwm.user_wl_id 
 LEFT JOIN watchlist wl ON wl.watchlistId = pwm.user_wl_id
 LEFT JOIN symbolanalytics sa ON sa.symbol=mt.symbol 
 LEFT JOIN equitiesfundamental ef ON ef.symbol=mt.symbol
