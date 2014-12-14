@@ -260,6 +260,8 @@ namespace ChartLabFinCalculation.BL
 
                 try
                 {
+
+                    
                     //TODO - get users all paid watchlists and then get alerts for all wl. currenlty there is only one paid wl - 10
                     int paidWatchlistId = 10;
                     Dictionary<int, List<SymbolAlerts>> wlAlerts = EmailAlertsDAO.getPaidWatchlistAlerts(userId, paidWatchlistId);
