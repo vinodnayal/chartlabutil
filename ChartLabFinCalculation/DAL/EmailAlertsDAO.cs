@@ -971,7 +971,7 @@ LEFT JOIN watchlist wl ON wl.watchlistId = pwm.user_wl_id
 LEFT JOIN symbolanalytics sa ON sa.symbol=mt.symbol 
 LEFT JOIN equitiesfundamental ef ON ef.symbol=mt.symbol
 LEFT JOIN symbol_live_data sl ON sl.symbol=mt.symbol
-WHERE  mt.DATE =CURDATE() AND pwm.userid=" + userId + " AND  pwm.watchlistId= " + paidWatchlistId, con);
+WHERE  mt.DATE =CURDATE() AND pwm.userid=" + userId + " ORDER BY watchlistname ", con);
 
 
             try
